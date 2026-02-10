@@ -32,16 +32,57 @@ bun dev
 bun build
 
 # Run tests
-bun test
+bun test                    # Run all tests
+moon run :test-watch        # Watch mode
+moon run :test-coverage     # With coverage
 
 # Type check
 bun typecheck
 
 # Lint
-bun lint
+bun lint                    # Check for issues
+moon run :lint-fix          # Auto-fix issues
 
 # Format
-bun format
+bun format                  # Check formatting
+moon run :format-write      # Auto-format
+```
+
+## Testing
+
+Tests are powered by [Vitest](https://vitest.dev/). Each package can have its own test files:
+
+```bash
+# Create a test file
+# packages/example/src/index.test.ts
+
+import { describe, it, expect } from 'vitest';
+
+describe('example', () => {
+  it('should work', () => {
+    expect(true).toBe(true);
+  });
+});
+```
+
+## Changesets
+
+Version management and changelogs are handled by [Changesets](https://github.com/changesets/changesets).
+
+```bash
+# 1. Make changes to packages
+# 2. Create a changeset
+bun changeset
+
+# 3. Commit changeset with your changes
+git add .changeset/
+git commit -m "Add new feature"
+
+# 4. When ready to release, version packages
+bun changeset:version
+
+# 5. Publish to npm (if public packages)
+bun changeset:publish
 ```
 
 ## Moon Commands

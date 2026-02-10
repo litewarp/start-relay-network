@@ -46,7 +46,17 @@ tasks:
       - "tsconfig.json"
 
   test:
-    command: "bun test"
+    command: "vitest run"
+    inputs:
+      - "@globs(sources)"
+      - "@globs(tests)"
+
+  test-watch:
+    command: "vitest"
+    local: true
+
+  test-coverage:
+    command: "vitest run --coverage"
     inputs:
       - "@globs(sources)"
       - "@globs(tests)"

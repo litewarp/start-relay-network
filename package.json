@@ -8,12 +8,19 @@
     "test": "moon run :test",
     "lint": "moon run :lint",
     "format": "moon run :format",
-    "typecheck": "moon run :typecheck"
+    "typecheck": "moon run :typecheck",
+    "changeset": "changeset",
+    "changeset:version": "changeset version",
+    "changeset:publish": "changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.11",
     "@moonrepo/cli": "2.0.0-rc.2",
+    "@types/bun": "^1.1.14",
     "oxlint": "^1.43.0",
     "oxfmt": "^0.28.0",
-    "oxlint-tsgolint": "^0.11.5"
+    "oxlint-tsgolint": "^0.11.5",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
   }
 }
