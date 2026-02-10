@@ -2,7 +2,7 @@
 # Accepts a list of globs, a mapping of projects to relative file paths,
 # or both values.
 projects:
-  - "examples/*"
+  - "apps/*"
   - "packages/*"
 
 # Configures the version control system (VCS). Also known as

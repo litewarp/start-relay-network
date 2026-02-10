@@ -1,7 +1,7 @@
 {
   "name": "start-relay-network",
   "private": true,
-  "workspaces": ["examples/*", "packages/*"],
+  "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev": "moon run :dev",
     "build": "moon run :build",

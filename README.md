@@ -5,7 +5,7 @@ A monorepo for Start Relay Network, powered by [moonrepo](https://moonrepo.dev) 
 ## Structure
 
 ```
-examples/     # Example applications and demos
+apps/         # Applications
 packages/     # Shared packages and libraries
 ```
 
