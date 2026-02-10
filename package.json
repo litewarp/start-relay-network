@@ -16,6 +16,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.27.11",
     "@moonrepo/cli": "2.0.0-rc.2",
+    "@typescript/native-preview": "^7.0.0-dev.20260210.1",
     "@types/bun": "^1.1.14",
     "oxlint": "^1.43.0",
     "oxfmt": "^0.28.0",
