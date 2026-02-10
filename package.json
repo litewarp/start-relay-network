@@ -1,0 +1,16 @@
+{
+  "name": "start-relay-network",
+  "private": true,
+  "workspaces": ["examples/*", "packages/*"],
+  "scripts": {
+    "dev": "moon run :dev",
+    "build": "moon run :build",
+    "test": "moon run :test",
+    "lint": "moon run :lint",
+    "format": "moon run :format",
+    "typecheck": "moon run :typecheck"
+  },
+  "devDependencies": {
+    "@moonrepo/cli": "2.0.0-rc.2"
+  }
+}

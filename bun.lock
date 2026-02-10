@@ -1,0 +1,29 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "start-relay-network",
+      "devDependencies": {
+        "@moonrepo/cli": "2.0.0-rc.2",
+      },
+    },
+  },
+  "packages": {
+    "@moonrepo/cli": ["@moonrepo/cli@2.0.0-rc.2", "", { "dependencies": { "detect-libc": "^2.1.2" }, "optionalDependencies": { "@moonrepo/core-linux-arm64-gnu": "2.0.0-rc.2", "@moonrepo/core-linux-arm64-musl": "2.0.0-rc.2", "@moonrepo/core-linux-x64-gnu": "2.0.0-rc.2", "@moonrepo/core-linux-x64-musl": "2.0.0-rc.2", "@moonrepo/core-macos-arm64": "2.0.0-rc.2", "@moonrepo/core-windows-x64-msvc": "2.0.0-rc.2" }, "bin": { "moon": "moon.js", "moonx": "moonx.js" } }, "sha512-Iaar67Jyu5JNBUmVH1r8WrkQkb7HTWwcQvduAx1+aI+3YD8vFSF4UqoVh8oZhWkggsNeonjDH0ayBi9QfvA4zQ=="],
+
+    "@moonrepo/core-linux-arm64-gnu": ["@moonrepo/core-linux-arm64-gnu@2.0.0-rc.2", "", { "os": "linux", "cpu": "arm64" }, "sha512-4/N/hD75K6uDSp0hemfsJbWnaOaqe3Rs47QAFbG8xjRXPY6I3BcTTI7DcuQ5UCx0CXe4C8sSta0fCKPL4R5zCQ=="],
+
+    "@moonrepo/core-linux-arm64-musl": ["@moonrepo/core-linux-arm64-musl@2.0.0-rc.2", "", { "os": "linux", "cpu": "arm64" }, "sha512-t2spMFBJwvYvFYB9/gPRkZ7HvLDWUyjMmXLPtPbV4KWt+ACKF43x5cOy3XsyeWCCSmqBls4Uc6gH/RVfoJnvqg=="],
+
+    "@moonrepo/core-linux-x64-gnu": ["@moonrepo/core-linux-x64-gnu@2.0.0-rc.2", "", { "os": "linux", "cpu": "x64" }, "sha512-LJk0l/ThN0uQU9/I7tFvM+OPTy6gObHo1eQVBuQ1r8cvBg1CLz8GMG2zT5xFM7NQTsyzcUzGKyREDcrAQWskAQ=="],
+
+    "@moonrepo/core-linux-x64-musl": ["@moonrepo/core-linux-x64-musl@2.0.0-rc.2", "", { "os": "linux", "cpu": "x64" }, "sha512-R9bENS682hu/PeAwGR9LcSSjMUe4WXBCVzyGE8s+XuB+JsJjoDZnVJRDsSCnVN1rd8zpUMCH2/uc5xb0K7EipA=="],
+
+    "@moonrepo/core-macos-arm64": ["@moonrepo/core-macos-arm64@2.0.0-rc.2", "", { "os": "darwin", "cpu": "arm64" }, "sha512-Q09iNAmevr5TR49EWv+tcEmhYGJvBWDGA/BfWMfVVcKDI0oGXLBPCtVRckgU8zbUrlMevEd85TC6kdX9/f6IdA=="],
+
+    "@moonrepo/core-windows-x64-msvc": ["@moonrepo/core-windows-x64-msvc@2.0.0-rc.2", "", { "os": "win32", "cpu": "x64" }, "sha512-9pHnZKvVyS3kEw+7IzeP69GjxkyB1HBxZri7fjm65WPky7vTa3fxqE2hJmiEgKjCiEpubD9ZhYlLmIsjuQ3Ing=="],
+
+    "detect-libc": ["detect-libc@2.1.2", "", {}, "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ=="],
+  }
+}
