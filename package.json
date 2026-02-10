@@ -11,6 +11,9 @@
     "typecheck": "moon run :typecheck"
   },
   "devDependencies": {
-    "@moonrepo/cli": "2.0.0-rc.2"
+    "@moonrepo/cli": "2.0.0-rc.2",
+    "oxlint": "^1.43.0",
+    "oxfmt": "^0.28.0",
+    "oxlint-tsgolint": "^0.11.5"
   }
 }

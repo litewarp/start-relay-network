@@ -1,0 +1,11 @@
+{
+  "$schema": "https://oxc.rs/schema.json",
+  "indentWidth": 2,
+  "lineWidth": 100,
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "arrowParens": "always",
+  "bracketSpacing": true
+}

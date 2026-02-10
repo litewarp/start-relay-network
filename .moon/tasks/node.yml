@@ -1,0 +1,52 @@
+# Shared tasks for all Node.js projects
+fileGroups:
+  sources:
+    - "src/**/*"
+  tests:
+    - "**/__tests__/**/*"
+    - "**/*.test.*"
+    - "**/*.spec.*"
+  configs:
+    - "*.config.*"
+
+tasks:
+  lint:
+    command: "oxlint ."
+    inputs:
+      - "@globs(sources)"
+      - "@globs(tests)"
+      - "@globs(configs)"
+
+  lint-fix:
+    command: "oxlint --fix ."
+    inputs:
+      - "@globs(sources)"
+      - "@globs(tests)"
+      - "@globs(configs)"
+
+  format:
+    command: "oxfmt ."
+    inputs:
+      - "@globs(sources)"
+      - "@globs(tests)"
+      - "@globs(configs)"
+
+  format-write:
+    command: "oxfmt --write ."
+    inputs:
+      - "@globs(sources)"
+      - "@globs(tests)"
+      - "@globs(configs)"
+
+  typecheck:
+    command: "tsc --noEmit"
+    inputs:
+      - "@globs(sources)"
+      - "@globs(tests)"
+      - "tsconfig.json"
+
+  test:
+    command: "bun test"
+    inputs:
+      - "@globs(sources)"
+      - "@globs(tests)"
