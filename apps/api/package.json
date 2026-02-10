@@ -1,0 +1,22 @@
+{
+  "name": "@start-relay-network/api",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v && docker compose up -d"
+  },
+  "dependencies": {
+    "and": "^0.0.3",
+    "grafserv": "^1.0.0-rc.5",
+    "graphile-config": "^1.0.0-rc.4",
+    "graphile-export": "^1.0.0-rc.4",
+    "pg": "^8.13.1",
+    "postgraphile": "^5.0.0-rc.6"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.10"
+  }
+}

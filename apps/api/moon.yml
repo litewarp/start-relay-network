@@ -1,0 +1,28 @@
+language: typescript
+type: application
+stack: backend
+tags:
+  - postgraphile
+  - graphql
+
+tasks:
+  dev:
+    command: bun run src/index.ts
+    options:
+      persistent: true
+      cache: false
+
+  db:up:
+    command: docker compose up -d
+    options:
+      cache: false
+
+  db:down:
+    command: docker compose down
+    options:
+      cache: false
+
+  db:reset:
+    command: docker compose down -v && docker compose up -d
+    options:
+      cache: false
