@@ -1,33 +1,28 @@
-import { postgraphile, makePluginHook } from 'postgraphile';
-import { grafserv } from 'grafserv/node';
-import { createServer } from 'node:http';
+import { postgraphile } from "postgraphile";
+import { createServer } from "node:http";
+import { grafserv } from "postgraphile/grafserv/node";
+import { makePgService } from "postgraphile/adaptors/pg";
 
-const pluginHook = makePluginHook([]);
+const PORT = 4000;
 
-const preset = {
-  grafserv: {
-    port: 4000,
-    graphiql: true,
-    watch: true,
+const pgl = postgraphile({
+  gather: {
+    installWatchFixtures: true,
   },
   grafast: {
     explain: true,
   },
-  gather: {
-    pgJwtSecret: process.env.JWT_SECRET,
+  grafserv: {
+    port: PORT,
+    graphiql: true,
+    watch: true,
   },
-  schema: {
-    pgJwtTypes: 'app_public.jwt_token',
-  },
-};
-
-const pgl = postgraphile({
-  ...preset,
-  connection: {
-    connectionString:
-      process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/app',
-  },
-  schemas: ['app_public'],
+  pgServices: [
+    makePgService({
+      connectionString: process.env.DATABASE_URL ?? "",
+      schemas: ["app_public"],
+    }),
+  ],
 });
 
 const serv = pgl.createServ(grafserv);
@@ -39,7 +34,7 @@ serv.addTo(server).catch((e) => {
   process.exit(1);
 });
 
-server.listen(preset.grafserv.port, () => {
-  console.log(`GraphQL endpoint: http://localhost:${preset.grafserv.port}/graphql`);
-  console.log(`GraphiQL IDE: http://localhost:${preset.grafserv.port}/graphiql`);
+server.listen(PORT, () => {
+  console.log(`GraphQL endpoint: http://localhost:${PORT}/graphql`);
+  console.log(`GraphiQL IDE: http://localhost:${PORT}/graphiql`);
 });
