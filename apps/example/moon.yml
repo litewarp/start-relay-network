@@ -1,5 +1,5 @@
 language: typescript
-type: application
+layer: application
 stack: frontend
 tags:
   - tanstack
@@ -7,13 +7,13 @@ tags:
 
 tasks:
   dev:
-    command: bunx vite dev
+    command: bun run vite dev
     options:
       persistent: true
       cache: false
 
   build:
-    command: bunx vite build
+    command: bun run vite build
     inputs:
       - src/**/*
       - app.config.ts
@@ -22,13 +22,13 @@ tasks:
       - .output/**/*
 
   preview:
-    command: bunx vite preview
+    command: bun vite preview
     options:
       persistent: true
       cache: false
 
   start:
-    command: node .output/server/index.mjs
+    command: bun run .output/server/index.mjs
     deps:
       - build
     options:

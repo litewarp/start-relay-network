@@ -1,5 +1,5 @@
 language: typescript
-type: application
+layer: application
 stack: backend
 tags:
   - postgraphile
@@ -11,18 +11,17 @@ tasks:
     options:
       persistent: true
       cache: false
+    deps:
+      - db-up
 
-  db:up:
+  db-up:
     command: docker compose up -d
     options:
       cache: false
+      internal: true
 
-  db:down:
+  db-down:
     command: docker compose down
     options:
       cache: false
-
-  db:reset:
-    command: docker compose down -v && docker compose up -d
-    options:
-      cache: false
+      internal: true

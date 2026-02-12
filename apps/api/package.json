@@ -9,7 +9,6 @@
     "db:reset": "docker compose down -v && docker compose up -d"
   },
   "dependencies": {
-    "and": "^0.0.3",
     "grafserv": "^1.0.0-rc.5",
     "graphile-config": "^1.0.0-rc.4",
     "graphile-export": "^1.0.0-rc.4",
