@@ -1,10 +1,16 @@
 {
-  "name": "@start-relay-network/adapter",
+  "name": "@litewarp/start-relay-network",
   "version": "0.1.0",
   "description": "TanStack Start adapter for Relay with SSR streaming support",
-  "keywords": ["relay", "tanstack", "start", "ssr", "streaming"],
+  "keywords": [
+    "relay",
+    "tanstack",
+    "start",
+    "ssr",
+    "streaming"
+  ],
   "license": "MIT",
-  "author": "",
+  "author": "litewarp",
   "type": "module",
   "imports": {
     "#@/*": "./src/*"
@@ -13,31 +19,31 @@
     ".": "./src/index.tsx"
   },
   "scripts": {},
-  "dependencies": {
-    "debug": "^4.4.3"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@tanstack/react-router": "^1.159.5",
-    "@tanstack/react-start": "^1.159.5",
+    "@tanstack/react-router": "catalog:react",
+    "@tanstack/react-start": "catalog:react",
     "@types/debug": "^4.1.12",
-    "@types/node": "^25.2.2",
-    "@types/react": "^19.2.13",
-    "@types/react-dom": "^19.2.3",
-    "@types/react-relay": "^18.2.1",
-    "@types/relay-runtime": "^20.1.1",
-    "deepmerge-ts": "^7.1.5",
-    "graphql": "^16.12.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-relay": "^20.1.1",
-    "relay-runtime": "^20.1.1",
-    "vitest": "^4.0.18"
+    "@types/node": "catalog:",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
+    "@types/react-relay": "catalog:react",
+    "@types/relay-runtime": "catalog:react",
+    "debug": "^4.4.3",
+    "graphql": "catalog:",
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "react-relay": "catalog:react",
+    "relay-runtime": "catalog:react",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
-    "@tanstack/react-router": "^1.0.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-relay": "^18.0.0 || ^20.0.0",
-    "relay-runtime": "^18.0.0 || ^20.0.0"
+    "@tanstack/react-router": "catalog:react",
+    "@tanstack/react-start": "catalog:react",
+    "graphql": "catalog:",
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "react-relay": "catalog:react",
+    "relay-runtime": "catalog:react"
   }
 }

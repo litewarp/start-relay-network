@@ -1,24 +1,9 @@
 import { postgraphile } from "postgraphile";
-import { grafserv } from "grafserv/node";
 import { createServer } from "node:http";
+import { grafserv } from "postgraphile/grafserv/node";
 import { makePgService } from "postgraphile/adaptors/pg";
 
-const preset = {
-  grafserv: {
-    port: 4000,
-    graphiql: true,
-    watch: true,
-  },
-  grafast: {
-    explain: true,
-  },
-  gather: {
-    pgJwtSecret: process.env.JWT_SECRET,
-  },
-  schema: {
-    pgJwtTypes: "app_public.jwt_token",
-  },
-};
+const PORT = 4000;
 
 const pgl = postgraphile({
   grafserv: {
@@ -50,11 +35,7 @@ serv.addTo(server).catch((e) => {
   process.exit(1);
 });
 
-server.listen(preset.grafserv.port, () => {
-  console.log(
-    `GraphQL endpoint: http://localhost:${preset.grafserv.port}/graphql`,
-  );
-  console.log(
-    `GraphiQL IDE: http://localhost:${preset.grafserv.port}/graphiql`,
-  );
+server.listen(PORT, () => {
+  console.log(`GraphQL endpoint: http://localhost:${PORT}/graphql`);
+  console.log(`GraphiQL IDE: http://localhost:${PORT}/graphiql`);
 });

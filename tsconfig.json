@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
+    "target": "esnext",
+    "module": "nodenext",
     "lib": ["ES2022"],
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
@@ -14,7 +14,7 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["bun", "vitest/globals"]
+    "types": ["bun", "vitest/globals", "node"]
   },
   "exclude": ["node_modules", "dist", "build", "coverage"]
 }

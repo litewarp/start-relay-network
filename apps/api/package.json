@@ -9,13 +9,10 @@
     "db:reset": "docker compose down -v && docker compose up -d"
   },
   "dependencies": {
-    "grafserv": "^1.0.0-rc.5",
-    "graphile-config": "^1.0.0-rc.4",
-    "graphile-export": "^1.0.0-rc.4",
     "pg": "^8.13.1",
     "postgraphile": "^5.0.0-rc.6"
   },
   "devDependencies": {
-    "@types/pg": "^8.11.10"
+    "@types/pg": "^8.6.7"
   }
 }
