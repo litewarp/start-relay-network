@@ -17,6 +17,7 @@ export function getRouter() {
     context: {
       environment,
       preloadQuery,
+      queryCache,
     },
   });
 
