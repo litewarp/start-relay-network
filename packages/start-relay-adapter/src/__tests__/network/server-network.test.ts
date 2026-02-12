@@ -26,17 +26,6 @@ function mockMultipartFetchResponse(parts: object[], boundary = '----abc123') {
   };
 }
 
-/**
- * Creates a mock fetch Response for application/json content.
- */
-function mockJsonFetchResponse(data: object) {
-  return {
-    status: 200,
-    headers: new Headers({ 'Content-Type': 'application/json' }),
-    json: vi.fn().mockResolvedValue(data),
-    body: null
-  };
-}
 
 /**
  * Subscribes to a Relay Observable and collects all emissions.
@@ -217,23 +206,37 @@ describe('ServerRelayNetwork', () => {
     });
   });
 
-  describe('cache-miss fallback', () => {
-    it('falls back to direct fetch and returns JSON when query not in cache', async () => {
+  describe('non-preloaded queries (cache miss)', () => {
+    it('returns a never-resolving Observable when query is not in cache', async () => {
       const queryCache = new QueryCache({ isServer: true }); // empty cache
-      const data = { data: { userById: { id: 1, name: 'Alice' } } };
 
-      globalThis.fetch = vi.fn().mockResolvedValue(mockJsonFetchResponse(data));
+      globalThis.fetch = vi.fn();
 
       const network = createServerNetwork(queryCache);
       const request = createMockRequestParameters({ id: 'uncached-server-query' });
       const observable = network.execute(request, {}, {}, null);
 
-      const { values, completed } = await subscribeAndCollect(observable);
+      const { values, completed, error } = await subscribeAndCollect(observable);
 
-      expect(globalThis.fetch).toHaveBeenCalled();
-      expect(values).toHaveLength(1);
-      expect(values[0]).toEqual(data);
-      expect(completed).toBe(true);
+      // Observable should never emit, complete, or error — it stays suspended
+      expect(values).toHaveLength(0);
+      expect(completed).toBe(false);
+      expect(error).toBeNull();
+      // No fetch should have been made
+      expect(globalThis.fetch).not.toHaveBeenCalled();
+    });
+
+    it('does not call watchQuery for non-preloaded queries', async () => {
+      const queryCache = new QueryCache({ isServer: true });
+      const watchQuerySpy = vi.spyOn(queryCache, 'watchQuery');
+
+      globalThis.fetch = vi.fn();
+
+      const network = createServerNetwork(queryCache);
+      const request = createMockRequestParameters({ id: 'unwatched-query' });
+      network.execute(request, {}, {}, null);
+
+      expect(watchQuerySpy).not.toHaveBeenCalled();
     });
   });
 

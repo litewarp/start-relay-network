@@ -580,6 +580,21 @@ describe('ClientRelayNetwork', () => {
       expect(values).toHaveLength(0);
     });
 
+    it('propagates fetch rejection to sink.error for uncached queries', async () => {
+      const queryCache = new QueryCache(); // empty cache
+
+      globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network failure'));
+
+      const network = createClientNetwork(queryCache);
+      const request = createMockRequestParameters({ id: 'fetch-reject-query' });
+      const observable = network.execute(request, {}, {}, null);
+      const { error, values } = await subscribeAndCollect(observable);
+
+      expect(values).toHaveLength(0);
+      expect(error).toBeInstanceOf(Error);
+      expect(error?.message).toContain('Network failure');
+    });
+
     it('calls sink.error when multipart stream errors mid-flight', async () => {
       let chunkCount = 0;
       const stream = new ReadableStream<Uint8Array>({
