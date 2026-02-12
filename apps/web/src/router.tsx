@@ -2,32 +2,11 @@ import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import { DefaultCatchBoundary } from "./components/DefaultCatchBoundary";
 import { NotFound } from "./components/NotFound";
-import {
-  initializeRelayEnvironment,
-  setupRouterRelayIntegration,
-} from "@litewarp/start-relay-network";
+import { setupRouterRelayIntegration } from "@litewarp/start-relay-network";
+import { createRelayEnvironment } from "./lib/relay/environment";
 
 export function getRouter() {
-  const { queryCache, environment, preloadQuery } = initializeRelayEnvironment({
-    url: "http://localhost:4000/graphql",
-    getFetchOptions: async (request, variables, cacheConfig) => {
-      const signal =
-        cacheConfig?.metadata?.abortSignal instanceof AbortSignal
-          ? cacheConfig.metadata.abortSignal
-          : undefined;
-      return {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: request.text,
-          variables,
-        }),
-        signal,
-      };
-    },
-  });
+  const { environment, preloadQuery, queryCache } = createRelayEnvironment();
 
   const router = createRouter({
     routeTree,
@@ -36,7 +15,6 @@ export function getRouter() {
     defaultNotFoundComponent: () => <NotFound />,
     scrollRestoration: true,
     context: {
-      queryCache,
       environment,
       preloadQuery,
     },

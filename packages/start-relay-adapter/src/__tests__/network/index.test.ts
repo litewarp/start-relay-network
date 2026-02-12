@@ -1,28 +1,34 @@
-import { createStartRelayNetwork } from '#@/network.js';
+import { createClientNetwork } from '#@/client.js';
+import { createServerNetwork } from '#@/server.js';
 import { ClientRelayNetwork } from '#@/network/client.js';
 import { ServerRelayNetwork } from '#@/network/server.js';
-import { QueryCache } from '#@/query-cache.js';
 import { describe, it, expect } from 'vitest';
 
-describe('createStartRelayNetwork', () => {
-  const config = {
-    url: 'http://test.com/graphql',
-    getFetchOptions: async () => ({ method: 'POST' as const }),
-    queryCache: new QueryCache()
-  };
+const config = {
+  url: 'http://test.com/graphql',
+  getFetchOptions: async () => ({ method: 'POST' as const }),
+};
 
-  it('returns ServerRelayNetwork when isServer is true', () => {
-    const network = createStartRelayNetwork(config, true);
+describe('createClientNetwork', () => {
+  it('returns a ClientRelayNetwork instance', () => {
+    const { network } = createClientNetwork(config);
+    expect(network).toBeInstanceOf(ClientRelayNetwork);
+  });
+
+  it('returns a createPreloader function', () => {
+    const { createPreloader } = createClientNetwork(config);
+    expect(typeof createPreloader).toBe('function');
+  });
+});
+
+describe('createServerNetwork', () => {
+  it('returns a ServerRelayNetwork instance', () => {
+    const { network } = createServerNetwork(config);
     expect(network).toBeInstanceOf(ServerRelayNetwork);
   });
 
-  it('returns ClientRelayNetwork when isServer is false', () => {
-    const network = createStartRelayNetwork(config, false);
-    expect(network).toBeInstanceOf(ClientRelayNetwork);
-  });
-
-  it('returns ClientRelayNetwork when isServer is undefined', () => {
-    const network = createStartRelayNetwork(config);
-    expect(network).toBeInstanceOf(ClientRelayNetwork);
+  it('returns a createPreloader function', () => {
+    const { createPreloader } = createServerNetwork(config);
+    expect(typeof createPreloader).toBe('function');
   });
 });
