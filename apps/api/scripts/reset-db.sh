@@ -18,15 +18,15 @@ until docker exec "$CONTAINER_NAME" pg_isready -U "$DB_USER" > /dev/null 2>&1; d
 done
 
 echo "Dropping database '$DB_NAME' (if it exists)..."
-docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -c "DROP DATABASE IF EXISTS $DB_NAME"
+docker exec "$CONTAINER_NAME" psql -q -U "$DB_USER" -c "DROP DATABASE IF EXISTS $DB_NAME"
 
 echo "Creating database '$DB_NAME'..."
-docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -c "CREATE DATABASE $DB_NAME OWNER $DB_USER"
+docker exec "$CONTAINER_NAME" psql -q -U "$DB_USER" -c "CREATE DATABASE $DB_NAME OWNER $DB_USER"
 
 echo "Running migration: 001_schema.sql"
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$MIGRATIONS_DIR/001_schema.sql"
+docker exec -i "$CONTAINER_NAME" psql -q -U "$DB_USER" -d "$DB_NAME" < "$MIGRATIONS_DIR/001_schema.sql"
 
 echo "Running migration: 002_seed.sql"
-docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" < "$MIGRATIONS_DIR/002_seed.sql"
+docker exec -i "$CONTAINER_NAME" psql -q -U "$DB_USER" -d "$DB_NAME" < "$MIGRATIONS_DIR/002_seed.sql"
 
 echo "Done! Database '$DB_NAME' has been reset on localhost:$DB_PORT"
