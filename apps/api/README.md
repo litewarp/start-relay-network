@@ -13,6 +13,7 @@ moon run api:dev
 ```
 
 The API will be available at:
+
 - GraphQL endpoint: http://localhost:4000/graphql
 - GraphiQL IDE: http://localhost:4000/graphiql
 
@@ -29,4 +30,11 @@ moon run api:db:down
 
 # Reset database (delete all data)
 moon run api:db:reset
+```
+
+To initialize the db
+
+```
+createdb starwars --owner=postgres
+psql -d starwars -f migrations/001_schema.sql
 ```

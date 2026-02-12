@@ -25,3 +25,6 @@ tasks:
     options:
       cache: false
       internal: true
+
+  reset:
+    command: ./scripts/reset-db.sh

@@ -1,20 +1,13 @@
-import type { QueryCache } from '#@/query-cache.js';
-import type {
-  CacheConfig,
-  ExecuteFunction,
-  RequestParameters,
-  Variables
-} from 'relay-runtime';
+import type { QueryCache } from "#@/query-cache.js";
+import type { ExecuteFunction, FetchFunction } from "relay-runtime";
 
-export type GetRequestInitFn = (
-  req: RequestParameters,
-  variables: Variables,
-  cacheConfig: CacheConfig
+export type GetFetchOptsFn = (
+  ...opts: Parameters<FetchFunction>
 ) => Promise<RequestInit>;
 
 export interface RelayNetworkConfig {
   url: string;
-  getRequestInit: GetRequestInitFn;
+  getFetchOptions: GetFetchOptsFn;
   queryCache: QueryCache;
 }
 
@@ -24,5 +17,5 @@ export interface StartSsrRelayNetwork {
 
 export type GetNetworkFn = (
   opts: RelayNetworkConfig,
-  isServer?: boolean
+  isServer?: boolean,
 ) => StartSsrRelayNetwork;

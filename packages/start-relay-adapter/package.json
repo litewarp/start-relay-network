@@ -16,34 +16,39 @@
     "#@/*": "./src/*"
   },
   "exports": {
-    ".": "./src/index.tsx"
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
   },
   "scripts": {},
   "dependencies": {},
   "devDependencies": {
-    "@tanstack/react-router": "catalog:react",
-    "@tanstack/react-start": "catalog:react",
+    "@tanstack/react-router-devtools": "^1.159.5",
+    "@tanstack/react-router": "^1.159.5",
+    "@tanstack/react-start": "^1.159.5",
     "@types/debug": "^4.1.12",
-    "@types/node": "catalog:",
-    "@types/react": "catalog:react",
-    "@types/react-dom": "catalog:react",
-    "@types/react-relay": "catalog:react",
-    "@types/relay-runtime": "catalog:react",
+    "@types/react-dom": "^19.2.3",
+    "@types/react-relay": "^18.2.1",
+    "@types/react": "^19.2.4",
+    "@types/relay-runtime": "^20.1.1",
     "debug": "^4.4.3",
-    "graphql": "catalog:",
-    "react": "catalog:react",
-    "react-dom": "catalog:react",
-    "react-relay": "catalog:react",
-    "relay-runtime": "catalog:react",
-    "vitest": "catalog:"
+    "graphql": "^16.12.0",
+    "react-dom": "^19.2.4",
+    "react-relay": "^20.1.1",
+    "react": "^19.2.4",
+    "relay-runtime": "^20.1.1",
+    "tailwind-merge": "^3.4.0",
+    "vitest": "catalog:",
+    "zod": "catalog:"
   },
   "peerDependencies": {
-    "@tanstack/react-router": "catalog:react",
-    "@tanstack/react-start": "catalog:react",
+    "@tanstack/react-router": "^1.159.5",
+    "@tanstack/react-start": "^1.159.5",
     "graphql": "catalog:",
-    "react": "catalog:react",
-    "react-dom": "catalog:react",
-    "react-relay": "catalog:react",
-    "relay-runtime": "catalog:react"
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-relay": "^20.1.1",
+    "relay-runtime": "^20.1.1"
   }
 }

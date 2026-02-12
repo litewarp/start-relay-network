@@ -2,10 +2,13 @@ import { postgraphile } from "postgraphile";
 import { createServer } from "node:http";
 import { grafserv } from "postgraphile/grafserv/node";
 import { makePgService } from "postgraphile/adaptors/pg";
+import PostGraphileAmberPreset from "postgraphile/presets/amber";
+import { PostGraphileRelayPreset } from "postgraphile/presets/relay";
 
 const PORT = 4000;
 
 const pgl = postgraphile({
+  extends: [PostGraphileAmberPreset, PostGraphileRelayPreset],
   grafserv: {
     port: 4000,
     graphiql: true,
@@ -19,9 +22,9 @@ const pgl = postgraphile({
   },
   pgServices: [
     makePgService({
-      connectionString: process.env.DATABASE_URL,
+      connectionString: process.env.CONNECTION_STRING,
       schemas: ["app_public"],
-      superuserConnectionString: process.env.DATABASE_URL,
+      superuserConnectionString: process.env.SUPERUSER_CONNECTION_STRING,
     }),
   ],
 });

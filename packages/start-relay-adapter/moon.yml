@@ -1,5 +1,18 @@
 language: typescript
-layer: 'library'
-stack: 'frontend'
+layer: "library"
+stack: "frontend"
 tags:
-  - 'vitest'
+  - "vitest"
+
+tasks:
+  build:
+    command: tsdown
+    deps:
+      - typecheck
+      - lint
+
+  dev:
+    command: tsdown --watch
+    options:
+      persistent: true
+      cache: false
