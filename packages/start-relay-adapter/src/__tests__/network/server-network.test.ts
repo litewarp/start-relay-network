@@ -85,7 +85,7 @@ describe('ServerRelayNetwork', () => {
   function createServerNetwork(queryCache: QueryCache) {
     return new ServerRelayNetwork({
       url: 'http://test.com/graphql',
-      getRequestInit: async () => ({
+      getFetchOptions: async () => ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: 'test' })
@@ -96,7 +96,7 @@ describe('ServerRelayNetwork', () => {
 
   describe('cache-hit pipeline (multipartFetch → query → Observable)', () => {
     it('forwards multipart @stream parts through query.next to Observable sink', async () => {
-      const queryCache = new QueryCache(true);
+      const queryCache = new QueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'stream-server' });
       queryCache.build(operation);
 
@@ -133,7 +133,7 @@ describe('ServerRelayNetwork', () => {
     });
 
     it('forwards multipart @defer parts through query.next to Observable sink', async () => {
-      const queryCache = new QueryCache(true);
+      const queryCache = new QueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'defer-server' });
       queryCache.build(operation);
 
@@ -171,7 +171,7 @@ describe('ServerRelayNetwork', () => {
     });
 
     it('calls watchQuery when query is found in cache', async () => {
-      const queryCache = new QueryCache(true);
+      const queryCache = new QueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'watch-query' });
       queryCache.build(operation);
 
@@ -189,7 +189,7 @@ describe('ServerRelayNetwork', () => {
     });
 
     it('query completion triggers Observable complete', async () => {
-      const queryCache = new QueryCache(true);
+      const queryCache = new QueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'complete-server' });
       queryCache.build(operation);
 
@@ -219,7 +219,7 @@ describe('ServerRelayNetwork', () => {
 
   describe('cache-miss fallback', () => {
     it('falls back to direct fetch and returns JSON when query not in cache', async () => {
-      const queryCache = new QueryCache(true); // empty cache
+      const queryCache = new QueryCache({ isServer: true }); // empty cache
       const data = { data: { userById: { id: 1, name: 'Alice' } } };
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockJsonFetchResponse(data));
@@ -239,7 +239,7 @@ describe('ServerRelayNetwork', () => {
 
   describe('error handling', () => {
     it('pipes multipartFetch rejection to query.error then Observable.error', async () => {
-      const queryCache = new QueryCache(true);
+      const queryCache = new QueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'fetch-error-server' });
       queryCache.build(operation);
 
@@ -255,7 +255,7 @@ describe('ServerRelayNetwork', () => {
     });
 
     it('pipes stream error to query.error then Observable.error', async () => {
-      const queryCache = new QueryCache(true);
+      const queryCache = new QueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'stream-error-server' });
       queryCache.build(operation);
 
@@ -295,7 +295,7 @@ describe('ServerRelayNetwork', () => {
 
   describe('AbortSignal forwarding', () => {
     it('forwards AbortSignal from cacheConfig.metadata to fetch', async () => {
-      const queryCache = new QueryCache(true);
+      const queryCache = new QueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'abort-server' });
       queryCache.build(operation);
 
@@ -318,7 +318,7 @@ describe('ServerRelayNetwork', () => {
     });
 
     it('does not include signal when cacheConfig has no abortSignal', async () => {
-      const queryCache = new QueryCache(true);
+      const queryCache = new QueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'no-abort-server' });
       queryCache.build(operation);
 

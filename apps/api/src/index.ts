@@ -7,18 +7,25 @@ import { PostGraphileRelayPreset } from "postgraphile/presets/relay";
 
 const PORT = 4000;
 
+const IS_DEV = process.env.GRAPHILE_ENV === "development";
+
 const pgl = postgraphile({
   extends: [PostGraphileAmberPreset, PostGraphileRelayPreset],
   grafserv: {
     port: 4000,
-    graphiql: true,
-    watch: true,
+    graphiql: IS_DEV,
+    watch: IS_DEV,
+    graphiqlPath: "/graphiql",
+    graphiqlOnGraphQLGET: IS_DEV,
   },
   grafast: {
-    explain: true,
+    explain: IS_DEV,
   },
   gather: {
-    installWatchFixtures: true,
+    installWatchFixtures: IS_DEV,
+  },
+  schema: {
+    exportSchemaSDLPath: IS_DEV ? "./schema.graphql" : undefined,
   },
   pgServices: [
     makePgService({

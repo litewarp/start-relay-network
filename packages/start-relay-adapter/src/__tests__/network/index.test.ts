@@ -7,7 +7,7 @@ import { describe, it, expect } from 'vitest';
 describe('createStartRelayNetwork', () => {
   const config = {
     url: 'http://test.com/graphql',
-    getRequestInit: async () => ({ method: 'POST' as const }),
+    getFetchOptions: async () => ({ method: 'POST' as const }),
     queryCache: new QueryCache()
   };
 

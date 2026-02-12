@@ -1,13 +1,13 @@
 import type { QueryCache } from "#@/query-cache.js";
 import type { ExecuteFunction, FetchFunction } from "relay-runtime";
 
-export type GetFetchOptsFn = (
+export type GetFetchOptionsFn = (
   ...opts: Parameters<FetchFunction>
 ) => Promise<RequestInit>;
 
 export interface RelayNetworkConfig {
   url: string;
-  getFetchOptions: GetFetchOptsFn;
+  getFetchOptions: GetFetchOptionsFn;
   queryCache: QueryCache;
 }
 

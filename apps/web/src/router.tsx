@@ -18,7 +18,7 @@ export function getRouter() {
       return {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${process.env.VITE_AUTH_TOKEN}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           query: request.text,

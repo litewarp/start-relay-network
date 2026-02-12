@@ -87,7 +87,7 @@ describe('ClientRelayNetwork', () => {
   function createClientNetwork(queryCache?: QueryCache) {
     return new ClientRelayNetwork({
       url: 'http://test.com/graphql',
-      getRequestInit: async () => ({
+      getFetchOptions: async () => ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: 'test' })
@@ -666,7 +666,7 @@ describe('ClientRelayNetwork', () => {
       const part2 = {
         incremental: [{ id: '0', data: { name: 'Alice' } }],
         hasNext: false
-      } as GraphQLResponse;
+      } as unknown as GraphQLResponse;
 
       query.next(part1);
       query.next(part2);

@@ -11,6 +11,9 @@ tasks:
     options:
       persistent: true
       cache: false
+    deps:
+      - relay
+      - start-relay-adapter:build
 
   build:
     command: bun run vite build
@@ -20,6 +23,9 @@ tasks:
       - tsconfig.json
     outputs:
       - .output/**/*
+    deps:
+      - relay
+      - start-relay-adapter:build
 
   preview:
     command: bun vite preview
@@ -33,3 +39,7 @@ tasks:
       - build
     options:
       persistent: true
+
+  relay:
+    command: bun run relay-compiler
+    inputs: ["./src/**/*.{ts,tsx}"]

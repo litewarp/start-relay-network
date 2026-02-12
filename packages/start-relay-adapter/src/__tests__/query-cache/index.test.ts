@@ -23,12 +23,12 @@ describe('QueryCache', () => {
     });
 
     it('creates a server-side cache when isServer is true', () => {
-      const cache = createQueryCache(true);
+      const cache = createQueryCache({ isServer: true });
       expect(cache._isServer).toBe(true);
     });
 
     it('creates a client-side cache when isServer is false', () => {
-      const cache = createQueryCache(false);
+      const cache = createQueryCache({ isServer: false });
       expect(cache._isServer).toBe(false);
     });
   });
@@ -113,7 +113,7 @@ describe('QueryCache', () => {
 
   describe('onQueryStarted (client-side)', () => {
     it('throws error when called on server', () => {
-      const cache = createQueryCache(true);
+      const cache = createQueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
 
       expect(() =>
@@ -126,7 +126,7 @@ describe('QueryCache', () => {
     });
 
     it('creates/gets a query and stores it for simulated streaming', () => {
-      const cache = createQueryCache(false);
+      const cache = createQueryCache({ isServer: false });
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
       const queryId = 'TestQuery:{}';
 
@@ -143,7 +143,7 @@ describe('QueryCache', () => {
 
   describe('onQueryProgress (client-side)', () => {
     it('throws error when called on server', () => {
-      const cache = createQueryCache(true);
+      const cache = createQueryCache({ isServer: true });
 
       expect(() =>
         cache.onQueryProgress({
@@ -154,7 +154,7 @@ describe('QueryCache', () => {
     });
 
     it('throws error when query not found', () => {
-      const cache = createQueryCache(false);
+      const cache = createQueryCache({ isServer: false });
 
       expect(() =>
         cache.onQueryProgress({
@@ -165,7 +165,7 @@ describe('QueryCache', () => {
     });
 
     it('forwards next events to the query', () => {
-      const cache = createQueryCache(false);
+      const cache = createQueryCache({ isServer: false });
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
       const queryId = 'TestQuery:{}';
 
@@ -185,7 +185,7 @@ describe('QueryCache', () => {
     });
 
     it('forwards complete events and removes from simulated queries', () => {
-      const cache = createQueryCache(false);
+      const cache = createQueryCache({ isServer: false });
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
       const queryId = 'TestQuery:{}';
 
@@ -200,7 +200,7 @@ describe('QueryCache', () => {
     });
 
     it('forwards error events and removes from simulated queries', () => {
-      const cache = createQueryCache(false);
+      const cache = createQueryCache({ isServer: false });
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
       const queryId = 'TestQuery:{}';
 
@@ -221,7 +221,7 @@ describe('QueryCache', () => {
 
   describe('watchQuery (server-side)', () => {
     it('pushes query started event to watch queue', () => {
-      const cache = createQueryCache(true);
+      const cache = createQueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
       const query = cache.build(operation);
 
@@ -239,7 +239,7 @@ describe('QueryCache', () => {
 
   describe('watchQueryQueue backpressure', () => {
     it('queues events when no callback registered', () => {
-      const cache = createQueryCache(true);
+      const cache = createQueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
       const query = cache.build(operation);
 
@@ -254,7 +254,7 @@ describe('QueryCache', () => {
     });
 
     it('drains queue when callback is registered', () => {
-      const cache = createQueryCache(true);
+      const cache = createQueryCache({ isServer: true });
       const operation1 = createMockOperationDescriptor({
         id: 'Query1',
         variables: {}

@@ -42,11 +42,18 @@ export const createServerPreloader = (environment: Environment, queryCache: Quer
     // store the operation in the queryCache
     queryCache.build(operation);
 
+    // Always use network-only on the server to ensure fresh data is fetched.
+    // The default 'store-or-network' combined with partial rendering policy
+    // causes Relay to skip the fetch when client:root exists in the store.
+    const serverOptions: LoadQueryOptions = {
+      ...options,
+      fetchPolicy: 'network-only',
+    };
     const preloadedQuery = relay.loadQuery<TQuery>(
       environment,
       request,
       variables,
-      options,
+      serverOptions,
       environmentProviderOptions
     );
 

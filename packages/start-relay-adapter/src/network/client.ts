@@ -63,7 +63,7 @@ export class ClientRelayNetwork {
         return Observable.create<GraphQLResponse>((sink) => {
           void multipartFetch({
             url: this.#url,
-            getRequestInit: () => config.getRequestInit(request, variables, cacheConfig),
+            getRequestInit: () => config.getFetchOptions(request, variables, cacheConfig),
             onComplete: () => sink.complete(),
             onError: (error) => sink.error(error),
             onNext: (responses) => responses.forEach((r) => sink.next(r))

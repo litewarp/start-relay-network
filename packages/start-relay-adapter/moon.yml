@@ -6,13 +6,8 @@ tags:
 
 tasks:
   build:
-    command: tsdown
-    deps:
-      - typecheck
-      - lint
+    command: bun run tsdown
+    outputs: ["dist/**"]
 
   dev:
-    command: tsdown --watch
-    options:
-      persistent: true
-      cache: false
+    command: bun run tsdown --watch

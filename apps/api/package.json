@@ -2,12 +2,7 @@
   "name": "api",
   "version": "0.1.0",
   "type": "module",
-  "scripts": {
-    "dev": "bun run src/index.ts",
-    "db:up": "docker compose up -d",
-    "db:down": "docker compose down",
-    "db:reset": "docker compose down -v && docker compose up -d"
-  },
+  "scripts": {},
   "dependencies": {
     "pg": "^8.13.1",
     "postgraphile": "^5.0.0-rc.6"

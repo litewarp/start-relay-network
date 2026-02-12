@@ -122,7 +122,7 @@ describe('hydration', () => {
         getStore: vi.fn(),
         getNetwork: vi.fn()
       };
-      queryCache = createQueryCache(false);
+      queryCache = createQueryCache({ isServer: false });
       // Suppress console.log during tests
       vi.spyOn(console, 'log').mockImplementation(() => {});
     });
@@ -215,7 +215,7 @@ describe('hydration', () => {
 
   describe('round-trip serialization', () => {
     it('preserves query identity through dehydrate/hydrate cycle', () => {
-      const queryCache = createQueryCache(false);
+      const queryCache = createQueryCache({ isServer: false });
       const mockEnvironment = {} as any;
 
       vi.spyOn(console, 'log').mockImplementation(() => {});

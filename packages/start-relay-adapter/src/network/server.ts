@@ -25,7 +25,7 @@ export class ServerRelayNetwork {
 
   public execute: ExecuteFunction;
 
-  constructor({ getRequestInit, url, queryCache }: RelayNetworkConfig) {
+  constructor({ getFetchOptions, url, queryCache }: RelayNetworkConfig) {
     this.#url = url;
     this.#queryCache = queryCache;
 
@@ -35,7 +35,7 @@ export class ServerRelayNetwork {
       const queryKey = queryKeyFromIdAndVariables(request.id ?? request.cacheID, variables);
 
       const wrappedGetRequestInit = async () => {
-        const res = await getRequestInit(request, variables, cacheConfig);
+        const res = await getFetchOptions(request, variables, cacheConfig);
         const signal = getAbortSignal(cacheConfig);
         return { ...res, signal };
       };

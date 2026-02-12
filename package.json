@@ -21,10 +21,12 @@
     "@moonrepo/cli": "2.0.0-rc.2",
     "@types/node": "^25.2.2",
     "@typescript/native-preview": "^7.0.0-dev.20260210.1",
+    "babel-plugin-relay": "^20.1.1",
     "oxfmt": "^0.31.0",
     "oxlint": "^1.46.0",
     "oxlint-tsgolint": "^0.11.5",
-    "tsdown": "^0.20.3"
+    "tsdown": "^0.20.3",
+    "vite-plugin-dts": "^4.5.4"
   },
   "catalog": {
     "graphql": "^16.12.0",

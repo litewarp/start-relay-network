@@ -7,7 +7,7 @@ tags:
 
 tasks:
   dev:
-    command: bun run src/index.ts
+    command: bun --watch src/index.ts
     options:
       persistent: true
       cache: false
