@@ -1,6 +1,7 @@
 /**
  * Adopted from fetch-multipart-graphql
  */
+import { IncrementalResponseTransformer } from './incremental-response-transformer.js';
 import { parseMultipartHttp } from './multipart-utils.js';
 
 export class PatchResolver<T> {
@@ -9,6 +10,7 @@ export class PatchResolver<T> {
   #chunkBuffer: string;
   #isPreamble: boolean;
   #textDecoder: TextDecoder;
+  #transformer: IncrementalResponseTransformer;
 
   constructor(config: { onNext: (results: T[]) => void; boundary?: string }) {
     this.boundary = config.boundary || '-';
@@ -16,6 +18,7 @@ export class PatchResolver<T> {
     this.#chunkBuffer = '';
     this.#isPreamble = true;
     this.#textDecoder = new TextDecoder();
+    this.#transformer = new IncrementalResponseTransformer();
   }
 
   handleChunk(chunk: Uint8Array<ArrayBuffer>) {
@@ -31,7 +34,12 @@ export class PatchResolver<T> {
     this.#isPreamble = isPreamble;
     this.#chunkBuffer = newBuffer;
     if (parts.length) {
-      this.onNext(parts);
+      const transformed = parts.flatMap((part) =>
+        this.#transformer.transform(part as Record<string, unknown>)
+      ) as T[];
+      if (transformed.length) {
+        this.onNext(transformed);
+      }
     }
   }
 }

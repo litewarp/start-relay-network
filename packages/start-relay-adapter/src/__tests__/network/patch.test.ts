@@ -105,14 +105,14 @@ describe('PatchResolver', () => {
       expect(onNext).toHaveBeenCalledWith([{ afterPreamble: true }]);
     });
 
-    it('handles incremental delivery results', () => {
+    it('transforms incremental delivery from 2023 spec to relay format', () => {
       const onNext = vi.fn();
       const resolver = new PatchResolver({ onNext, boundary });
 
       const initial = createDelimitedPart({
         data: { user: { id: '1' } },
         hasNext: true,
-        pending: [{ id: '0', path: ['user'] }]
+        pending: [{ id: '0', path: ['user'], label: 'UserQuery$defer$fragment' }]
       });
 
       const subsequent = createDelimitedPart({
@@ -129,14 +129,54 @@ describe('PatchResolver', () => {
       expect(onNext).toHaveBeenCalledWith([
         {
           data: { user: { id: '1' } },
-          hasNext: true,
-          pending: [{ id: '0', path: ['user'] }]
+          hasNext: true
         },
         {
-          incremental: [{ id: '0', data: { name: 'Alice' } }],
-          completed: [{ id: '0' }],
+          data: { name: 'Alice' },
+          path: ['user'],
+          label: 'UserQuery$defer$fragment',
           hasNext: false
         }
+      ]);
+    });
+
+    it('filters out bare completion signals with no data', () => {
+      const onNext = vi.fn();
+      const resolver = new PatchResolver({ onNext, boundary });
+
+      const bare = createDelimitedPart({ hasNext: false });
+      const closing = `\r\n--${boundary}--`;
+
+      resolver.handleChunk(encode(bare + closing));
+
+      // Bare { hasNext: false } is absorbed — no onNext call
+      expect(onNext).not.toHaveBeenCalled();
+    });
+
+    it('filters out completed-only chunks with no incremental data', () => {
+      const onNext = vi.fn();
+      const resolver = new PatchResolver({ onNext, boundary });
+
+      const initial = createDelimitedPart({
+        data: { user: { id: '1' } },
+        hasNext: true,
+        pending: [{ id: '0', path: ['user'], label: 'frag' }]
+      });
+
+      // A chunk with only completed and hasNext (no incremental)
+      const completedOnly = createDelimitedPart({
+        completed: [{ id: '0' }],
+        hasNext: false
+      });
+
+      const closing = `\r\n--${boundary}--`;
+
+      resolver.handleChunk(encode(initial + completedOnly + closing));
+
+      expect(onNext).toHaveBeenCalledTimes(1);
+      // Only the initial response is emitted; completed-only chunk produces nothing
+      expect(onNext).toHaveBeenCalledWith([
+        { data: { user: { id: '1' } }, hasNext: true }
       ]);
     });
   });

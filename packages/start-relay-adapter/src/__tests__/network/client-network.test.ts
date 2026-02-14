@@ -122,10 +122,21 @@ describe('ClientRelayNetwork', () => {
       const observable = network.execute(createMockRequestParameters(), {}, {}, null);
       const { values, completed } = await subscribeAndCollect(observable);
 
+      // Transformer converts 2023 spec → Relay format
       expect(values).toHaveLength(3);
-      expect(values[0]).toEqual(parts[0]);
-      expect(values[1]).toEqual(parts[1]);
-      expect(values[2]).toEqual(parts[2]);
+      expect(values[0]).toEqual({ data: { allUsersList: [] }, hasNext: true });
+      expect(values[1]).toEqual({
+        items: [{ id: 1, name: 'Alice' }],
+        path: ['allUsersList'],
+        label: 'users',
+        hasNext: true
+      });
+      expect(values[2]).toEqual({
+        items: [{ id: 2, name: 'Bob' }],
+        path: ['allUsersList'],
+        label: 'users',
+        hasNext: false
+      });
       expect(completed).toBe(true);
     });
 
@@ -159,12 +170,16 @@ describe('ClientRelayNetwork', () => {
       );
       expect(values[1]).toEqual(
         expect.objectContaining({
-          incremental: [{ id: '0', items: [{ id: 1, name: 'Alice' }] }]
+          items: [{ id: 1, name: 'Alice' }],
+          path: ['allUsersList'],
+          label: 'users'
         })
       );
       expect(values[2]).toEqual(
         expect.objectContaining({
-          incremental: [{ id: '0', items: [{ id: 2, name: 'Bob' }] }],
+          items: [{ id: 2, name: 'Bob' }],
+          path: ['allUsersList'],
+          label: 'users',
           hasNext: false
         })
       );
@@ -200,7 +215,9 @@ describe('ClientRelayNetwork', () => {
       );
       expect(values[1]).toEqual(
         expect.objectContaining({
-          incremental: [{ id: '0', items: [{ id: 2, name: 'Bob' }] }],
+          items: [{ id: 2, name: 'Bob' }],
+          path: ['allUsersList'],
+          label: 'users',
           hasNext: false
         })
       );
@@ -228,8 +245,9 @@ describe('ClientRelayNetwork', () => {
       const observable = network.execute(createMockRequestParameters(), {}, {}, null);
       const { values, completed } = await subscribeAndCollect(observable);
 
-      expect(values).toHaveLength(3);
-      expect(values[2]).toEqual({ hasNext: false });
+      // Bare { hasNext: false } is absorbed by the transformer (no data for Relay),
+      // completion comes from the multipart stream ending
+      expect(values).toHaveLength(2);
       expect(completed).toBe(true);
     });
 
@@ -282,7 +300,9 @@ describe('ClientRelayNetwork', () => {
       );
       expect(values[1]).toEqual(
         expect.objectContaining({
-          incremental: [{ id: '0', data: { name: 'Alice', email: 'alice@example.com' } }],
+          data: { name: 'Alice', email: 'alice@example.com' },
+          path: ['userById'],
+          label: 'details',
           hasNext: false
         })
       );
@@ -311,21 +331,19 @@ describe('ClientRelayNetwork', () => {
       const observable = network.execute(createMockRequestParameters(), {}, {}, null);
       const { values, completed } = await subscribeAndCollect(observable);
 
-      // First emission: initial payload without deferred fields
+      // First emission: initial payload without deferred fields or pending
       expect(values[0]).toEqual(
         expect.objectContaining({
           data: { userById: { id: 1, __typename: 'User' } },
           hasNext: true
         })
       );
-      // Second emission: deferred fragment data
+      // Second emission: expanded deferred fragment data (Relay format)
       expect(values[1]).toEqual(
         expect.objectContaining({
-          incremental: expect.arrayContaining([
-            expect.objectContaining({
-              data: expect.objectContaining({ name: 'Alice', email: 'alice@example.com' })
-            })
-          ]),
+          data: expect.objectContaining({ name: 'Alice', email: 'alice@example.com' }),
+          path: ['userById'],
+          label: 'UserDetails',
           hasNext: false
         })
       );
@@ -398,9 +416,45 @@ describe('ClientRelayNetwork', () => {
       const observable = network.execute(createMockRequestParameters(), {}, {}, null);
       const { values, completed } = await subscribeAndCollect(observable);
 
-      expect(values).toHaveLength(4);
-      expect(values[0]).toEqual(expect.objectContaining({ data: { allUsersList: [] } }));
-      expect(values[3]).toEqual(expect.objectContaining({ hasNext: false }));
+      // Part 0: initial → { data, hasNext } (pending stripped)
+      // Part 1: incremental [id:0 items] → expanded to { items, path, label, hasNext }
+      // Part 2: incremental [id:1 data, id:0 items] → 2 expanded responses
+      // Part 3: incremental [id:2 data] → expanded
+      expect(values).toHaveLength(5);
+      expect(values[0]).toEqual(
+        expect.objectContaining({ data: { allUsersList: [] }, hasNext: true })
+      );
+      expect(values[1]).toEqual(
+        expect.objectContaining({
+          items: [{ id: 1 }],
+          path: ['allUsersList'],
+          label: 'users',
+          hasNext: true
+        })
+      );
+      // Part 2 has 2 incremental items expanded
+      expect(values[2]).toEqual(
+        expect.objectContaining({
+          data: { name: 'Alice', email: 'alice@example.com' },
+          path: ['allUsersList', 0],
+          label: 'UserDetails'
+        })
+      );
+      expect(values[3]).toEqual(
+        expect.objectContaining({
+          items: [{ id: 2 }],
+          path: ['allUsersList'],
+          label: 'users'
+        })
+      );
+      expect(values[4]).toEqual(
+        expect.objectContaining({
+          data: { name: 'Bob', email: 'bob@example.com' },
+          path: ['allUsersList', 1],
+          label: 'UserDetails',
+          hasNext: false
+        })
+      );
       expect(completed).toBe(true);
     });
 
@@ -436,25 +490,34 @@ describe('ClientRelayNetwork', () => {
       const { values, completed } = await subscribeAndCollect(observable);
 
       expect(values).toHaveLength(4);
-      // Initial payload
-      expect(values[0]).toEqual(expect.objectContaining({ data: { userById: { id: 1 } } }));
-      // Deferred fragment with empty posts
+      // Initial payload (pending stripped)
+      expect(values[0]).toEqual(
+        expect.objectContaining({ data: { userById: { id: 1 } }, hasNext: true })
+      );
+      // Deferred fragment with empty posts (Relay format)
       expect(values[1]).toEqual(
         expect.objectContaining({
-          incremental: expect.arrayContaining([
-            expect.objectContaining({ data: { posts: [] } })
-          ])
+          data: { posts: [] },
+          path: ['userById'],
+          label: 'UserWithPosts'
         })
       );
-      // Streamed post items
+      // Streamed post items (Relay format)
       expect(values[2]).toEqual(
         expect.objectContaining({
-          incremental: expect.arrayContaining([
-            expect.objectContaining({ items: [{ id: 101, title: 'Post 1' }] })
-          ])
+          items: [{ id: 101, title: 'Post 1' }],
+          path: ['userById', 'posts'],
+          label: 'PostItems'
         })
       );
-      expect(values[3]).toEqual(expect.objectContaining({ hasNext: false }));
+      expect(values[3]).toEqual(
+        expect.objectContaining({
+          items: [{ id: 102, title: 'Post 2' }],
+          path: ['userById', 'posts'],
+          label: 'PostItems',
+          hasNext: false
+        })
+      );
       expect(completed).toBe(true);
     });
   });
@@ -511,18 +574,17 @@ describe('ClientRelayNetwork', () => {
       const observable = network.execute(createMockRequestParameters(), {}, {}, null);
       const { values, completed } = await subscribeAndCollect(observable);
 
-      // First value is the initial payload
+      // First value is the initial payload (pending stripped)
       expect(values[0]).toEqual(
         expect.objectContaining({ data: { userById: { id: 1 } }, hasNext: true })
       );
-      // Second value includes the error in incremental
+      // Second value: expanded Relay format with error
       expect(values[1]).toEqual(
         expect.objectContaining({
-          incremental: expect.arrayContaining([
-            expect.objectContaining({
-              errors: [{ message: 'Deferred field failed' }]
-            })
-          ]),
+          data: null,
+          path: ['userById'],
+          label: 'details',
+          errors: [{ message: 'Deferred field failed' }],
           hasNext: false
         })
       );

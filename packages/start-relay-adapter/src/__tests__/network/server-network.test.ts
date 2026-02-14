@@ -114,10 +114,21 @@ describe('ServerRelayNetwork', () => {
       const observable = network.execute(request, {}, {}, null);
       const { values, completed } = await subscribeAndCollect(observable);
 
+      // Transformer converts 2023 spec → Relay format
       expect(values).toHaveLength(3);
-      expect(values[0]).toEqual(parts[0]);
-      expect(values[1]).toEqual(parts[1]);
-      expect(values[2]).toEqual(parts[2]);
+      expect(values[0]).toEqual({ data: { allUsersList: [] }, hasNext: true });
+      expect(values[1]).toEqual({
+        items: [{ id: 1, name: 'Alice' }],
+        path: ['allUsersList'],
+        label: 'users',
+        hasNext: true
+      });
+      expect(values[2]).toEqual({
+        items: [{ id: 2, name: 'Bob' }],
+        path: ['allUsersList'],
+        label: 'users',
+        hasNext: false
+      });
       expect(completed).toBe(true);
     });
 
@@ -152,7 +163,9 @@ describe('ServerRelayNetwork', () => {
       );
       expect(values[1]).toEqual(
         expect.objectContaining({
-          incremental: [{ id: '0', data: { name: 'Alice', email: 'alice@example.com' } }],
+          data: { name: 'Alice', email: 'alice@example.com' },
+          path: ['userById'],
+          label: 'details',
           hasNext: false
         })
       );
