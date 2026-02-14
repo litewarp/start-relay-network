@@ -1,16 +1,25 @@
-import { createFileRoute } from "@tanstack/react-router";
-import relay from "react-relay";
-import type { routesIndexQuery } from "../__generated__/routesIndexQuery.graphql";
-import { loggingMiddleware } from "#@/utils/loggingMiddleware.js";
+import { createFileRoute } from '@tanstack/react-router';
+import relay from 'react-relay';
+import type { routesIndexQuery } from '../__generated__/routesIndexQuery.graphql';
+import { loggingMiddleware } from '#@/utils/loggingMiddleware.js';
 const { graphql, usePreloadedQuery } = relay;
 
 const query = graphql`
   query routesIndexQuery {
-    id
+    films(first: 10) {
+      totalCount
+      edges {
+        cursor
+        node {
+          id
+          title
+        }
+      }
+    }
   }
 `;
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute('/')({
   component: Home,
   loader: ({ context }) => {
     const preloadedQuery = context.preloadQuery<routesIndexQuery>(query, {});

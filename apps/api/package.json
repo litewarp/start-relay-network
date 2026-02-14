@@ -5,10 +5,12 @@
   "scripts": {},
   "private": true,
   "dependencies": {
+    "@graphile-contrib/pg-many-to-many": "^2.0.0-rc.1",
     "pg": "^8.13.1",
     "postgraphile": "^5.0.0-rc.6"
   },
   "devDependencies": {
+    "@graphile/simplify-inflection": "^8.0.0-rc.3",
     "@types/pg": "^8.6.7"
   }
 }

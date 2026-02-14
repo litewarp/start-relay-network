@@ -21,10 +21,12 @@
       "name": "api",
       "version": "0.1.0",
       "dependencies": {
+        "@graphile-contrib/pg-many-to-many": "^2.0.0-rc.1",
         "pg": "^8.13.1",
         "postgraphile": "^5.0.0-rc.6",
       },
       "devDependencies": {
+        "@graphile/simplify-inflection": "^8.0.0-rc.3",
         "@types/pg": "^8.6.7",
       },
     },
@@ -59,7 +61,7 @@
     },
     "packages/start-relay-adapter": {
       "name": "@litewarp/start-relay-network",
-      "version": "0.1.0",
+      "version": "1.0.0-alpha.2",
       "dependencies": {
         "debug": "^4.4.3",
       },
@@ -256,7 +258,11 @@
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.10", "", {}, "sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ=="],
 
+    "@graphile-contrib/pg-many-to-many": ["@graphile-contrib/pg-many-to-many@2.0.0-rc.1", "", {}, "sha512-qd6u50sxYFEzGPO6rjH+5OH6A8BFNhVsTuJaVD/JOfF2LIO+ANS8sT0MTicgZ9WLd+Eq6OYrYJD0iNUDN3Eing=="],
+
     "@graphile/lru": ["@graphile/lru@5.0.0-rc.4", "", { "dependencies": { "tslib": "^2.8.1" } }, "sha512-QJibEzd/Fhxut3OS5opWd+b1kYUhg74hurepbhb4cHSW76U7Xp6vIPBh//eRznymIOVgE4KNDo7bKblM/NGbVA=="],
+
+    "@graphile/simplify-inflection": ["@graphile/simplify-inflection@8.0.0-rc.3", "", {}, "sha512-2ujrwI5P7tNDUfr0NegXmU6M9cwyBPoGGy+sykQne5jf2PUgdwJz4HxLsyFT/ykukwZt5Kcrm7Thik2f7reiJA=="],
 
     "@graphiql/plugin-doc-explorer": ["@graphiql/plugin-doc-explorer@0.4.1", "", { "dependencies": { "@headlessui/react": "^2.2", "zustand": "^5" }, "peerDependencies": { "@graphiql/react": "^0.37.0", "graphql": "^15.5.0 || ^16.0.0 || ^17.0.0", "react": "^18 || ^19", "react-compiler-runtime": "19.1.0-rc.1", "react-dom": "^18 || ^19" } }, "sha512-+ram1dDDGMqJn/f9n5I8E6grTvxcM9JZYt/HhtYLuCvkN8kERI6/E3zBHBshhIUnQZoXioZ03fAzXg7JOn0Kyg=="],
 

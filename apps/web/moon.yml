@@ -12,7 +12,6 @@ tasks:
       persistent: true
       cache: false
     deps:
-      - relay
       - start-relay-adapter:build
 
   build:
@@ -42,4 +41,4 @@ tasks:
 
   relay:
     command: bun run relay-compiler
-    inputs: ["./src/**/*.{ts,tsx}"]
+    inputs: ['./src/**/*.{ts,tsx}']

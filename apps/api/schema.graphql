@@ -1,3 +1,28 @@
+"""
+Directs the executor to stream plural fields when the `if` argument is true or undefined.
+"""
+directive @stream(
+  """Stream when true or undefined."""
+  if: Boolean
+
+  """Unique name"""
+  label: String
+
+  """Number of items to return immediately"""
+  initialCount: Int = 0
+) on FIELD
+
+"""
+Directs the executor to defer this fragment when the `if` argument is true or undefined.
+"""
+directive @defer(
+  """Deferred when true or undefined."""
+  if: Boolean
+
+  """Unique name"""
+  label: String
+) on FRAGMENT_SPREAD | INLINE_FRAGMENT
+
 """The root query type which gives access points into the data universe."""
 type Query implements Node {
   """
@@ -18,7 +43,7 @@ type Query implements Node {
   ): Node
 
   """Reads a single `FilmPerson` using its globally unique `ID`."""
-  filmPerson(
+  filmPersonById(
     """
     The globally unique `ID` to be used in selecting a single `FilmPerson`.
     """
@@ -26,21 +51,23 @@ type Query implements Node {
   ): FilmPerson
 
   """Reads a single `FilmPlanet` using its globally unique `ID`."""
-  filmPlanet(
+  filmPlanetById(
     """
     The globally unique `ID` to be used in selecting a single `FilmPlanet`.
     """
     id: ID!
   ): FilmPlanet
 
-  """Reads a single `FilmSpecy` using its globally unique `ID`."""
-  filmSpecy(
-    """The globally unique `ID` to be used in selecting a single `FilmSpecy`."""
+  """Reads a single `FilmSpecies` using its globally unique `ID`."""
+  filmSpeciesById(
+    """
+    The globally unique `ID` to be used in selecting a single `FilmSpecies`.
+    """
     id: ID!
-  ): FilmSpecy
+  ): FilmSpecies
 
   """Reads a single `FilmStarship` using its globally unique `ID`."""
-  filmStarship(
+  filmStarshipById(
     """
     The globally unique `ID` to be used in selecting a single `FilmStarship`.
     """
@@ -48,7 +75,7 @@ type Query implements Node {
   ): FilmStarship
 
   """Reads a single `FilmVehicle` using its globally unique `ID`."""
-  filmVehicle(
+  filmVehicleById(
     """
     The globally unique `ID` to be used in selecting a single `FilmVehicle`.
     """
@@ -56,7 +83,7 @@ type Query implements Node {
   ): FilmVehicle
 
   """Reads a single `PersonStarship` using its globally unique `ID`."""
-  personStarship(
+  personStarshipById(
     """
     The globally unique `ID` to be used in selecting a single `PersonStarship`.
     """
@@ -64,7 +91,7 @@ type Query implements Node {
   ): PersonStarship
 
   """Reads a single `PersonVehicle` using its globally unique `ID`."""
-  personVehicle(
+  personVehicleById(
     """
     The globally unique `ID` to be used in selecting a single `PersonVehicle`.
     """
@@ -72,43 +99,43 @@ type Query implements Node {
   ): PersonVehicle
 
   """Reads a single `Person` using its globally unique `ID`."""
-  person(
+  personById(
     """The globally unique `ID` to be used in selecting a single `Person`."""
     id: ID!
   ): Person
 
   """Reads a single `Film` using its globally unique `ID`."""
-  film(
+  filmById(
     """The globally unique `ID` to be used in selecting a single `Film`."""
     id: ID!
   ): Film
 
   """Reads a single `Planet` using its globally unique `ID`."""
-  planet(
+  planetById(
     """The globally unique `ID` to be used in selecting a single `Planet`."""
     id: ID!
   ): Planet
 
   """Reads a single `Species` using its globally unique `ID`."""
-  species(
+  speciesById(
     """The globally unique `ID` to be used in selecting a single `Species`."""
     id: ID!
   ): Species
 
   """Reads a single `Vehicle` using its globally unique `ID`."""
-  vehicle(
+  vehicleById(
     """The globally unique `ID` to be used in selecting a single `Vehicle`."""
     id: ID!
   ): Vehicle
 
   """Reads a single `Starship` using its globally unique `ID`."""
-  starship(
+  starshipById(
     """The globally unique `ID` to be used in selecting a single `Starship`."""
     id: ID!
   ): Starship
 
   """Reads and enables pagination through a set of `FilmPerson`."""
-  allFilmPeople(
+  filmPeople(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -137,7 +164,7 @@ type Query implements Node {
   ): FilmPersonConnection
 
   """Reads and enables pagination through a set of `FilmPlanet`."""
-  allFilmPlanets(
+  filmPlanets(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -165,8 +192,8 @@ type Query implements Node {
     orderBy: [FilmPlanetOrderBy!] = [PRIMARY_KEY_ASC]
   ): FilmPlanetConnection
 
-  """Reads and enables pagination through a set of `FilmSpecy`."""
-  allFilmSpecies(
+  """Reads and enables pagination through a set of `FilmSpecies`."""
+  filmSpecieses(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -188,14 +215,14 @@ type Query implements Node {
     """
     A condition to be used in determining which values should be returned by the collection.
     """
-    condition: FilmSpecyCondition
+    condition: FilmSpeciesCondition
 
-    """The method to use when ordering `FilmSpecy`."""
-    orderBy: [FilmSpecyOrderBy!] = [PRIMARY_KEY_ASC]
-  ): FilmSpecyConnection
+    """The method to use when ordering `FilmSpecies`."""
+    orderBy: [FilmSpeciesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): FilmSpeciesConnection
 
   """Reads and enables pagination through a set of `FilmStarship`."""
-  allFilmStarships(
+  filmStarships(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -224,7 +251,7 @@ type Query implements Node {
   ): FilmStarshipConnection
 
   """Reads and enables pagination through a set of `FilmVehicle`."""
-  allFilmVehicles(
+  filmVehicles(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -253,7 +280,7 @@ type Query implements Node {
   ): FilmVehicleConnection
 
   """Reads and enables pagination through a set of `PersonStarship`."""
-  allPersonStarships(
+  personStarships(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -282,7 +309,7 @@ type Query implements Node {
   ): PersonStarshipConnection
 
   """Reads and enables pagination through a set of `PersonVehicle`."""
-  allPersonVehicles(
+  personVehicles(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -311,7 +338,7 @@ type Query implements Node {
   ): PersonVehicleConnection
 
   """Reads and enables pagination through a set of `Person`."""
-  allPeople(
+  people(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -340,7 +367,7 @@ type Query implements Node {
   ): PersonConnection
 
   """Reads and enables pagination through a set of `Film`."""
-  allFilms(
+  films(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -369,7 +396,7 @@ type Query implements Node {
   ): FilmConnection
 
   """Reads and enables pagination through a set of `Planet`."""
-  allPlanets(
+  planets(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -393,7 +420,7 @@ type Query implements Node {
   ): PlanetConnection
 
   """Reads and enables pagination through a set of `Species`."""
-  allSpecies(
+  specieses(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -422,7 +449,7 @@ type Query implements Node {
   ): SpeciesConnection
 
   """Reads and enables pagination through a set of `Vehicle`."""
-  allVehicles(
+  vehicles(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -446,7 +473,7 @@ type Query implements Node {
   ): VehicleConnection
 
   """Reads and enables pagination through a set of `Starship`."""
-  allStarships(
+  starships(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -485,10 +512,10 @@ type FilmPerson implements Node {
   id: ID!
 
   """Reads a single `Film` that is related to this `FilmPerson`."""
-  filmByFilmId: Film
+  film: Film
 
   """Reads a single `Person` that is related to this `FilmPerson`."""
-  personByPersonId: Person
+  person: Person
 }
 
 type Film implements Node {
@@ -505,8 +532,138 @@ type Film implements Node {
   createdAt: Datetime!
   updatedAt: Datetime!
 
+  """Reads and enables pagination through a set of `Person`."""
+  peopleByFilmPersonFilmIdAndPersonId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PersonCondition
+
+    """The method to use when ordering `Person`."""
+    orderBy: [PersonOrderBy!] = [PRIMARY_KEY_ASC]
+  ): FilmPeopleByFilmPersonFilmIdAndPersonIdManyToManyConnection!
+
+  """Reads and enables pagination through a set of `Planet`."""
+  planetsByFilmPlanetFilmIdAndPlanetId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Planet`."""
+    orderBy: [PlanetOrderBy!] = [PRIMARY_KEY_ASC]
+  ): FilmPlanetsByFilmPlanetFilmIdAndPlanetIdManyToManyConnection!
+
+  """Reads and enables pagination through a set of `Species`."""
+  speciesByFilmSpeciesFilmIdAndSpeciesId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: SpeciesCondition
+
+    """The method to use when ordering `Species`."""
+    orderBy: [SpeciesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): FilmSpeciesByFilmSpeciesFilmIdAndSpeciesIdManyToManyConnection!
+
+  """Reads and enables pagination through a set of `Starship`."""
+  starshipsByFilmStarshipFilmIdAndStarshipId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Starship`."""
+    orderBy: [StarshipOrderBy!] = [PRIMARY_KEY_ASC]
+  ): FilmStarshipsByFilmStarshipFilmIdAndStarshipIdManyToManyConnection!
+
+  """Reads and enables pagination through a set of `Vehicle`."""
+  vehiclesByFilmVehicleFilmIdAndVehicleId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Vehicle`."""
+    orderBy: [VehicleOrderBy!] = [PRIMARY_KEY_ASC]
+  ): FilmVehiclesByFilmVehicleFilmIdAndVehicleIdManyToManyConnection!
+
   """Reads and enables pagination through a set of `FilmPerson`."""
-  filmPeopleByFilmId(
+  filmPeople(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -535,7 +692,7 @@ type Film implements Node {
   ): FilmPersonConnection!
 
   """Reads and enables pagination through a set of `FilmPlanet`."""
-  filmPlanetsByFilmId(
+  filmPlanets(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -563,8 +720,8 @@ type Film implements Node {
     orderBy: [FilmPlanetOrderBy!] = [PRIMARY_KEY_ASC]
   ): FilmPlanetConnection!
 
-  """Reads and enables pagination through a set of `FilmSpecy`."""
-  filmSpeciesByFilmId(
+  """Reads and enables pagination through a set of `FilmSpecies`."""
+  filmSpecieses(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -586,14 +743,14 @@ type Film implements Node {
     """
     A condition to be used in determining which values should be returned by the collection.
     """
-    condition: FilmSpecyCondition
+    condition: FilmSpeciesCondition
 
-    """The method to use when ordering `FilmSpecy`."""
-    orderBy: [FilmSpecyOrderBy!] = [PRIMARY_KEY_ASC]
-  ): FilmSpecyConnection!
+    """The method to use when ordering `FilmSpecies`."""
+    orderBy: [FilmSpeciesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): FilmSpeciesConnection!
 
   """Reads and enables pagination through a set of `FilmStarship`."""
-  filmStarshipsByFilmId(
+  filmStarships(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -622,7 +779,7 @@ type Film implements Node {
   ): FilmStarshipConnection!
 
   """Reads and enables pagination through a set of `FilmVehicle`."""
-  filmVehiclesByFilmId(
+  filmVehicles(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -663,30 +820,241 @@ to unexpected results.
 """
 scalar Datetime
 
-"""A connection to a list of `FilmPerson` values."""
-type FilmPersonConnection {
-  """A list of `FilmPerson` objects."""
-  nodes: [FilmPerson]!
+"""
+A connection to a list of `Person` values, with data from `FilmPerson`.
+"""
+type FilmPeopleByFilmPersonFilmIdAndPersonIdManyToManyConnection {
+  """A list of `Person` objects."""
+  nodes: [Person]!
 
   """
-  A list of edges which contains the `FilmPerson` and cursor to aid in pagination.
+  A list of edges which contains the `Person`, info from the `FilmPerson`, and the cursor to aid in pagination.
   """
-  edges: [FilmPersonEdge]!
+  edges: [FilmPeopleByFilmPersonFilmIdAndPersonIdManyToManyEdge!]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  """The count of *all* `FilmPerson` you could get from the connection."""
+  """The count of *all* `Person` you could get from the connection."""
   totalCount: Int!
 }
 
-"""A `FilmPerson` edge in the connection."""
-type FilmPersonEdge {
+type Person implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  id: ID!
+  name: String!
+  birthYear: String
+  eyeColor: String
+  gender: String
+  hairColor: String
+  height: Int
+  mass: BigFloat
+  skinColor: String
+  createdAt: Datetime!
+  updatedAt: Datetime!
+
+  """Reads and enables pagination through a set of `Film`."""
+  filmsByFilmPersonPersonIdAndFilmId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: FilmCondition
+
+    """The method to use when ordering `Film`."""
+    orderBy: [FilmOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PersonFilmsByFilmPersonPersonIdAndFilmIdManyToManyConnection!
+
+  """Reads and enables pagination through a set of `Starship`."""
+  starshipsByPersonStarshipPersonIdAndStarshipId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Starship`."""
+    orderBy: [StarshipOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PersonStarshipsByPersonStarshipPersonIdAndStarshipIdManyToManyConnection!
+
+  """Reads and enables pagination through a set of `Vehicle`."""
+  vehiclesByPersonVehiclePersonIdAndVehicleId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Vehicle`."""
+    orderBy: [VehicleOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PersonVehiclesByPersonVehiclePersonIdAndVehicleIdManyToManyConnection!
+
+  """Reads a single `Planet` that is related to this `Person`."""
+  homeworld: Planet
+
+  """Reads a single `Species` that is related to this `Person`."""
+  species: Species
+
+  """Reads and enables pagination through a set of `FilmPerson`."""
+  filmPeople(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: FilmPersonCondition
+
+    """The method to use when ordering `FilmPerson`."""
+    orderBy: [FilmPersonOrderBy!] = [PRIMARY_KEY_ASC]
+  ): FilmPersonConnection!
+
+  """Reads and enables pagination through a set of `PersonStarship`."""
+  personStarships(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PersonStarshipCondition
+
+    """The method to use when ordering `PersonStarship`."""
+    orderBy: [PersonStarshipOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PersonStarshipConnection!
+
+  """Reads and enables pagination through a set of `PersonVehicle`."""
+  personVehicles(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PersonVehicleCondition
+
+    """The method to use when ordering `PersonVehicle`."""
+    orderBy: [PersonVehicleOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PersonVehicleConnection!
+}
+
+"""
+A floating point number that requires more precision than IEEE 754 binary 64
+"""
+scalar BigFloat
+
+"""A connection to a list of `Film` values, with data from `FilmPerson`."""
+type PersonFilmsByFilmPersonPersonIdAndFilmIdManyToManyConnection {
+  """A list of `Film` objects."""
+  nodes: [Film]!
+
+  """
+  A list of edges which contains the `Film`, info from the `FilmPerson`, and the cursor to aid in pagination.
+  """
+  edges: [PersonFilmsByFilmPersonPersonIdAndFilmIdManyToManyEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Film` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Film` edge in the connection, with data from `FilmPerson`."""
+type PersonFilmsByFilmPersonPersonIdAndFilmIdManyToManyEdge {
   """A cursor for use in pagination."""
   cursor: Cursor
 
-  """The `FilmPerson` at the end of the edge."""
-  node: FilmPerson
+  """The `Film` at the end of the edge."""
+  node: Film
 }
 
 """A location in a connection that can be used for resuming pagination."""
@@ -708,49 +1076,709 @@ type PageInfo {
 }
 
 """
-A condition to be used against `FilmPerson` object types. All fields are tested
-for equality and combined with a logical ‘and.’
+A condition to be used against `Film` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
-input FilmPersonCondition {
-  filmByFilmId: ID
-  personByPersonId: ID
+input FilmCondition {
+  """Checks for equality with the object’s `episodeId` field."""
+  episodeId: Int
 }
 
-"""Methods to use when ordering `FilmPerson`."""
-enum FilmPersonOrderBy {
+"""Methods to use when ordering `Film`."""
+enum FilmOrderBy {
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+  EPISODE_ID_ASC
+  EPISODE_ID_DESC
+}
+
+"""
+A connection to a list of `Starship` values, with data from `PersonStarship`.
+"""
+type PersonStarshipsByPersonStarshipPersonIdAndStarshipIdManyToManyConnection {
+  """A list of `Starship` objects."""
+  nodes: [Starship]!
+
+  """
+  A list of edges which contains the `Starship`, info from the `PersonStarship`, and the cursor to aid in pagination.
+  """
+  edges: [PersonStarshipsByPersonStarshipPersonIdAndStarshipIdManyToManyEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Starship` you could get from the connection."""
+  totalCount: Int!
+}
+
+type Starship implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  id: ID!
+  name: String!
+  model: String
+  starshipClass: String
+  manufacturer: [String]
+  costInCredits: BigFloat
+  length: BigFloat
+  crew: String
+  passengers: String
+  maxAtmospheringSpeed: Int
+  hyperdriveRating: BigFloat
+  mglt: Int
+  cargoCapacity: BigFloat
+  consumables: String
+  createdAt: Datetime!
+  updatedAt: Datetime!
+
+  """Reads and enables pagination through a set of `Film`."""
+  filmsByFilmStarshipStarshipIdAndFilmId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: FilmCondition
+
+    """The method to use when ordering `Film`."""
+    orderBy: [FilmOrderBy!] = [PRIMARY_KEY_ASC]
+  ): StarshipFilmsByFilmStarshipStarshipIdAndFilmIdManyToManyConnection!
+
+  """Reads and enables pagination through a set of `Person`."""
+  peopleByPersonStarshipStarshipIdAndPersonId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PersonCondition
+
+    """The method to use when ordering `Person`."""
+    orderBy: [PersonOrderBy!] = [PRIMARY_KEY_ASC]
+  ): StarshipPeopleByPersonStarshipStarshipIdAndPersonIdManyToManyConnection!
+
+  """Reads and enables pagination through a set of `FilmStarship`."""
+  filmStarships(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: FilmStarshipCondition
+
+    """The method to use when ordering `FilmStarship`."""
+    orderBy: [FilmStarshipOrderBy!] = [PRIMARY_KEY_ASC]
+  ): FilmStarshipConnection!
+
+  """Reads and enables pagination through a set of `PersonStarship`."""
+  personStarships(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PersonStarshipCondition
+
+    """The method to use when ordering `PersonStarship`."""
+    orderBy: [PersonStarshipOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PersonStarshipConnection!
+}
+
+"""
+A connection to a list of `Film` values, with data from `FilmStarship`.
+"""
+type StarshipFilmsByFilmStarshipStarshipIdAndFilmIdManyToManyConnection {
+  """A list of `Film` objects."""
+  nodes: [Film]!
+
+  """
+  A list of edges which contains the `Film`, info from the `FilmStarship`, and the cursor to aid in pagination.
+  """
+  edges: [StarshipFilmsByFilmStarshipStarshipIdAndFilmIdManyToManyEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Film` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Film` edge in the connection, with data from `FilmStarship`."""
+type StarshipFilmsByFilmStarshipStarshipIdAndFilmIdManyToManyEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Film` at the end of the edge."""
+  node: Film
+}
+
+"""
+A connection to a list of `Person` values, with data from `PersonStarship`.
+"""
+type StarshipPeopleByPersonStarshipStarshipIdAndPersonIdManyToManyConnection {
+  """A list of `Person` objects."""
+  nodes: [Person]!
+
+  """
+  A list of edges which contains the `Person`, info from the `PersonStarship`, and the cursor to aid in pagination.
+  """
+  edges: [StarshipPeopleByPersonStarshipStarshipIdAndPersonIdManyToManyEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Person` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Person` edge in the connection, with data from `PersonStarship`."""
+type StarshipPeopleByPersonStarshipStarshipIdAndPersonIdManyToManyEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Person` at the end of the edge."""
+  node: Person
+}
+
+"""
+A condition to be used against `Person` object types. All fields are tested for equality and combined with a logical ‘and.’
+"""
+input PersonCondition {
+  homeworld: ID
+  species: ID
+}
+
+"""Methods to use when ordering `Person`."""
+enum PersonOrderBy {
   NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }
 
-"""A connection to a list of `FilmPlanet` values."""
-type FilmPlanetConnection {
-  """A list of `FilmPlanet` objects."""
-  nodes: [FilmPlanet]!
+"""A connection to a list of `FilmStarship` values."""
+type FilmStarshipConnection {
+  """A list of `FilmStarship` objects."""
+  nodes: [FilmStarship]!
 
   """
-  A list of edges which contains the `FilmPlanet` and cursor to aid in pagination.
+  A list of edges which contains the `FilmStarship` and cursor to aid in pagination.
   """
-  edges: [FilmPlanetEdge]!
+  edges: [FilmStarshipEdge]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  """The count of *all* `FilmPlanet` you could get from the connection."""
+  """The count of *all* `FilmStarship` you could get from the connection."""
   totalCount: Int!
 }
 
-type FilmPlanet implements Node {
+type FilmStarship implements Node {
   """
   A globally unique identifier. Can be used in various places throughout the system to identify this single value.
   """
   id: ID!
 
-  """Reads a single `Film` that is related to this `FilmPlanet`."""
-  filmByFilmId: Film
+  """Reads a single `Film` that is related to this `FilmStarship`."""
+  film: Film
 
-  """Reads a single `Planet` that is related to this `FilmPlanet`."""
-  planetByPlanetId: Planet
+  """Reads a single `Starship` that is related to this `FilmStarship`."""
+  starship: Starship
+}
+
+"""A `FilmStarship` edge in the connection."""
+type FilmStarshipEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `FilmStarship` at the end of the edge."""
+  node: FilmStarship
+}
+
+"""
+A condition to be used against `FilmStarship` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input FilmStarshipCondition {
+  film: ID
+  starship: ID
+}
+
+"""Methods to use when ordering `FilmStarship`."""
+enum FilmStarshipOrderBy {
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""A connection to a list of `PersonStarship` values."""
+type PersonStarshipConnection {
+  """A list of `PersonStarship` objects."""
+  nodes: [PersonStarship]!
+
+  """
+  A list of edges which contains the `PersonStarship` and cursor to aid in pagination.
+  """
+  edges: [PersonStarshipEdge]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `PersonStarship` you could get from the connection."""
+  totalCount: Int!
+}
+
+type PersonStarship implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  id: ID!
+
+  """Reads a single `Person` that is related to this `PersonStarship`."""
+  person: Person
+
+  """Reads a single `Starship` that is related to this `PersonStarship`."""
+  starship: Starship
+}
+
+"""A `PersonStarship` edge in the connection."""
+type PersonStarshipEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `PersonStarship` at the end of the edge."""
+  node: PersonStarship
+}
+
+"""
+A condition to be used against `PersonStarship` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input PersonStarshipCondition {
+  person: ID
+  starship: ID
+}
+
+"""Methods to use when ordering `PersonStarship`."""
+enum PersonStarshipOrderBy {
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""A `Starship` edge in the connection, with data from `PersonStarship`."""
+type PersonStarshipsByPersonStarshipPersonIdAndStarshipIdManyToManyEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Starship` at the end of the edge."""
+  node: Starship
+}
+
+"""Methods to use when ordering `Starship`."""
+enum StarshipOrderBy {
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""
+A connection to a list of `Vehicle` values, with data from `PersonVehicle`.
+"""
+type PersonVehiclesByPersonVehiclePersonIdAndVehicleIdManyToManyConnection {
+  """A list of `Vehicle` objects."""
+  nodes: [Vehicle]!
+
+  """
+  A list of edges which contains the `Vehicle`, info from the `PersonVehicle`, and the cursor to aid in pagination.
+  """
+  edges: [PersonVehiclesByPersonVehiclePersonIdAndVehicleIdManyToManyEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Vehicle` you could get from the connection."""
+  totalCount: Int!
+}
+
+type Vehicle implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  id: ID!
+  name: String!
+  model: String
+  vehicleClass: String
+  manufacturer: [String]
+  costInCredits: BigFloat
+  length: BigFloat
+  crew: String
+  passengers: String
+  maxAtmospheringSpeed: Int
+  cargoCapacity: BigFloat
+  consumables: String
+  createdAt: Datetime!
+  updatedAt: Datetime!
+
+  """Reads and enables pagination through a set of `Film`."""
+  filmsByFilmVehicleVehicleIdAndFilmId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: FilmCondition
+
+    """The method to use when ordering `Film`."""
+    orderBy: [FilmOrderBy!] = [PRIMARY_KEY_ASC]
+  ): VehicleFilmsByFilmVehicleVehicleIdAndFilmIdManyToManyConnection!
+
+  """Reads and enables pagination through a set of `Person`."""
+  peopleByPersonVehicleVehicleIdAndPersonId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PersonCondition
+
+    """The method to use when ordering `Person`."""
+    orderBy: [PersonOrderBy!] = [PRIMARY_KEY_ASC]
+  ): VehiclePeopleByPersonVehicleVehicleIdAndPersonIdManyToManyConnection!
+
+  """Reads and enables pagination through a set of `FilmVehicle`."""
+  filmVehicles(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: FilmVehicleCondition
+
+    """The method to use when ordering `FilmVehicle`."""
+    orderBy: [FilmVehicleOrderBy!] = [PRIMARY_KEY_ASC]
+  ): FilmVehicleConnection!
+
+  """Reads and enables pagination through a set of `PersonVehicle`."""
+  personVehicles(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PersonVehicleCondition
+
+    """The method to use when ordering `PersonVehicle`."""
+    orderBy: [PersonVehicleOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PersonVehicleConnection!
+}
+
+"""A connection to a list of `Film` values, with data from `FilmVehicle`."""
+type VehicleFilmsByFilmVehicleVehicleIdAndFilmIdManyToManyConnection {
+  """A list of `Film` objects."""
+  nodes: [Film]!
+
+  """
+  A list of edges which contains the `Film`, info from the `FilmVehicle`, and the cursor to aid in pagination.
+  """
+  edges: [VehicleFilmsByFilmVehicleVehicleIdAndFilmIdManyToManyEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Film` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Film` edge in the connection, with data from `FilmVehicle`."""
+type VehicleFilmsByFilmVehicleVehicleIdAndFilmIdManyToManyEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Film` at the end of the edge."""
+  node: Film
+}
+
+"""
+A connection to a list of `Person` values, with data from `PersonVehicle`.
+"""
+type VehiclePeopleByPersonVehicleVehicleIdAndPersonIdManyToManyConnection {
+  """A list of `Person` objects."""
+  nodes: [Person]!
+
+  """
+  A list of edges which contains the `Person`, info from the `PersonVehicle`, and the cursor to aid in pagination.
+  """
+  edges: [VehiclePeopleByPersonVehicleVehicleIdAndPersonIdManyToManyEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Person` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Person` edge in the connection, with data from `PersonVehicle`."""
+type VehiclePeopleByPersonVehicleVehicleIdAndPersonIdManyToManyEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Person` at the end of the edge."""
+  node: Person
+}
+
+"""A connection to a list of `FilmVehicle` values."""
+type FilmVehicleConnection {
+  """A list of `FilmVehicle` objects."""
+  nodes: [FilmVehicle]!
+
+  """
+  A list of edges which contains the `FilmVehicle` and cursor to aid in pagination.
+  """
+  edges: [FilmVehicleEdge]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `FilmVehicle` you could get from the connection."""
+  totalCount: Int!
+}
+
+type FilmVehicle implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  id: ID!
+
+  """Reads a single `Film` that is related to this `FilmVehicle`."""
+  film: Film
+
+  """Reads a single `Vehicle` that is related to this `FilmVehicle`."""
+  vehicle: Vehicle
+}
+
+"""A `FilmVehicle` edge in the connection."""
+type FilmVehicleEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `FilmVehicle` at the end of the edge."""
+  node: FilmVehicle
+}
+
+"""
+A condition to be used against `FilmVehicle` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input FilmVehicleCondition {
+  film: ID
+  vehicle: ID
+}
+
+"""Methods to use when ordering `FilmVehicle`."""
+enum FilmVehicleOrderBy {
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""A connection to a list of `PersonVehicle` values."""
+type PersonVehicleConnection {
+  """A list of `PersonVehicle` objects."""
+  nodes: [PersonVehicle]!
+
+  """
+  A list of edges which contains the `PersonVehicle` and cursor to aid in pagination.
+  """
+  edges: [PersonVehicleEdge]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `PersonVehicle` you could get from the connection."""
+  totalCount: Int!
+}
+
+type PersonVehicle implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  id: ID!
+
+  """Reads a single `Person` that is related to this `PersonVehicle`."""
+  person: Person
+
+  """Reads a single `Vehicle` that is related to this `PersonVehicle`."""
+  vehicle: Vehicle
+}
+
+"""A `PersonVehicle` edge in the connection."""
+type PersonVehicleEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `PersonVehicle` at the end of the edge."""
+  node: PersonVehicle
+}
+
+"""
+A condition to be used against `PersonVehicle` object types. All fields are
+tested for equality and combined with a logical ‘and.’
+"""
+input PersonVehicleCondition {
+  person: ID
+  vehicle: ID
+}
+
+"""Methods to use when ordering `PersonVehicle`."""
+enum PersonVehicleOrderBy {
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""A `Vehicle` edge in the connection, with data from `PersonVehicle`."""
+type PersonVehiclesByPersonVehiclePersonIdAndVehicleIdManyToManyEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Vehicle` at the end of the edge."""
+  node: Vehicle
+}
+
+"""Methods to use when ordering `Vehicle`."""
+enum VehicleOrderBy {
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
 }
 
 type Planet implements Node {
@@ -769,6 +1797,64 @@ type Planet implements Node {
   surfaceWater: BigFloat
   createdAt: Datetime!
   updatedAt: Datetime!
+
+  """Reads and enables pagination through a set of `Species`."""
+  speciesByPersonHomeworldIdAndSpeciesId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: SpeciesCondition
+
+    """The method to use when ordering `Species`."""
+    orderBy: [SpeciesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PlanetSpeciesByPersonHomeworldIdAndSpeciesIdManyToManyConnection!
+
+  """Reads and enables pagination through a set of `Film`."""
+  filmsByFilmPlanetPlanetIdAndFilmId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: FilmCondition
+
+    """The method to use when ordering `Film`."""
+    orderBy: [FilmOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PlanetFilmsByFilmPlanetPlanetIdAndFilmIdManyToManyConnection!
 
   """Reads and enables pagination through a set of `Species`."""
   speciesByHomeworldId(
@@ -829,7 +1915,7 @@ type Planet implements Node {
   ): PersonConnection!
 
   """Reads and enables pagination through a set of `FilmPlanet`."""
-  filmPlanetsByPlanetId(
+  filmPlanets(
     """Only read the first `n` values of the set."""
     first: Int
 
@@ -865,20 +1951,15 @@ strings and not numbers.
 """
 scalar BigInt
 
-"""
-A floating point number that requires more precision than IEEE 754 binary 64
-"""
-scalar BigFloat
-
-"""A connection to a list of `Species` values."""
-type SpeciesConnection {
+"""A connection to a list of `Species` values, with data from `Person`."""
+type PlanetSpeciesByPersonHomeworldIdAndSpeciesIdManyToManyConnection {
   """A list of `Species` objects."""
   nodes: [Species]!
 
   """
-  A list of edges which contains the `Species` and cursor to aid in pagination.
+  A list of edges which contains the `Species`, info from the `Person`, and the cursor to aid in pagination.
   """
-  edges: [SpeciesEdge]!
+  edges: [PlanetSpeciesByPersonHomeworldIdAndSpeciesIdManyToManyEdge!]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
@@ -904,8 +1985,297 @@ type Species implements Node {
   createdAt: Datetime!
   updatedAt: Datetime!
 
+  """Reads and enables pagination through a set of `Planet`."""
+  planetsByPersonSpeciesIdAndHomeworldId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """The method to use when ordering `Planet`."""
+    orderBy: [PlanetOrderBy!] = [PRIMARY_KEY_ASC]
+  ): SpeciesPlanetsByPersonSpeciesIdAndHomeworldIdManyToManyConnection!
+
+  """Reads and enables pagination through a set of `Film`."""
+  filmsByFilmSpeciesSpeciesIdAndFilmId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: FilmCondition
+
+    """The method to use when ordering `Film`."""
+    orderBy: [FilmOrderBy!] = [PRIMARY_KEY_ASC]
+  ): SpeciesFilmsByFilmSpeciesSpeciesIdAndFilmIdManyToManyConnection!
+
   """Reads a single `Planet` that is related to this `Species`."""
-  planetByHomeworldId: Planet
+  homeworld: Planet
+
+  """Reads and enables pagination through a set of `Person`."""
+  people(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PersonCondition
+
+    """The method to use when ordering `Person`."""
+    orderBy: [PersonOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PersonConnection!
+
+  """Reads and enables pagination through a set of `FilmSpecies`."""
+  filmSpecieses(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: FilmSpeciesCondition
+
+    """The method to use when ordering `FilmSpecies`."""
+    orderBy: [FilmSpeciesOrderBy!] = [PRIMARY_KEY_ASC]
+  ): FilmSpeciesConnection!
+}
+
+"""A connection to a list of `Planet` values, with data from `Person`."""
+type SpeciesPlanetsByPersonSpeciesIdAndHomeworldIdManyToManyConnection {
+  """A list of `Planet` objects."""
+  nodes: [Planet]!
+
+  """
+  A list of edges which contains the `Planet`, info from the `Person`, and the cursor to aid in pagination.
+  """
+  edges: [SpeciesPlanetsByPersonSpeciesIdAndHomeworldIdManyToManyEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Planet` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Planet` edge in the connection, with data from `Person`."""
+type SpeciesPlanetsByPersonSpeciesIdAndHomeworldIdManyToManyEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Planet` at the end of the edge."""
+  node: Planet
+
+  """Reads and enables pagination through a set of `Person`."""
+  peopleByHomeworldId(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PersonCondition
+
+    """The method to use when ordering `Person`."""
+    orderBy: [PersonOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PersonConnection!
+}
+
+"""A connection to a list of `Person` values."""
+type PersonConnection {
+  """A list of `Person` objects."""
+  nodes: [Person]!
+
+  """
+  A list of edges which contains the `Person` and cursor to aid in pagination.
+  """
+  edges: [PersonEdge]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Person` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Person` edge in the connection."""
+type PersonEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Person` at the end of the edge."""
+  node: Person
+}
+
+"""Methods to use when ordering `Planet`."""
+enum PlanetOrderBy {
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""A connection to a list of `Film` values, with data from `FilmSpecies`."""
+type SpeciesFilmsByFilmSpeciesSpeciesIdAndFilmIdManyToManyConnection {
+  """A list of `Film` objects."""
+  nodes: [Film]!
+
+  """
+  A list of edges which contains the `Film`, info from the `FilmSpecies`, and the cursor to aid in pagination.
+  """
+  edges: [SpeciesFilmsByFilmSpeciesSpeciesIdAndFilmIdManyToManyEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Film` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Film` edge in the connection, with data from `FilmSpecies`."""
+type SpeciesFilmsByFilmSpeciesSpeciesIdAndFilmIdManyToManyEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Film` at the end of the edge."""
+  node: Film
+}
+
+"""A connection to a list of `FilmSpecies` values."""
+type FilmSpeciesConnection {
+  """A list of `FilmSpecies` objects."""
+  nodes: [FilmSpecies]!
+
+  """
+  A list of edges which contains the `FilmSpecies` and cursor to aid in pagination.
+  """
+  edges: [FilmSpeciesEdge]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `FilmSpecies` you could get from the connection."""
+  totalCount: Int!
+}
+
+type FilmSpecies implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  id: ID!
+
+  """Reads a single `Film` that is related to this `FilmSpecies`."""
+  film: Film
+
+  """Reads a single `Species` that is related to this `FilmSpecies`."""
+  species: Species
+}
+
+"""A `FilmSpecies` edge in the connection."""
+type FilmSpeciesEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `FilmSpecies` at the end of the edge."""
+  node: FilmSpecies
+}
+
+"""
+A condition to be used against `FilmSpecies` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input FilmSpeciesCondition {
+  film: ID
+  species: ID
+}
+
+"""Methods to use when ordering `FilmSpecies`."""
+enum FilmSpeciesOrderBy {
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""A `Species` edge in the connection, with data from `Person`."""
+type PlanetSpeciesByPersonHomeworldIdAndSpeciesIdManyToManyEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Species` at the end of the edge."""
+  node: Species
 
   """Reads and enables pagination through a set of `Person`."""
   peopleBySpeciesId(
@@ -935,619 +2305,63 @@ type Species implements Node {
     """The method to use when ordering `Person`."""
     orderBy: [PersonOrderBy!] = [PRIMARY_KEY_ASC]
   ): PersonConnection!
-
-  """Reads and enables pagination through a set of `FilmSpecy`."""
-  filmSpeciesBySpeciesId(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: FilmSpecyCondition
-
-    """The method to use when ordering `FilmSpecy`."""
-    orderBy: [FilmSpecyOrderBy!] = [PRIMARY_KEY_ASC]
-  ): FilmSpecyConnection!
-}
-
-"""A connection to a list of `Person` values."""
-type PersonConnection {
-  """A list of `Person` objects."""
-  nodes: [Person]!
-
-  """
-  A list of edges which contains the `Person` and cursor to aid in pagination.
-  """
-  edges: [PersonEdge]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `Person` you could get from the connection."""
-  totalCount: Int!
-}
-
-type Person implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  id: ID!
-  name: String!
-  birthYear: String
-  eyeColor: String
-  gender: String
-  hairColor: String
-  height: Int
-  mass: BigFloat
-  skinColor: String
-  createdAt: Datetime!
-  updatedAt: Datetime!
-
-  """Reads a single `Planet` that is related to this `Person`."""
-  planetByHomeworldId: Planet
-
-  """Reads a single `Species` that is related to this `Person`."""
-  speciesBySpeciesId: Species
-
-  """Reads and enables pagination through a set of `FilmPerson`."""
-  filmPeopleByPersonId(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: FilmPersonCondition
-
-    """The method to use when ordering `FilmPerson`."""
-    orderBy: [FilmPersonOrderBy!] = [PRIMARY_KEY_ASC]
-  ): FilmPersonConnection!
-
-  """Reads and enables pagination through a set of `PersonStarship`."""
-  personStarshipsByPersonId(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: PersonStarshipCondition
-
-    """The method to use when ordering `PersonStarship`."""
-    orderBy: [PersonStarshipOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PersonStarshipConnection!
-
-  """Reads and enables pagination through a set of `PersonVehicle`."""
-  personVehiclesByPersonId(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: PersonVehicleCondition
-
-    """The method to use when ordering `PersonVehicle`."""
-    orderBy: [PersonVehicleOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PersonVehicleConnection!
-}
-
-"""A connection to a list of `PersonStarship` values."""
-type PersonStarshipConnection {
-  """A list of `PersonStarship` objects."""
-  nodes: [PersonStarship]!
-
-  """
-  A list of edges which contains the `PersonStarship` and cursor to aid in pagination.
-  """
-  edges: [PersonStarshipEdge]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `PersonStarship` you could get from the connection."""
-  totalCount: Int!
-}
-
-type PersonStarship implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  id: ID!
-
-  """Reads a single `Person` that is related to this `PersonStarship`."""
-  personByPersonId: Person
-
-  """Reads a single `Starship` that is related to this `PersonStarship`."""
-  starshipByStarshipId: Starship
-}
-
-type Starship implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  id: ID!
-  name: String!
-  model: String
-  starshipClass: String
-  manufacturer: [String]
-  costInCredits: BigFloat
-  length: BigFloat
-  crew: String
-  passengers: String
-  maxAtmospheringSpeed: Int
-  hyperdriveRating: BigFloat
-  mglt: Int
-  cargoCapacity: BigFloat
-  consumables: String
-  createdAt: Datetime!
-  updatedAt: Datetime!
-
-  """Reads and enables pagination through a set of `FilmStarship`."""
-  filmStarshipsByStarshipId(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: FilmStarshipCondition
-
-    """The method to use when ordering `FilmStarship`."""
-    orderBy: [FilmStarshipOrderBy!] = [PRIMARY_KEY_ASC]
-  ): FilmStarshipConnection!
-
-  """Reads and enables pagination through a set of `PersonStarship`."""
-  personStarshipsByStarshipId(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: PersonStarshipCondition
-
-    """The method to use when ordering `PersonStarship`."""
-    orderBy: [PersonStarshipOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PersonStarshipConnection!
-}
-
-"""A connection to a list of `FilmStarship` values."""
-type FilmStarshipConnection {
-  """A list of `FilmStarship` objects."""
-  nodes: [FilmStarship]!
-
-  """
-  A list of edges which contains the `FilmStarship` and cursor to aid in pagination.
-  """
-  edges: [FilmStarshipEdge]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `FilmStarship` you could get from the connection."""
-  totalCount: Int!
-}
-
-type FilmStarship implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  id: ID!
-
-  """Reads a single `Film` that is related to this `FilmStarship`."""
-  filmByFilmId: Film
-
-  """Reads a single `Starship` that is related to this `FilmStarship`."""
-  starshipByStarshipId: Starship
-}
-
-"""A `FilmStarship` edge in the connection."""
-type FilmStarshipEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `FilmStarship` at the end of the edge."""
-  node: FilmStarship
 }
 
 """
-A condition to be used against `FilmStarship` object types. All fields are
-tested for equality and combined with a logical ‘and.’
+A condition to be used against `Species` object types. All fields are tested for equality and combined with a logical ‘and.’
 """
-input FilmStarshipCondition {
-  filmByFilmId: ID
-  starshipByStarshipId: ID
+input SpeciesCondition {
+  homeworld: ID
 }
 
-"""Methods to use when ordering `FilmStarship`."""
-enum FilmStarshipOrderBy {
+"""Methods to use when ordering `Species`."""
+enum SpeciesOrderBy {
   NATURAL
   PRIMARY_KEY_ASC
   PRIMARY_KEY_DESC
 }
 
-"""
-A condition to be used against `PersonStarship` object types. All fields are
-tested for equality and combined with a logical ‘and.’
-"""
-input PersonStarshipCondition {
-  personByPersonId: ID
-  starshipByStarshipId: ID
-}
-
-"""Methods to use when ordering `PersonStarship`."""
-enum PersonStarshipOrderBy {
-  NATURAL
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""A `PersonStarship` edge in the connection."""
-type PersonStarshipEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `PersonStarship` at the end of the edge."""
-  node: PersonStarship
-}
-
-"""A connection to a list of `PersonVehicle` values."""
-type PersonVehicleConnection {
-  """A list of `PersonVehicle` objects."""
-  nodes: [PersonVehicle]!
+"""A connection to a list of `Film` values, with data from `FilmPlanet`."""
+type PlanetFilmsByFilmPlanetPlanetIdAndFilmIdManyToManyConnection {
+  """A list of `Film` objects."""
+  nodes: [Film]!
 
   """
-  A list of edges which contains the `PersonVehicle` and cursor to aid in pagination.
+  A list of edges which contains the `Film`, info from the `FilmPlanet`, and the cursor to aid in pagination.
   """
-  edges: [PersonVehicleEdge]!
+  edges: [PlanetFilmsByFilmPlanetPlanetIdAndFilmIdManyToManyEdge!]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  """The count of *all* `PersonVehicle` you could get from the connection."""
+  """The count of *all* `Film` you could get from the connection."""
   totalCount: Int!
 }
 
-type PersonVehicle implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  id: ID!
+"""A `Film` edge in the connection, with data from `FilmPlanet`."""
+type PlanetFilmsByFilmPlanetPlanetIdAndFilmIdManyToManyEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
 
-  """Reads a single `Person` that is related to this `PersonVehicle`."""
-  personByPersonId: Person
-
-  """Reads a single `Vehicle` that is related to this `PersonVehicle`."""
-  vehicleByVehicleId: Vehicle
+  """The `Film` at the end of the edge."""
+  node: Film
 }
 
-type Vehicle implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  id: ID!
-  name: String!
-  model: String
-  vehicleClass: String
-  manufacturer: [String]
-  costInCredits: BigFloat
-  length: BigFloat
-  crew: String
-  passengers: String
-  maxAtmospheringSpeed: Int
-  cargoCapacity: BigFloat
-  consumables: String
-  createdAt: Datetime!
-  updatedAt: Datetime!
-
-  """Reads and enables pagination through a set of `FilmVehicle`."""
-  filmVehiclesByVehicleId(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: FilmVehicleCondition
-
-    """The method to use when ordering `FilmVehicle`."""
-    orderBy: [FilmVehicleOrderBy!] = [PRIMARY_KEY_ASC]
-  ): FilmVehicleConnection!
-
-  """Reads and enables pagination through a set of `PersonVehicle`."""
-  personVehiclesByVehicleId(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: PersonVehicleCondition
-
-    """The method to use when ordering `PersonVehicle`."""
-    orderBy: [PersonVehicleOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PersonVehicleConnection!
-}
-
-"""A connection to a list of `FilmVehicle` values."""
-type FilmVehicleConnection {
-  """A list of `FilmVehicle` objects."""
-  nodes: [FilmVehicle]!
+"""A connection to a list of `Species` values."""
+type SpeciesConnection {
+  """A list of `Species` objects."""
+  nodes: [Species]!
 
   """
-  A list of edges which contains the `FilmVehicle` and cursor to aid in pagination.
+  A list of edges which contains the `Species` and cursor to aid in pagination.
   """
-  edges: [FilmVehicleEdge]!
+  edges: [SpeciesEdge]!
 
   """Information to aid in pagination."""
   pageInfo: PageInfo!
 
-  """The count of *all* `FilmVehicle` you could get from the connection."""
+  """The count of *all* `Species` you could get from the connection."""
   totalCount: Int!
-}
-
-type FilmVehicle implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  id: ID!
-
-  """Reads a single `Film` that is related to this `FilmVehicle`."""
-  filmByFilmId: Film
-
-  """Reads a single `Vehicle` that is related to this `FilmVehicle`."""
-  vehicleByVehicleId: Vehicle
-}
-
-"""A `FilmVehicle` edge in the connection."""
-type FilmVehicleEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `FilmVehicle` at the end of the edge."""
-  node: FilmVehicle
-}
-
-"""
-A condition to be used against `FilmVehicle` object types. All fields are tested
-for equality and combined with a logical ‘and.’
-"""
-input FilmVehicleCondition {
-  filmByFilmId: ID
-  vehicleByVehicleId: ID
-}
-
-"""Methods to use when ordering `FilmVehicle`."""
-enum FilmVehicleOrderBy {
-  NATURAL
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""
-A condition to be used against `PersonVehicle` object types. All fields are
-tested for equality and combined with a logical ‘and.’
-"""
-input PersonVehicleCondition {
-  personByPersonId: ID
-  vehicleByVehicleId: ID
-}
-
-"""Methods to use when ordering `PersonVehicle`."""
-enum PersonVehicleOrderBy {
-  NATURAL
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""A `PersonVehicle` edge in the connection."""
-type PersonVehicleEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `PersonVehicle` at the end of the edge."""
-  node: PersonVehicle
-}
-
-"""A `Person` edge in the connection."""
-type PersonEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `Person` at the end of the edge."""
-  node: Person
-}
-
-"""
-A condition to be used against `Person` object types. All fields are tested for equality and combined with a logical ‘and.’
-"""
-input PersonCondition {
-  planetByHomeworldId: ID
-  speciesBySpeciesId: ID
-}
-
-"""Methods to use when ordering `Person`."""
-enum PersonOrderBy {
-  NATURAL
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
-"""A connection to a list of `FilmSpecy` values."""
-type FilmSpecyConnection {
-  """A list of `FilmSpecy` objects."""
-  nodes: [FilmSpecy]!
-
-  """
-  A list of edges which contains the `FilmSpecy` and cursor to aid in pagination.
-  """
-  edges: [FilmSpecyEdge]!
-
-  """Information to aid in pagination."""
-  pageInfo: PageInfo!
-
-  """The count of *all* `FilmSpecy` you could get from the connection."""
-  totalCount: Int!
-}
-
-type FilmSpecy implements Node {
-  """
-  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
-  """
-  id: ID!
-
-  """Reads a single `Film` that is related to this `FilmSpecy`."""
-  filmByFilmId: Film
-
-  """Reads a single `Species` that is related to this `FilmSpecy`."""
-  speciesBySpeciesId: Species
-}
-
-"""A `FilmSpecy` edge in the connection."""
-type FilmSpecyEdge {
-  """A cursor for use in pagination."""
-  cursor: Cursor
-
-  """The `FilmSpecy` at the end of the edge."""
-  node: FilmSpecy
-}
-
-"""
-A condition to be used against `FilmSpecy` object types. All fields are tested
-for equality and combined with a logical ‘and.’
-"""
-input FilmSpecyCondition {
-  filmByFilmId: ID
-  speciesBySpeciesId: ID
-}
-
-"""Methods to use when ordering `FilmSpecy`."""
-enum FilmSpecyOrderBy {
-  NATURAL
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
 }
 
 """A `Species` edge in the connection."""
@@ -1559,34 +2373,34 @@ type SpeciesEdge {
   node: Species
 }
 
-"""
-A condition to be used against `Species` object types. All fields are tested for equality and combined with a logical ‘and.’
-"""
-input SpeciesCondition {
-  planetByHomeworldId: ID
+"""A connection to a list of `FilmPlanet` values."""
+type FilmPlanetConnection {
+  """A list of `FilmPlanet` objects."""
+  nodes: [FilmPlanet]!
+
+  """
+  A list of edges which contains the `FilmPlanet` and cursor to aid in pagination.
+  """
+  edges: [FilmPlanetEdge]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `FilmPlanet` you could get from the connection."""
+  totalCount: Int!
 }
 
-"""Methods to use when ordering `Species`."""
-enum SpeciesOrderBy {
-  NATURAL
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
+type FilmPlanet implements Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  id: ID!
 
-"""
-A condition to be used against `FilmPlanet` object types. All fields are tested
-for equality and combined with a logical ‘and.’
-"""
-input FilmPlanetCondition {
-  filmByFilmId: ID
-  planetByPlanetId: ID
-}
+  """Reads a single `Film` that is related to this `FilmPlanet`."""
+  film: Film
 
-"""Methods to use when ordering `FilmPlanet`."""
-enum FilmPlanetOrderBy {
-  NATURAL
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
+  """Reads a single `Planet` that is related to this `FilmPlanet`."""
+  planet: Planet
 }
 
 """A `FilmPlanet` edge in the connection."""
@@ -1596,6 +2410,185 @@ type FilmPlanetEdge {
 
   """The `FilmPlanet` at the end of the edge."""
   node: FilmPlanet
+}
+
+"""
+A condition to be used against `FilmPlanet` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input FilmPlanetCondition {
+  film: ID
+  planet: ID
+}
+
+"""Methods to use when ordering `FilmPlanet`."""
+enum FilmPlanetOrderBy {
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""A connection to a list of `FilmPerson` values."""
+type FilmPersonConnection {
+  """A list of `FilmPerson` objects."""
+  nodes: [FilmPerson]!
+
+  """
+  A list of edges which contains the `FilmPerson` and cursor to aid in pagination.
+  """
+  edges: [FilmPersonEdge]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `FilmPerson` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `FilmPerson` edge in the connection."""
+type FilmPersonEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `FilmPerson` at the end of the edge."""
+  node: FilmPerson
+}
+
+"""
+A condition to be used against `FilmPerson` object types. All fields are tested
+for equality and combined with a logical ‘and.’
+"""
+input FilmPersonCondition {
+  film: ID
+  person: ID
+}
+
+"""Methods to use when ordering `FilmPerson`."""
+enum FilmPersonOrderBy {
+  NATURAL
+  PRIMARY_KEY_ASC
+  PRIMARY_KEY_DESC
+}
+
+"""A `Person` edge in the connection, with data from `FilmPerson`."""
+type FilmPeopleByFilmPersonFilmIdAndPersonIdManyToManyEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Person` at the end of the edge."""
+  node: Person
+}
+
+"""
+A connection to a list of `Planet` values, with data from `FilmPlanet`.
+"""
+type FilmPlanetsByFilmPlanetFilmIdAndPlanetIdManyToManyConnection {
+  """A list of `Planet` objects."""
+  nodes: [Planet]!
+
+  """
+  A list of edges which contains the `Planet`, info from the `FilmPlanet`, and the cursor to aid in pagination.
+  """
+  edges: [FilmPlanetsByFilmPlanetFilmIdAndPlanetIdManyToManyEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Planet` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Planet` edge in the connection, with data from `FilmPlanet`."""
+type FilmPlanetsByFilmPlanetFilmIdAndPlanetIdManyToManyEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Planet` at the end of the edge."""
+  node: Planet
+}
+
+"""
+A connection to a list of `Species` values, with data from `FilmSpecies`.
+"""
+type FilmSpeciesByFilmSpeciesFilmIdAndSpeciesIdManyToManyConnection {
+  """A list of `Species` objects."""
+  nodes: [Species]!
+
+  """
+  A list of edges which contains the `Species`, info from the `FilmSpecies`, and the cursor to aid in pagination.
+  """
+  edges: [FilmSpeciesByFilmSpeciesFilmIdAndSpeciesIdManyToManyEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Species` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Species` edge in the connection, with data from `FilmSpecies`."""
+type FilmSpeciesByFilmSpeciesFilmIdAndSpeciesIdManyToManyEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Species` at the end of the edge."""
+  node: Species
+}
+
+"""
+A connection to a list of `Starship` values, with data from `FilmStarship`.
+"""
+type FilmStarshipsByFilmStarshipFilmIdAndStarshipIdManyToManyConnection {
+  """A list of `Starship` objects."""
+  nodes: [Starship]!
+
+  """
+  A list of edges which contains the `Starship`, info from the `FilmStarship`, and the cursor to aid in pagination.
+  """
+  edges: [FilmStarshipsByFilmStarshipFilmIdAndStarshipIdManyToManyEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Starship` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Starship` edge in the connection, with data from `FilmStarship`."""
+type FilmStarshipsByFilmStarshipFilmIdAndStarshipIdManyToManyEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Starship` at the end of the edge."""
+  node: Starship
+}
+
+"""
+A connection to a list of `Vehicle` values, with data from `FilmVehicle`.
+"""
+type FilmVehiclesByFilmVehicleFilmIdAndVehicleIdManyToManyConnection {
+  """A list of `Vehicle` objects."""
+  nodes: [Vehicle]!
+
+  """
+  A list of edges which contains the `Vehicle`, info from the `FilmVehicle`, and the cursor to aid in pagination.
+  """
+  edges: [FilmVehiclesByFilmVehicleFilmIdAndVehicleIdManyToManyEdge!]!
+
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """The count of *all* `Vehicle` you could get from the connection."""
+  totalCount: Int!
+}
+
+"""A `Vehicle` edge in the connection, with data from `FilmVehicle`."""
+type FilmVehiclesByFilmVehicleFilmIdAndVehicleIdManyToManyEdge {
+  """A cursor for use in pagination."""
+  cursor: Cursor
+
+  """The `Vehicle` at the end of the edge."""
+  node: Vehicle
 }
 
 """A connection to a list of `Film` values."""
@@ -1624,23 +2617,6 @@ type FilmEdge {
   node: Film
 }
 
-"""
-A condition to be used against `Film` object types. All fields are tested for equality and combined with a logical ‘and.’
-"""
-input FilmCondition {
-  """Checks for equality with the object’s `episodeId` field."""
-  episodeId: Int
-}
-
-"""Methods to use when ordering `Film`."""
-enum FilmOrderBy {
-  NATURAL
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-  EPISODE_ID_ASC
-  EPISODE_ID_DESC
-}
-
 """A connection to a list of `Planet` values."""
 type PlanetConnection {
   """A list of `Planet` objects."""
@@ -1665,13 +2641,6 @@ type PlanetEdge {
 
   """The `Planet` at the end of the edge."""
   node: Planet
-}
-
-"""Methods to use when ordering `Planet`."""
-enum PlanetOrderBy {
-  NATURAL
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
 }
 
 """A connection to a list of `Vehicle` values."""
@@ -1700,13 +2669,6 @@ type VehicleEdge {
   node: Vehicle
 }
 
-"""Methods to use when ordering `Vehicle`."""
-enum VehicleOrderBy {
-  NATURAL
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
 """A connection to a list of `Starship` values."""
 type StarshipConnection {
   """A list of `Starship` objects."""
@@ -1733,13 +2695,6 @@ type StarshipEdge {
   node: Starship
 }
 
-"""Methods to use when ordering `Starship`."""
-enum StarshipOrderBy {
-  NATURAL
-  PRIMARY_KEY_ASC
-  PRIMARY_KEY_DESC
-}
-
 """
 The root mutation type which contains root level fields which mutate data.
 """
@@ -1760,13 +2715,13 @@ type Mutation {
     input: CreateFilmPlanetInput!
   ): CreateFilmPlanetPayload
 
-  """Creates a single `FilmSpecy`."""
-  createFilmSpecy(
+  """Creates a single `FilmSpecies`."""
+  createFilmSpecies(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: CreateFilmSpecyInput!
-  ): CreateFilmSpecyPayload
+    input: CreateFilmSpeciesInput!
+  ): CreateFilmSpeciesPayload
 
   """Creates a single `FilmStarship`."""
   createFilmStarship(
@@ -1851,221 +2806,223 @@ type Mutation {
   """
   Updates a single `FilmPerson` using its globally unique id and a patch.
   """
-  updateFilmPerson(
+  updateFilmPersonById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: UpdateFilmPersonInput!
+    input: UpdateFilmPersonByIdInput!
   ): UpdateFilmPersonPayload
 
   """
   Updates a single `FilmPlanet` using its globally unique id and a patch.
   """
-  updateFilmPlanet(
+  updateFilmPlanetById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: UpdateFilmPlanetInput!
+    input: UpdateFilmPlanetByIdInput!
   ): UpdateFilmPlanetPayload
 
-  """Updates a single `FilmSpecy` using its globally unique id and a patch."""
-  updateFilmSpecy(
+  """
+  Updates a single `FilmSpecies` using its globally unique id and a patch.
+  """
+  updateFilmSpeciesById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: UpdateFilmSpecyInput!
-  ): UpdateFilmSpecyPayload
+    input: UpdateFilmSpeciesByIdInput!
+  ): UpdateFilmSpeciesPayload
 
   """
   Updates a single `FilmStarship` using its globally unique id and a patch.
   """
-  updateFilmStarship(
+  updateFilmStarshipById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: UpdateFilmStarshipInput!
+    input: UpdateFilmStarshipByIdInput!
   ): UpdateFilmStarshipPayload
 
   """
   Updates a single `FilmVehicle` using its globally unique id and a patch.
   """
-  updateFilmVehicle(
+  updateFilmVehicleById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: UpdateFilmVehicleInput!
+    input: UpdateFilmVehicleByIdInput!
   ): UpdateFilmVehiclePayload
 
   """
   Updates a single `PersonStarship` using its globally unique id and a patch.
   """
-  updatePersonStarship(
+  updatePersonStarshipById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: UpdatePersonStarshipInput!
+    input: UpdatePersonStarshipByIdInput!
   ): UpdatePersonStarshipPayload
 
   """
   Updates a single `PersonVehicle` using its globally unique id and a patch.
   """
-  updatePersonVehicle(
+  updatePersonVehicleById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: UpdatePersonVehicleInput!
+    input: UpdatePersonVehicleByIdInput!
   ): UpdatePersonVehiclePayload
 
   """Updates a single `Person` using its globally unique id and a patch."""
-  updatePerson(
+  updatePersonById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: UpdatePersonInput!
+    input: UpdatePersonByIdInput!
   ): UpdatePersonPayload
 
   """Updates a single `Film` using its globally unique id and a patch."""
-  updateFilm(
+  updateFilmById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: UpdateFilmInput!
+    input: UpdateFilmByIdInput!
   ): UpdateFilmPayload
 
   """Updates a single `Planet` using its globally unique id and a patch."""
-  updatePlanet(
+  updatePlanetById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: UpdatePlanetInput!
+    input: UpdatePlanetByIdInput!
   ): UpdatePlanetPayload
 
   """Updates a single `Species` using its globally unique id and a patch."""
-  updateSpecies(
+  updateSpeciesById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: UpdateSpeciesInput!
+    input: UpdateSpeciesByIdInput!
   ): UpdateSpeciesPayload
 
   """Updates a single `Vehicle` using its globally unique id and a patch."""
-  updateVehicle(
+  updateVehicleById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: UpdateVehicleInput!
+    input: UpdateVehicleByIdInput!
   ): UpdateVehiclePayload
 
   """Updates a single `Starship` using its globally unique id and a patch."""
-  updateStarship(
+  updateStarshipById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: UpdateStarshipInput!
+    input: UpdateStarshipByIdInput!
   ): UpdateStarshipPayload
 
   """Deletes a single `FilmPerson` using its globally unique id."""
-  deleteFilmPerson(
+  deleteFilmPersonById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: DeleteFilmPersonInput!
+    input: DeleteFilmPersonByIdInput!
   ): DeleteFilmPersonPayload
 
   """Deletes a single `FilmPlanet` using its globally unique id."""
-  deleteFilmPlanet(
+  deleteFilmPlanetById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: DeleteFilmPlanetInput!
+    input: DeleteFilmPlanetByIdInput!
   ): DeleteFilmPlanetPayload
 
-  """Deletes a single `FilmSpecy` using its globally unique id."""
-  deleteFilmSpecy(
+  """Deletes a single `FilmSpecies` using its globally unique id."""
+  deleteFilmSpeciesById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: DeleteFilmSpecyInput!
-  ): DeleteFilmSpecyPayload
+    input: DeleteFilmSpeciesByIdInput!
+  ): DeleteFilmSpeciesPayload
 
   """Deletes a single `FilmStarship` using its globally unique id."""
-  deleteFilmStarship(
+  deleteFilmStarshipById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: DeleteFilmStarshipInput!
+    input: DeleteFilmStarshipByIdInput!
   ): DeleteFilmStarshipPayload
 
   """Deletes a single `FilmVehicle` using its globally unique id."""
-  deleteFilmVehicle(
+  deleteFilmVehicleById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: DeleteFilmVehicleInput!
+    input: DeleteFilmVehicleByIdInput!
   ): DeleteFilmVehiclePayload
 
   """Deletes a single `PersonStarship` using its globally unique id."""
-  deletePersonStarship(
+  deletePersonStarshipById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: DeletePersonStarshipInput!
+    input: DeletePersonStarshipByIdInput!
   ): DeletePersonStarshipPayload
 
   """Deletes a single `PersonVehicle` using its globally unique id."""
-  deletePersonVehicle(
+  deletePersonVehicleById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: DeletePersonVehicleInput!
+    input: DeletePersonVehicleByIdInput!
   ): DeletePersonVehiclePayload
 
   """Deletes a single `Person` using its globally unique id."""
-  deletePerson(
+  deletePersonById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: DeletePersonInput!
+    input: DeletePersonByIdInput!
   ): DeletePersonPayload
 
   """Deletes a single `Film` using its globally unique id."""
-  deleteFilm(
+  deleteFilmById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: DeleteFilmInput!
+    input: DeleteFilmByIdInput!
   ): DeleteFilmPayload
 
   """Deletes a single `Planet` using its globally unique id."""
-  deletePlanet(
+  deletePlanetById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: DeletePlanetInput!
+    input: DeletePlanetByIdInput!
   ): DeletePlanetPayload
 
   """Deletes a single `Species` using its globally unique id."""
-  deleteSpecies(
+  deleteSpeciesById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: DeleteSpeciesInput!
+    input: DeleteSpeciesByIdInput!
   ): DeleteSpeciesPayload
 
   """Deletes a single `Vehicle` using its globally unique id."""
-  deleteVehicle(
+  deleteVehicleById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: DeleteVehicleInput!
+    input: DeleteVehicleByIdInput!
   ): DeleteVehiclePayload
 
   """Deletes a single `Starship` using its globally unique id."""
-  deleteStarship(
+  deleteStarshipById(
     """
     The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
     """
-    input: DeleteStarshipInput!
+    input: DeleteStarshipByIdInput!
   ): DeleteStarshipPayload
 }
 
@@ -2106,8 +3063,8 @@ input CreateFilmPersonInput {
 
 """An input for mutations affecting `FilmPerson`"""
 input FilmPersonInput {
-  filmByFilmId: ID!
-  personByPersonId: ID!
+  film: ID!
+  person: ID!
 }
 
 """The output of our create `FilmPlanet` mutation."""
@@ -2147,49 +3104,49 @@ input CreateFilmPlanetInput {
 
 """An input for mutations affecting `FilmPlanet`"""
 input FilmPlanetInput {
-  filmByFilmId: ID!
-  planetByPlanetId: ID!
+  film: ID!
+  planet: ID!
 }
 
-"""The output of our create `FilmSpecy` mutation."""
-type CreateFilmSpecyPayload {
+"""The output of our create `FilmSpecies` mutation."""
+type CreateFilmSpeciesPayload {
   """
   The exact same `clientMutationId` that was provided in the mutation input,
   unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
-  """The `FilmSpecy` that was created by this mutation."""
-  filmSpecy: FilmSpecy
+  """The `FilmSpecies` that was created by this mutation."""
+  filmSpecies: FilmSpecies
 
   """
   Our root query field type. Allows us to run any query from our mutation payload.
   """
   query: Query
 
-  """An edge for our `FilmSpecy`. May be used by Relay 1."""
-  filmSpecyEdge(
-    """The method to use when ordering `FilmSpecy`."""
-    orderBy: [FilmSpecyOrderBy!]! = [PRIMARY_KEY_ASC]
-  ): FilmSpecyEdge
+  """An edge for our `FilmSpecies`. May be used by Relay 1."""
+  filmSpeciesEdge(
+    """The method to use when ordering `FilmSpecies`."""
+    orderBy: [FilmSpeciesOrderBy!]! = [PRIMARY_KEY_ASC]
+  ): FilmSpeciesEdge
 }
 
-"""All input for the create `FilmSpecy` mutation."""
-input CreateFilmSpecyInput {
+"""All input for the create `FilmSpecies` mutation."""
+input CreateFilmSpeciesInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
   """
   clientMutationId: String
 
-  """The `FilmSpecy` to be created by this mutation."""
-  filmSpecy: FilmSpecyInput!
+  """The `FilmSpecies` to be created by this mutation."""
+  filmSpecies: FilmSpeciesInput!
 }
 
-"""An input for mutations affecting `FilmSpecy`"""
-input FilmSpecyInput {
-  filmByFilmId: ID!
-  speciesBySpeciesId: ID!
+"""An input for mutations affecting `FilmSpecies`"""
+input FilmSpeciesInput {
+  film: ID!
+  species: ID!
 }
 
 """The output of our create `FilmStarship` mutation."""
@@ -2229,8 +3186,8 @@ input CreateFilmStarshipInput {
 
 """An input for mutations affecting `FilmStarship`"""
 input FilmStarshipInput {
-  filmByFilmId: ID!
-  starshipByStarshipId: ID!
+  film: ID!
+  starship: ID!
 }
 
 """The output of our create `FilmVehicle` mutation."""
@@ -2270,8 +3227,8 @@ input CreateFilmVehicleInput {
 
 """An input for mutations affecting `FilmVehicle`"""
 input FilmVehicleInput {
-  filmByFilmId: ID!
-  vehicleByVehicleId: ID!
+  film: ID!
+  vehicle: ID!
 }
 
 """The output of our create `PersonStarship` mutation."""
@@ -2311,8 +3268,8 @@ input CreatePersonStarshipInput {
 
 """An input for mutations affecting `PersonStarship`"""
 input PersonStarshipInput {
-  personByPersonId: ID!
-  starshipByStarshipId: ID!
+  person: ID!
+  starship: ID!
 }
 
 """The output of our create `PersonVehicle` mutation."""
@@ -2352,8 +3309,8 @@ input CreatePersonVehicleInput {
 
 """An input for mutations affecting `PersonVehicle`"""
 input PersonVehicleInput {
-  personByPersonId: ID!
-  vehicleByVehicleId: ID!
+  person: ID!
+  vehicle: ID!
 }
 
 """The output of our create `Person` mutation."""
@@ -2404,8 +3361,8 @@ input PersonInput {
   skinColor: String
   createdAt: Datetime
   updatedAt: Datetime
-  planetByHomeworldId: ID
-  speciesBySpeciesId: ID
+  homeworld: ID
+  species: ID
 }
 
 """The output of our create `Film` mutation."""
@@ -2556,7 +3513,7 @@ input SpeciesInput {
   language: String
   createdAt: Datetime
   updatedAt: Datetime
-  planetByHomeworldId: ID
+  homeworld: ID
 }
 
 """The output of our create `Vehicle` mutation."""
@@ -2690,8 +3647,8 @@ type UpdateFilmPersonPayload {
   ): FilmPersonEdge
 }
 
-"""All input for the `updateFilmPerson` mutation."""
-input UpdateFilmPersonInput {
+"""All input for the `updateFilmPersonById` mutation."""
+input UpdateFilmPersonByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -2706,15 +3663,15 @@ input UpdateFilmPersonInput {
   """
   An object where the defined keys will be set on the `FilmPerson` being updated.
   """
-  filmPersonPatch: FilmPersonPatch!
+  patch: FilmPersonPatch!
 }
 
 """
 Represents an update to a `FilmPerson`. Fields that are set will be updated.
 """
 input FilmPersonPatch {
-  filmByFilmId: ID
-  personByPersonId: ID
+  film: ID
+  person: ID
 }
 
 """The output of our update `FilmPlanet` mutation."""
@@ -2740,8 +3697,8 @@ type UpdateFilmPlanetPayload {
   ): FilmPlanetEdge
 }
 
-"""All input for the `updateFilmPlanet` mutation."""
-input UpdateFilmPlanetInput {
+"""All input for the `updateFilmPlanetById` mutation."""
+input UpdateFilmPlanetByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -2756,42 +3713,42 @@ input UpdateFilmPlanetInput {
   """
   An object where the defined keys will be set on the `FilmPlanet` being updated.
   """
-  filmPlanetPatch: FilmPlanetPatch!
+  patch: FilmPlanetPatch!
 }
 
 """
 Represents an update to a `FilmPlanet`. Fields that are set will be updated.
 """
 input FilmPlanetPatch {
-  filmByFilmId: ID
-  planetByPlanetId: ID
+  film: ID
+  planet: ID
 }
 
-"""The output of our update `FilmSpecy` mutation."""
-type UpdateFilmSpecyPayload {
+"""The output of our update `FilmSpecies` mutation."""
+type UpdateFilmSpeciesPayload {
   """
   The exact same `clientMutationId` that was provided in the mutation input,
   unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
-  """The `FilmSpecy` that was updated by this mutation."""
-  filmSpecy: FilmSpecy
+  """The `FilmSpecies` that was updated by this mutation."""
+  filmSpecies: FilmSpecies
 
   """
   Our root query field type. Allows us to run any query from our mutation payload.
   """
   query: Query
 
-  """An edge for our `FilmSpecy`. May be used by Relay 1."""
-  filmSpecyEdge(
-    """The method to use when ordering `FilmSpecy`."""
-    orderBy: [FilmSpecyOrderBy!]! = [PRIMARY_KEY_ASC]
-  ): FilmSpecyEdge
+  """An edge for our `FilmSpecies`. May be used by Relay 1."""
+  filmSpeciesEdge(
+    """The method to use when ordering `FilmSpecies`."""
+    orderBy: [FilmSpeciesOrderBy!]! = [PRIMARY_KEY_ASC]
+  ): FilmSpeciesEdge
 }
 
-"""All input for the `updateFilmSpecy` mutation."""
-input UpdateFilmSpecyInput {
+"""All input for the `updateFilmSpeciesById` mutation."""
+input UpdateFilmSpeciesByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -2799,22 +3756,22 @@ input UpdateFilmSpecyInput {
   clientMutationId: String
 
   """
-  The globally unique `ID` which will identify a single `FilmSpecy` to be updated.
+  The globally unique `ID` which will identify a single `FilmSpecies` to be updated.
   """
   id: ID!
 
   """
-  An object where the defined keys will be set on the `FilmSpecy` being updated.
+  An object where the defined keys will be set on the `FilmSpecies` being updated.
   """
-  filmSpecyPatch: FilmSpecyPatch!
+  patch: FilmSpeciesPatch!
 }
 
 """
-Represents an update to a `FilmSpecy`. Fields that are set will be updated.
+Represents an update to a `FilmSpecies`. Fields that are set will be updated.
 """
-input FilmSpecyPatch {
-  filmByFilmId: ID
-  speciesBySpeciesId: ID
+input FilmSpeciesPatch {
+  film: ID
+  species: ID
 }
 
 """The output of our update `FilmStarship` mutation."""
@@ -2840,8 +3797,8 @@ type UpdateFilmStarshipPayload {
   ): FilmStarshipEdge
 }
 
-"""All input for the `updateFilmStarship` mutation."""
-input UpdateFilmStarshipInput {
+"""All input for the `updateFilmStarshipById` mutation."""
+input UpdateFilmStarshipByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -2856,15 +3813,15 @@ input UpdateFilmStarshipInput {
   """
   An object where the defined keys will be set on the `FilmStarship` being updated.
   """
-  filmStarshipPatch: FilmStarshipPatch!
+  patch: FilmStarshipPatch!
 }
 
 """
 Represents an update to a `FilmStarship`. Fields that are set will be updated.
 """
 input FilmStarshipPatch {
-  filmByFilmId: ID
-  starshipByStarshipId: ID
+  film: ID
+  starship: ID
 }
 
 """The output of our update `FilmVehicle` mutation."""
@@ -2890,8 +3847,8 @@ type UpdateFilmVehiclePayload {
   ): FilmVehicleEdge
 }
 
-"""All input for the `updateFilmVehicle` mutation."""
-input UpdateFilmVehicleInput {
+"""All input for the `updateFilmVehicleById` mutation."""
+input UpdateFilmVehicleByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -2906,15 +3863,15 @@ input UpdateFilmVehicleInput {
   """
   An object where the defined keys will be set on the `FilmVehicle` being updated.
   """
-  filmVehiclePatch: FilmVehiclePatch!
+  patch: FilmVehiclePatch!
 }
 
 """
 Represents an update to a `FilmVehicle`. Fields that are set will be updated.
 """
 input FilmVehiclePatch {
-  filmByFilmId: ID
-  vehicleByVehicleId: ID
+  film: ID
+  vehicle: ID
 }
 
 """The output of our update `PersonStarship` mutation."""
@@ -2940,8 +3897,8 @@ type UpdatePersonStarshipPayload {
   ): PersonStarshipEdge
 }
 
-"""All input for the `updatePersonStarship` mutation."""
-input UpdatePersonStarshipInput {
+"""All input for the `updatePersonStarshipById` mutation."""
+input UpdatePersonStarshipByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -2956,15 +3913,15 @@ input UpdatePersonStarshipInput {
   """
   An object where the defined keys will be set on the `PersonStarship` being updated.
   """
-  personStarshipPatch: PersonStarshipPatch!
+  patch: PersonStarshipPatch!
 }
 
 """
 Represents an update to a `PersonStarship`. Fields that are set will be updated.
 """
 input PersonStarshipPatch {
-  personByPersonId: ID
-  starshipByStarshipId: ID
+  person: ID
+  starship: ID
 }
 
 """The output of our update `PersonVehicle` mutation."""
@@ -2990,8 +3947,8 @@ type UpdatePersonVehiclePayload {
   ): PersonVehicleEdge
 }
 
-"""All input for the `updatePersonVehicle` mutation."""
-input UpdatePersonVehicleInput {
+"""All input for the `updatePersonVehicleById` mutation."""
+input UpdatePersonVehicleByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3006,15 +3963,15 @@ input UpdatePersonVehicleInput {
   """
   An object where the defined keys will be set on the `PersonVehicle` being updated.
   """
-  personVehiclePatch: PersonVehiclePatch!
+  patch: PersonVehiclePatch!
 }
 
 """
 Represents an update to a `PersonVehicle`. Fields that are set will be updated.
 """
 input PersonVehiclePatch {
-  personByPersonId: ID
-  vehicleByVehicleId: ID
+  person: ID
+  vehicle: ID
 }
 
 """The output of our update `Person` mutation."""
@@ -3040,8 +3997,8 @@ type UpdatePersonPayload {
   ): PersonEdge
 }
 
-"""All input for the `updatePerson` mutation."""
-input UpdatePersonInput {
+"""All input for the `updatePersonById` mutation."""
+input UpdatePersonByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3056,7 +4013,7 @@ input UpdatePersonInput {
   """
   An object where the defined keys will be set on the `Person` being updated.
   """
-  personPatch: PersonPatch!
+  patch: PersonPatch!
 }
 
 """
@@ -3073,8 +4030,8 @@ input PersonPatch {
   skinColor: String
   createdAt: Datetime
   updatedAt: Datetime
-  planetByHomeworldId: ID
-  speciesBySpeciesId: ID
+  homeworld: ID
+  species: ID
 }
 
 """The output of our update `Film` mutation."""
@@ -3100,8 +4057,8 @@ type UpdateFilmPayload {
   ): FilmEdge
 }
 
-"""All input for the `updateFilm` mutation."""
-input UpdateFilmInput {
+"""All input for the `updateFilmById` mutation."""
+input UpdateFilmByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3116,7 +4073,7 @@ input UpdateFilmInput {
   """
   An object where the defined keys will be set on the `Film` being updated.
   """
-  filmPatch: FilmPatch!
+  patch: FilmPatch!
 }
 
 """Represents an update to a `Film`. Fields that are set will be updated."""
@@ -3154,8 +4111,8 @@ type UpdatePlanetPayload {
   ): PlanetEdge
 }
 
-"""All input for the `updatePlanet` mutation."""
-input UpdatePlanetInput {
+"""All input for the `updatePlanetById` mutation."""
+input UpdatePlanetByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3170,7 +4127,7 @@ input UpdatePlanetInput {
   """
   An object where the defined keys will be set on the `Planet` being updated.
   """
-  planetPatch: PlanetPatch!
+  patch: PlanetPatch!
 }
 
 """
@@ -3213,8 +4170,8 @@ type UpdateSpeciesPayload {
   ): SpeciesEdge
 }
 
-"""All input for the `updateSpecies` mutation."""
-input UpdateSpeciesInput {
+"""All input for the `updateSpeciesById` mutation."""
+input UpdateSpeciesByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3229,7 +4186,7 @@ input UpdateSpeciesInput {
   """
   An object where the defined keys will be set on the `Species` being updated.
   """
-  speciesPatch: SpeciesPatch!
+  patch: SpeciesPatch!
 }
 
 """
@@ -3247,7 +4204,7 @@ input SpeciesPatch {
   language: String
   createdAt: Datetime
   updatedAt: Datetime
-  planetByHomeworldId: ID
+  homeworld: ID
 }
 
 """The output of our update `Vehicle` mutation."""
@@ -3273,8 +4230,8 @@ type UpdateVehiclePayload {
   ): VehicleEdge
 }
 
-"""All input for the `updateVehicle` mutation."""
-input UpdateVehicleInput {
+"""All input for the `updateVehicleById` mutation."""
+input UpdateVehicleByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3289,7 +4246,7 @@ input UpdateVehicleInput {
   """
   An object where the defined keys will be set on the `Vehicle` being updated.
   """
-  vehiclePatch: VehiclePatch!
+  patch: VehiclePatch!
 }
 
 """
@@ -3334,8 +4291,8 @@ type UpdateStarshipPayload {
   ): StarshipEdge
 }
 
-"""All input for the `updateStarship` mutation."""
-input UpdateStarshipInput {
+"""All input for the `updateStarshipById` mutation."""
+input UpdateStarshipByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3350,7 +4307,7 @@ input UpdateStarshipInput {
   """
   An object where the defined keys will be set on the `Starship` being updated.
   """
-  starshipPatch: StarshipPatch!
+  patch: StarshipPatch!
 }
 
 """
@@ -3398,8 +4355,8 @@ type DeleteFilmPersonPayload {
   ): FilmPersonEdge
 }
 
-"""All input for the `deleteFilmPerson` mutation."""
-input DeleteFilmPersonInput {
+"""All input for the `deleteFilmPersonById` mutation."""
+input DeleteFilmPersonByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3436,8 +4393,8 @@ type DeleteFilmPlanetPayload {
   ): FilmPlanetEdge
 }
 
-"""All input for the `deleteFilmPlanet` mutation."""
-input DeleteFilmPlanetInput {
+"""All input for the `deleteFilmPlanetById` mutation."""
+input DeleteFilmPlanetByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3450,32 +4407,32 @@ input DeleteFilmPlanetInput {
   id: ID!
 }
 
-"""The output of our delete `FilmSpecy` mutation."""
-type DeleteFilmSpecyPayload {
+"""The output of our delete `FilmSpecies` mutation."""
+type DeleteFilmSpeciesPayload {
   """
   The exact same `clientMutationId` that was provided in the mutation input,
   unchanged and unused. May be used by a client to track mutations.
   """
   clientMutationId: String
 
-  """The `FilmSpecy` that was deleted by this mutation."""
-  filmSpecy: FilmSpecy
-  deletedFilmSpecyId: ID
+  """The `FilmSpecies` that was deleted by this mutation."""
+  filmSpecies: FilmSpecies
+  deletedFilmSpeciesId: ID
 
   """
   Our root query field type. Allows us to run any query from our mutation payload.
   """
   query: Query
 
-  """An edge for our `FilmSpecy`. May be used by Relay 1."""
-  filmSpecyEdge(
-    """The method to use when ordering `FilmSpecy`."""
-    orderBy: [FilmSpecyOrderBy!]! = [PRIMARY_KEY_ASC]
-  ): FilmSpecyEdge
+  """An edge for our `FilmSpecies`. May be used by Relay 1."""
+  filmSpeciesEdge(
+    """The method to use when ordering `FilmSpecies`."""
+    orderBy: [FilmSpeciesOrderBy!]! = [PRIMARY_KEY_ASC]
+  ): FilmSpeciesEdge
 }
 
-"""All input for the `deleteFilmSpecy` mutation."""
-input DeleteFilmSpecyInput {
+"""All input for the `deleteFilmSpeciesById` mutation."""
+input DeleteFilmSpeciesByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3483,7 +4440,7 @@ input DeleteFilmSpecyInput {
   clientMutationId: String
 
   """
-  The globally unique `ID` which will identify a single `FilmSpecy` to be deleted.
+  The globally unique `ID` which will identify a single `FilmSpecies` to be deleted.
   """
   id: ID!
 }
@@ -3512,8 +4469,8 @@ type DeleteFilmStarshipPayload {
   ): FilmStarshipEdge
 }
 
-"""All input for the `deleteFilmStarship` mutation."""
-input DeleteFilmStarshipInput {
+"""All input for the `deleteFilmStarshipById` mutation."""
+input DeleteFilmStarshipByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3550,8 +4507,8 @@ type DeleteFilmVehiclePayload {
   ): FilmVehicleEdge
 }
 
-"""All input for the `deleteFilmVehicle` mutation."""
-input DeleteFilmVehicleInput {
+"""All input for the `deleteFilmVehicleById` mutation."""
+input DeleteFilmVehicleByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3588,8 +4545,8 @@ type DeletePersonStarshipPayload {
   ): PersonStarshipEdge
 }
 
-"""All input for the `deletePersonStarship` mutation."""
-input DeletePersonStarshipInput {
+"""All input for the `deletePersonStarshipById` mutation."""
+input DeletePersonStarshipByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3626,8 +4583,8 @@ type DeletePersonVehiclePayload {
   ): PersonVehicleEdge
 }
 
-"""All input for the `deletePersonVehicle` mutation."""
-input DeletePersonVehicleInput {
+"""All input for the `deletePersonVehicleById` mutation."""
+input DeletePersonVehicleByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3664,8 +4621,8 @@ type DeletePersonPayload {
   ): PersonEdge
 }
 
-"""All input for the `deletePerson` mutation."""
-input DeletePersonInput {
+"""All input for the `deletePersonById` mutation."""
+input DeletePersonByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3702,8 +4659,8 @@ type DeleteFilmPayload {
   ): FilmEdge
 }
 
-"""All input for the `deleteFilm` mutation."""
-input DeleteFilmInput {
+"""All input for the `deleteFilmById` mutation."""
+input DeleteFilmByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3740,8 +4697,8 @@ type DeletePlanetPayload {
   ): PlanetEdge
 }
 
-"""All input for the `deletePlanet` mutation."""
-input DeletePlanetInput {
+"""All input for the `deletePlanetById` mutation."""
+input DeletePlanetByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3778,8 +4735,8 @@ type DeleteSpeciesPayload {
   ): SpeciesEdge
 }
 
-"""All input for the `deleteSpecies` mutation."""
-input DeleteSpeciesInput {
+"""All input for the `deleteSpeciesById` mutation."""
+input DeleteSpeciesByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3816,8 +4773,8 @@ type DeleteVehiclePayload {
   ): VehicleEdge
 }
 
-"""All input for the `deleteVehicle` mutation."""
-input DeleteVehicleInput {
+"""All input for the `deleteVehicleById` mutation."""
+input DeleteVehicleByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.
@@ -3854,8 +4811,8 @@ type DeleteStarshipPayload {
   ): StarshipEdge
 }
 
-"""All input for the `deleteStarship` mutation."""
-input DeleteStarshipInput {
+"""All input for the `deleteStarshipById` mutation."""
+input DeleteStarshipByIdInput {
   """
   An arbitrary string value with no semantic meaning. Will be included in the
   payload verbatim. May be used to track mutations by the client.

@@ -4,13 +4,17 @@ import { grafserv } from "postgraphile/grafserv/node";
 import { makePgService } from "postgraphile/adaptors/pg";
 import PostGraphileAmberPreset from "postgraphile/presets/amber";
 import { PostGraphileRelayPreset } from "postgraphile/presets/relay";
+import {PgSimplifyInflectionPreset} from '@graphile/simplify-inflection'
+import { StreamDeferPlugin } from "postgraphile/graphile-build";
+import { PgManyToManyPreset } from "@graphile-contrib/pg-many-to-many";
 
 const PORT = 4000;
 
 const IS_DEV = process.env.GRAPHILE_ENV === "development";
 
 const pgl = postgraphile({
-  extends: [PostGraphileAmberPreset, PostGraphileRelayPreset],
+  extends: [PostGraphileAmberPreset, PostGraphileRelayPreset,  PgSimplifyInflectionPreset, PgManyToManyPreset],
+  plugins: [StreamDeferPlugin],
   grafserv: {
     port: 4000,
     graphiql: IS_DEV,
