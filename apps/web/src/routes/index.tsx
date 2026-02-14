@@ -3,6 +3,10 @@ import relay from 'react-relay';
 import type { routesIndexQuery } from '../__generated__/routesIndexQuery.graphql';
 import { loggingMiddleware } from '#@/utils/loggingMiddleware.js';
 const { graphql, usePreloadedQuery } = relay;
+import { createLink } from '@tanstack/react-router';
+import { Link as HeroUILink } from '@heroui/react';
+import { Fragment } from 'react/jsx-runtime';
+import { nanoid } from 'nanoid';
 
 const query = graphql`
   query routesIndexQuery {
@@ -19,24 +23,36 @@ const query = graphql`
   }
 `;
 
+const Link = createLink(HeroUILink);
+
 export const Route = createFileRoute('/')({
   component: Home,
   loader: ({ context }) => {
     const preloadedQuery = context.preloadQuery<routesIndexQuery>(query, {});
     return { preloadedQuery };
   },
-  server: {
-    middleware: [loggingMiddleware],
-  },
 });
 
 function Home() {
   const { preloadedQuery } = Route.useLoaderData();
   const data = usePreloadedQuery<routesIndexQuery>(query, preloadedQuery);
+  const edges = data.films?.edges ?? [];
   return (
-    <div className="p-2">
-      <h3>Welcome Home!!!</h3>
-      <p>Data from GraphQL: {JSON.stringify(data)}</p>
-    </div>
+    <>
+      <h1>Star Wars Films</h1>
+      <div className="p-8 flex flex-col gap-4 w-full mx-auto">
+        {edges.map((edge) => {
+          return (
+            <Fragment key={edge?.cursor ?? `missing-${nanoid()}`}>
+              {edge?.node?.id ? (
+                <Link to="/film/$id" params={{ id: edge.node.id }}>
+                  {edge.node.title}
+                </Link>
+              ) : null}
+            </Fragment>
+          );
+        })}
+      </div>
+    </>
   );
 }

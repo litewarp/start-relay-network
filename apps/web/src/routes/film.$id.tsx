@@ -17,6 +17,7 @@ const query = graphql`
 
 export const Route = createFileRoute('/film/$id')({
   component: RouteComponent,
+
   loader: ({ context, params }) => {
     const preloadedQuery = context.preloadQuery<filmQuery>(query, { id: params.id });
     return { preloadedQuery };
@@ -28,13 +29,14 @@ function RouteComponent() {
   const data = usePreloadedQuery<filmQuery>(query, preloadedQuery);
   return (
     <div className="flex flex-col">
-      <div>Hello {data.filmById.title}</div>;
+      <div>{data.filmById.title}</div>
       <Suspense fallback={'loading...'}>
         <FilmDetails film={data.filmById} />
       </Suspense>
     </div>
   );
 }
+
 const fragment = graphql`
   fragment filmFragment_planets on Film {
     filmPlanets {
