@@ -29,7 +29,8 @@ const config: CreateNetworkInit = {
 
 export const createRelayEnvironment = createIsomorphicFn()
   .client(() => {
-    const { network, createPreloader, queryCache } = createClientNetwork(config);
+    const { network, createPreloader, queryCache } =
+      createClientNetwork(config);
     const environment = new Environment({
       network,
       isServer: false,
@@ -41,7 +42,8 @@ export const createRelayEnvironment = createIsomorphicFn()
     };
   })
   .server(() => {
-    const { network, createPreloader, queryCache } = createServerNetwork(config);
+    const { network, createPreloader, queryCache } =
+      createServerNetwork(config);
     const environment = new Environment({
       network,
       isServer: true,
