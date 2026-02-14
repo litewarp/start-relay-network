@@ -11,54 +11,54 @@ fileGroups:
 
 tasks:
   lint:
-    command: "bunx oxlint ."
+    command: "bun run oxlint ."
     inputs:
       - "@globs(sources)"
       - "@globs(tests)"
       - "@globs(configs)"
 
   lint-fix:
-    command: "bunx oxlint --fix ."
+    command: "bun run oxlint --fix ."
     inputs:
       - "@globs(sources)"
       - "@globs(tests)"
       - "@globs(configs)"
 
   format:
-    command: "bunx oxfmt ."
+    command: "bun run oxfmt ."
     inputs:
       - "@globs(sources)"
       - "@globs(tests)"
       - "@globs(configs)"
 
   format-write:
-    command: "bunx oxfmt --write ."
+    command: "bun run --write ."
     inputs:
       - "@globs(sources)"
       - "@globs(tests)"
       - "@globs(configs)"
 
   typecheck:
-    command: "bunx tsc --noEmit"
+    command: "bun run tsgo --noEmit"
     inputs:
       - "@globs(sources)"
       - "@globs(tests)"
       - "tsconfig.json"
 
   test:
-    command: "bunx vitest run"
+    command: "bun run vitest run"
     inputs:
       - "@globs(sources)"
       - "@globs(tests)"
 
   test-watch:
-    command: "bunx vitest"
+    command: "bun run vitest"
     options:
       cache: false
       persistent: true
 
   test-coverage:
-    command: "bunx vitest run --coverage"
+    command: "bun run vitest run --coverage"
     inputs:
       - "@globs(sources)"
       - "@globs(tests)"

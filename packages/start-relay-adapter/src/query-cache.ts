@@ -1,26 +1,27 @@
-import { buildQueryKey } from './cache/query-utils.js';
-import { RelayQuery } from './cache/relay-query.js';
+import { buildQueryKey } from "./cache/query-utils.js";
+import { RelayQuery } from "./cache/relay-query.js";
 
-import type { QueryEvent, QueryProgressEvent } from '#@/transport/types.js';
+import type { QueryEvent, QueryProgressEvent } from "#@/transport/types.js";
 
-import { createBackpressuredCallback } from '#@/callback.js';
-import { warnRelay } from '#@/debug.js';
-import { Environment, type OperationDescriptor } from 'relay-runtime';
+import { createBackpressuredCallback } from "#@/callback.js";
+import { warnRelay } from "#@/debug.js";
+import { Environment, type OperationDescriptor } from "relay-runtime";
 
-export * from './cache/query-utils.js';
+export * from "./cache/query-utils.js";
 
-export const createQueryCache = (isServer?: boolean) => new QueryCache(isServer);
+export const createQueryCache = (opts?: { isServer?: boolean }) =>
+  new QueryCache(opts);
 
 export class QueryCache {
   _isServer: boolean;
 
-  constructor(isServer?: boolean) {
-    this._isServer = !!isServer;
+  constructor(opts?: { isServer?: boolean }) {
+    this._isServer = Boolean(opts?.isServer);
   }
 
   // server side subscription to requests
   watchQueryQueue = createBackpressuredCallback<{
-    event: Extract<QueryEvent, { type: 'started' }>;
+    event: Extract<QueryEvent, { type: "started" }>;
     query: RelayQuery;
   }>();
 
@@ -46,9 +47,9 @@ export class QueryCache {
     return this.queries.get(queryId);
   }
 
-  onQueryStarted(event: Extract<QueryEvent, { type: 'started' }>): void {
+  onQueryStarted(event: Extract<QueryEvent, { type: "started" }>): void {
     if (this._isServer) {
-      throw new Error('onQueryStarted should not be called on the server');
+      throw new Error("onQueryStarted should not be called on the server");
     }
     const query = this.build(event.operation);
     this.simulatedStreamingQueries.set(event.id, query);
@@ -56,21 +57,21 @@ export class QueryCache {
 
   onQueryProgress(event: QueryProgressEvent) {
     if (this._isServer) {
-      throw new Error('onQueryProgress should not be called on the server');
+      throw new Error("onQueryProgress should not be called on the server");
     }
     const query = this.simulatedStreamingQueries.get(event.id);
     if (!query) {
       throw new Error(`RelayQuery with id ${event.id} not found`);
     }
     switch (event.type) {
-      case 'next':
+      case "next":
         query.next(event.data);
         break;
-      case 'error':
+      case "error":
         this.simulatedStreamingQueries.delete(event.id);
         query.error(JSON.stringify(event.error));
         break;
-      case 'complete':
+      case "complete":
         this.simulatedStreamingQueries.delete(event.id);
         query.complete();
         break;
@@ -86,8 +87,8 @@ export class QueryCache {
     for (const [id, query] of this.simulatedStreamingQueries) {
       this.simulatedStreamingQueries.delete(id);
       warnRelay(
-        'Streaming connection closed before server query could be fully transported, rerunning:',
-        query.getOperation().request
+        "Streaming connection closed before server query could be fully transported, rerunning:",
+        query.getOperation().request,
       );
 
       return environment.execute({ operation: query.getOperation() });
@@ -98,8 +99,8 @@ export class QueryCache {
   watchQuery(query: RelayQuery) {
     const event = {
       id: query.queryKey,
-      type: 'started' as const,
-      operation: query.getOperation()
+      type: "started" as const,
+      operation: query.getOperation(),
     };
 
     this.watchQueryQueue.push({ event, query });

@@ -2,25 +2,36 @@ import { postgraphile } from "postgraphile";
 import { createServer } from "node:http";
 import { grafserv } from "postgraphile/grafserv/node";
 import { makePgService } from "postgraphile/adaptors/pg";
+import PostGraphileAmberPreset from "postgraphile/presets/amber";
+import { PostGraphileRelayPreset } from "postgraphile/presets/relay";
 
 const PORT = 4000;
 
+const IS_DEV = process.env.GRAPHILE_ENV === "development";
+
 const pgl = postgraphile({
-  gather: {
-    installWatchFixtures: true,
+  extends: [PostGraphileAmberPreset, PostGraphileRelayPreset],
+  grafserv: {
+    port: 4000,
+    graphiql: IS_DEV,
+    watch: IS_DEV,
+    graphiqlPath: "/graphiql",
+    graphiqlOnGraphQLGET: IS_DEV,
   },
   grafast: {
-    explain: true,
+    explain: IS_DEV,
   },
-  grafserv: {
-    port: PORT,
-    graphiql: true,
-    watch: true,
+  gather: {
+    installWatchFixtures: IS_DEV,
+  },
+  schema: {
+    exportSchemaSDLPath: IS_DEV ? "./schema.graphql" : undefined,
   },
   pgServices: [
     makePgService({
-      connectionString: process.env.DATABASE_URL ?? "",
+      connectionString: process.env.CONNECTION_STRING,
       schemas: ["app_public"],
+      superuserConnectionString: process.env.SUPERUSER_CONNECTION_STRING,
     }),
   ],
 });

@@ -1,5 +1,5 @@
 language: typescript
-type: application
+layer: application
 stack: backend
 tags:
   - postgraphile
@@ -7,22 +7,24 @@ tags:
 
 tasks:
   dev:
-    command: bun run src/index.ts
+    command: bun --watch src/index.ts
     options:
       persistent: true
       cache: false
+    deps:
+      - db-up
 
-  db:up:
+  db-up:
     command: docker compose up -d
     options:
       cache: false
+      internal: true
 
-  db:down:
+  db-down:
     command: docker compose down
     options:
       cache: false
+      internal: true
 
-  db:reset:
-    command: docker compose down -v && docker compose up -d
-    options:
-      cache: false
+  reset:
+    command: ./scripts/reset-db.sh

@@ -61,13 +61,13 @@ export class ClientRelayNetwork {
         // otherwise fetch as normal
       } else {
         return Observable.create<GraphQLResponse>((sink) => {
-          void multipartFetch({
+          multipartFetch({
             url: this.#url,
-            getRequestInit: () => config.getRequestInit(request, variables, cacheConfig),
+            getRequestInit: () => config.getFetchOptions(request, variables, cacheConfig),
             onComplete: () => sink.complete(),
             onError: (error) => sink.error(error),
             onNext: (responses) => responses.forEach((r) => sink.next(r))
-          });
+          }).catch((err: unknown) => sink.error(coerceError(err)));
         });
       }
     };

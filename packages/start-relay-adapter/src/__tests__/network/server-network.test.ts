@@ -26,17 +26,6 @@ function mockMultipartFetchResponse(parts: object[], boundary = '----abc123') {
   };
 }
 
-/**
- * Creates a mock fetch Response for application/json content.
- */
-function mockJsonFetchResponse(data: object) {
-  return {
-    status: 200,
-    headers: new Headers({ 'Content-Type': 'application/json' }),
-    json: vi.fn().mockResolvedValue(data),
-    body: null
-  };
-}
 
 /**
  * Subscribes to a Relay Observable and collects all emissions.
@@ -85,7 +74,7 @@ describe('ServerRelayNetwork', () => {
   function createServerNetwork(queryCache: QueryCache) {
     return new ServerRelayNetwork({
       url: 'http://test.com/graphql',
-      getRequestInit: async () => ({
+      getFetchOptions: async () => ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: 'test' })
@@ -96,7 +85,7 @@ describe('ServerRelayNetwork', () => {
 
   describe('cache-hit pipeline (multipartFetch → query → Observable)', () => {
     it('forwards multipart @stream parts through query.next to Observable sink', async () => {
-      const queryCache = new QueryCache(true);
+      const queryCache = new QueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'stream-server' });
       queryCache.build(operation);
 
@@ -133,7 +122,7 @@ describe('ServerRelayNetwork', () => {
     });
 
     it('forwards multipart @defer parts through query.next to Observable sink', async () => {
-      const queryCache = new QueryCache(true);
+      const queryCache = new QueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'defer-server' });
       queryCache.build(operation);
 
@@ -171,7 +160,7 @@ describe('ServerRelayNetwork', () => {
     });
 
     it('calls watchQuery when query is found in cache', async () => {
-      const queryCache = new QueryCache(true);
+      const queryCache = new QueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'watch-query' });
       queryCache.build(operation);
 
@@ -189,7 +178,7 @@ describe('ServerRelayNetwork', () => {
     });
 
     it('query completion triggers Observable complete', async () => {
-      const queryCache = new QueryCache(true);
+      const queryCache = new QueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'complete-server' });
       queryCache.build(operation);
 
@@ -217,29 +206,43 @@ describe('ServerRelayNetwork', () => {
     });
   });
 
-  describe('cache-miss fallback', () => {
-    it('falls back to direct fetch and returns JSON when query not in cache', async () => {
-      const queryCache = new QueryCache(true); // empty cache
-      const data = { data: { userById: { id: 1, name: 'Alice' } } };
+  describe('non-preloaded queries (cache miss)', () => {
+    it('returns a never-resolving Observable when query is not in cache', async () => {
+      const queryCache = new QueryCache({ isServer: true }); // empty cache
 
-      globalThis.fetch = vi.fn().mockResolvedValue(mockJsonFetchResponse(data));
+      globalThis.fetch = vi.fn();
 
       const network = createServerNetwork(queryCache);
       const request = createMockRequestParameters({ id: 'uncached-server-query' });
       const observable = network.execute(request, {}, {}, null);
 
-      const { values, completed } = await subscribeAndCollect(observable);
+      const { values, completed, error } = await subscribeAndCollect(observable);
 
-      expect(globalThis.fetch).toHaveBeenCalled();
-      expect(values).toHaveLength(1);
-      expect(values[0]).toEqual(data);
-      expect(completed).toBe(true);
+      // Observable should never emit, complete, or error — it stays suspended
+      expect(values).toHaveLength(0);
+      expect(completed).toBe(false);
+      expect(error).toBeNull();
+      // No fetch should have been made
+      expect(globalThis.fetch).not.toHaveBeenCalled();
+    });
+
+    it('does not call watchQuery for non-preloaded queries', async () => {
+      const queryCache = new QueryCache({ isServer: true });
+      const watchQuerySpy = vi.spyOn(queryCache, 'watchQuery');
+
+      globalThis.fetch = vi.fn();
+
+      const network = createServerNetwork(queryCache);
+      const request = createMockRequestParameters({ id: 'unwatched-query' });
+      network.execute(request, {}, {}, null);
+
+      expect(watchQuerySpy).not.toHaveBeenCalled();
     });
   });
 
   describe('error handling', () => {
     it('pipes multipartFetch rejection to query.error then Observable.error', async () => {
-      const queryCache = new QueryCache(true);
+      const queryCache = new QueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'fetch-error-server' });
       queryCache.build(operation);
 
@@ -255,7 +258,7 @@ describe('ServerRelayNetwork', () => {
     });
 
     it('pipes stream error to query.error then Observable.error', async () => {
-      const queryCache = new QueryCache(true);
+      const queryCache = new QueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'stream-error-server' });
       queryCache.build(operation);
 
@@ -295,7 +298,7 @@ describe('ServerRelayNetwork', () => {
 
   describe('AbortSignal forwarding', () => {
     it('forwards AbortSignal from cacheConfig.metadata to fetch', async () => {
-      const queryCache = new QueryCache(true);
+      const queryCache = new QueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'abort-server' });
       queryCache.build(operation);
 
@@ -318,7 +321,7 @@ describe('ServerRelayNetwork', () => {
     });
 
     it('does not include signal when cacheConfig has no abortSignal', async () => {
-      const queryCache = new QueryCache(true);
+      const queryCache = new QueryCache({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'no-abort-server' });
       queryCache.build(operation);
 

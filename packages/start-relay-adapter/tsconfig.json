@@ -5,7 +5,8 @@
     "rootDir": "src",
     "jsx": "react-jsx",
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "types": ["node", "vitest/globals"]
+    "types": ["node", "vitest/globals"],
+    "tsBuildInfoFile": "./dist/tsconfig.bundleinfo"
   },
   "include": ["src/**/*"]
 }

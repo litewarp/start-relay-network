@@ -3,7 +3,7 @@ import { queryKeyFromIdAndVariables, type QueryCache } from '../query-cache.js';
 
 import type { RelayNetworkConfig } from './types.js';
 
-import { debugNetworkServer, errorRelay, warnRelay } from '#@/debug.js';
+import { debugNetworkServer } from '#@/debug.js';
 import runtime, {
   type CacheConfig,
   type ExecuteFunction,
@@ -25,7 +25,7 @@ export class ServerRelayNetwork {
 
   public execute: ExecuteFunction;
 
-  constructor({ getRequestInit, url, queryCache }: RelayNetworkConfig) {
+  constructor({ getFetchOptions, url, queryCache }: RelayNetworkConfig) {
     this.#url = url;
     this.#queryCache = queryCache;
 
@@ -35,24 +35,19 @@ export class ServerRelayNetwork {
       const queryKey = queryKeyFromIdAndVariables(request.id ?? request.cacheID, variables);
 
       const wrappedGetRequestInit = async () => {
-        const res = await getRequestInit(request, variables, cacheConfig);
+        const res = await getFetchOptions(request, variables, cacheConfig);
         const signal = getAbortSignal(cacheConfig);
         return { ...res, signal };
       };
-      /**
-       * TODO: Handle non-preloaded queries (i.e. one without a loader call)
-       */
       const query = this.#queryCache.get(queryKey);
       if (!query) {
-        warnRelay(
-          `Query with key ${queryKey} not found in cache on server. Fetching as promise`
+        debugNetworkServer(
+          'Query not preloaded — skipping server fetch for queryKey:',
+          queryKey
         );
-        return wrappedGetRequestInit()
-          .then((init) => fetch(this.#url, init))
-          .then((res) => res.json())
-          .catch((err) => {
-            errorRelay('Error fetching query:', err);
-          });
+        // Return an Observable that never emits. The component stays suspended
+        // during SSR and the client will re-fetch via ClientRelayNetwork.
+        return Observable.create<GraphQLResponse>(() => {});
       }
 
       // subscribe to the query's replay subject to get updates

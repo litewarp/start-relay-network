@@ -1,0 +1,45 @@
+language: typescript
+layer: application
+stack: frontend
+tags:
+  - tanstack
+  - react
+
+tasks:
+  dev:
+    command: bun run vite dev
+    options:
+      persistent: true
+      cache: false
+    deps:
+      - relay
+      - start-relay-adapter:build
+
+  build:
+    command: bun run vite build
+    inputs:
+      - src/**/*
+      - app.config.ts
+      - tsconfig.json
+    outputs:
+      - .output/**/*
+    deps:
+      - relay
+      - start-relay-adapter:build
+
+  preview:
+    command: bun vite preview
+    options:
+      persistent: true
+      cache: false
+
+  start:
+    command: bun run .output/server/index.mjs
+    deps:
+      - build
+    options:
+      persistent: true
+
+  relay:
+    command: bun run relay-compiler
+    inputs: ["./src/**/*.{ts,tsx}"]

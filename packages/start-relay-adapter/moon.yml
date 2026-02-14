@@ -1,5 +1,13 @@
 language: typescript
-layer: 'library'
-stack: 'frontend'
+layer: "library"
+stack: "frontend"
 tags:
-  - 'vitest'
+  - "vitest"
+
+tasks:
+  build:
+    command: bun run tsdown
+    outputs: ["dist/**"]
+
+  dev:
+    command: bun run tsdown --watch
