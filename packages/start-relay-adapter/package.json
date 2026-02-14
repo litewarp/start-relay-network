@@ -15,13 +15,20 @@
   "imports": {
     "#@/*": "./src/*"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "tsconfig.json"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"
     }
   },
-  "scripts": {},
+  "scripts": {
+    "build": "tsdown"
+  },
   "dependencies": {
     "debug": "^4.4.3"
   },
