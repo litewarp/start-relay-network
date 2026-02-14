@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {},
+  "private": true,
   "dependencies": {
     "pg": "^8.13.1",
     "postgraphile": "^5.0.0-rc.6"
