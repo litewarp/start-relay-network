@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import relay from "react-relay";
 import type { routesIndexQuery } from "../__generated__/routesIndexQuery.graphql";
+import { loggingMiddleware } from "#@/utils/loggingMiddleware.js";
 const { graphql, usePreloadedQuery } = relay;
 
 const query = graphql`
@@ -11,10 +12,12 @@ const query = graphql`
 
 export const Route = createFileRoute("/")({
   component: Home,
-  // @ts-expect-error serialization adapter handles PreloadedQuery at runtime
   loader: ({ context }) => {
     const preloadedQuery = context.preloadQuery<routesIndexQuery>(query, {});
     return { preloadedQuery };
+  },
+  server: {
+    middleware: [loggingMiddleware],
   },
 });
 

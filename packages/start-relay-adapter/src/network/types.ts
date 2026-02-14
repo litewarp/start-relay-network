@@ -15,9 +15,4 @@ export interface StartSsrRelayNetwork {
   execute: ExecuteFunction;
 }
 
-export type GetNetworkFn = (
-  opts: RelayNetworkConfig,
-  isServer?: boolean,
-) => StartSsrRelayNetwork;
-
 export type CreateNetworkInit = Omit<RelayNetworkConfig, "queryCache">;

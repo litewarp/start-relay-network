@@ -1,43 +1,37 @@
-import { debugPreload } from '../debug.js';
+import { debugPreload } from "../debug.js";
 
-import type { QueryCache } from '../query-cache.js';
-import type {
-  EnvironmentProviderOptions,
-  LoadQueryOptions,
-  OperationDescriptor,
-  PreloadedQuery
-} from 'react-relay';
+import type { QueryCache } from "../query-cache.js";
+import type { EnvironmentProviderOptions, LoadQueryOptions } from "react-relay";
 
-import relay from 'react-relay';
+import relay from "react-relay";
 import runtime, {
   type Environment,
   type GraphQLTaggedNode,
   type OperationType,
-  type VariablesOf
-} from 'relay-runtime';
-
+  type VariablesOf,
+} from "relay-runtime";
+import type { PreloadedQuery } from "./types.js";
 const { getRequest, createOperationDescriptor } = runtime;
 
-export interface StreamedPreloadedQuery<
-  TQuery extends OperationType
-> extends PreloadedQuery<TQuery> {
-  $__relay_queryRef: {
-    operation: OperationDescriptor;
-  };
-}
-
-export const createServerPreloader = (environment: Environment, queryCache: QueryCache) => {
+export const createServerPreloader = (
+  environment: Environment,
+  queryCache: QueryCache,
+) => {
   return <TQuery extends OperationType>(
     request: GraphQLTaggedNode,
     variables: VariablesOf<TQuery>,
     options?: LoadQueryOptions,
-    environmentProviderOptions?: EnvironmentProviderOptions
-  ): StreamedPreloadedQuery<TQuery> => {
-    debugPreload('[server] Preloading query:', request, variables);
+    environmentProviderOptions?: EnvironmentProviderOptions,
+  ): PreloadedQuery<TQuery> => {
+    debugPreload("[server] Preloading query:", request, variables);
 
     // build the operation descriptor
     const req = getRequest(request);
-    const operation = createOperationDescriptor(req, variables, options?.networkCacheConfig);
+    const operation = createOperationDescriptor(
+      req,
+      variables,
+      options?.networkCacheConfig,
+    );
 
     // store the operation in the queryCache
     queryCache.build(operation);
@@ -47,23 +41,23 @@ export const createServerPreloader = (environment: Environment, queryCache: Quer
     // causes Relay to skip the fetch when client:root exists in the store.
     const serverOptions: LoadQueryOptions = {
       ...options,
-      fetchPolicy: 'network-only',
+      fetchPolicy: "network-only",
     };
     const preloadedQuery = relay.loadQuery<TQuery>(
       environment,
       request,
       variables,
       serverOptions,
-      environmentProviderOptions
+      environmentProviderOptions,
     );
 
     // add the streaming metadata
     return {
       ...preloadedQuery,
       $__relay_queryRef: {
-        operation
-      }
-    };
+        operation,
+      },
+    } as unknown as PreloadedQuery<TQuery>;
   };
 };
 

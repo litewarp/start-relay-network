@@ -3,7 +3,6 @@ import {
   HeadContent,
   Link,
   Scripts,
-  createRootRoute,
   createRootRouteWithContext,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
@@ -12,11 +11,9 @@ import { DefaultCatchBoundary } from "#@/components/DefaultCatchBoundary.js";
 import { NotFound } from "#@/components/NotFound.js";
 import appCss from "#@/styles/app.css?url";
 import { seo } from "#@/utils/seo.js";
-import type { initializeRelayEnvironment } from "@litewarp/start-relay-network";
+import type { StartRelayContext } from "@litewarp/start-relay-network";
 
-type RootContext = ReturnType<typeof initializeRelayEnvironment>;
-
-export const Route = createRootRouteWithContext<RootContext>()({
+export const Route = createRootRouteWithContext<StartRelayContext>()({
   head: () => ({
     meta: [
       {

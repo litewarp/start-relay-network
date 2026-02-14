@@ -1,37 +1,14 @@
-/**
- * New Exports
- */
-import type { Transport } from "#@/transport/types.js";
-import type { AnyRouter } from "@tanstack/react-router";
+import type RelayModernEnvironment from "relay-runtime/lib/store/RelayModernEnvironment.js";
+import type { RelayStartQueryCache } from "./query-cache.js";
+import type { ServerPreloadFunction } from "./preload/server.js";
+import type { ClientPreloadFunction } from "./preload/client.js";
 
-import {
-  setCoreRouterRelayIntegration,
-  type RouterSsrRelayOptions,
-} from "#@/setup/core.js";
-import { RelayProvider } from "#@/transport/relay-provider.jsx";
-import { Fragment } from "react/jsx-runtime";
+export { setupRouterRelayIntegration } from "./setup/setup.js";
 
-export function setupRouterRelayIntegration<TRouter extends AnyRouter>(
-  opts: Omit<RouterSsrRelayOptions<TRouter>, "providerContext">,
-) {
-  // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-  const providerContext = {} as { transport: Transport };
-
-  setCoreRouterRelayIntegration<TRouter>({ ...opts, providerContext });
-
-  const PreviousInnerWrap = opts.router.options.InnerWrap ?? Fragment;
-
-  opts.router.options.InnerWrap = ({ children }) => {
-    return (
-      <RelayProvider
-        environment={opts.environment}
-        queryCache={opts.queryCache}
-        context={providerContext}
-      >
-        <PreviousInnerWrap>{children}</PreviousInnerWrap>
-      </RelayProvider>
-    );
-  };
+export interface StartRelayContext {
+  environment: RelayModernEnvironment;
+  queryCache: RelayStartQueryCache;
+  preloadQuery: ServerPreloadFunction | ClientPreloadFunction;
 }
 
 export * from "./network/types.js";
