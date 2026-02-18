@@ -1,5 +1,11 @@
 # @litewarp/start-relay-network
 
+## 1.0.0-alpha.5
+
+### Patch Changes
+
+- d27d5d0: Remove debug from bundled dependencies
+
 ## 1.0.0-alpha.3
 
 ### Patch Changes
