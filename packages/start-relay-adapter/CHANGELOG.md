@@ -1,5 +1,11 @@
 # @litewarp/start-relay-network
 
+## 1.0.0-alpha.6
+
+### Patch Changes
+
+- e5f8e12: remove debug from package.json because claude can't be trusted
+
 ## 1.0.0-alpha.5
 
 ### Patch Changes
