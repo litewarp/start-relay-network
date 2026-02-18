@@ -1,5 +1,11 @@
 # @litewarp/start-relay-network
 
+## 1.0.0-alpha.3
+
+### Patch Changes
+
+- Externalize `debug` package from bundle so it is not compiled into the browser build
+
 ## 1.0.0-alpha.2
 
 ### Major Changes
