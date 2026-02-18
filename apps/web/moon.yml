@@ -12,7 +12,6 @@ tasks:
       persistent: true
       cache: false
     deps:
-      - relay
       - start-relay-adapter:build
 
   build:
@@ -24,7 +23,6 @@ tasks:
     outputs:
       - .output/**/*
     deps:
-      - relay
       - start-relay-adapter:build
 
   preview:
@@ -41,5 +39,8 @@ tasks:
       persistent: true
 
   relay:
-    command: bun run relay-compiler
-    inputs: ["./src/**/*.{ts,tsx}"]
+    command: bun relay-compiler
+    inputs:
+      - src/**/*.{ts,tsx}
+      - src/**/*.graphql
+    outputs: ["src/__generated__/**/*"]

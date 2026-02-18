@@ -2,6 +2,7 @@ import { defineConfig } from "tsdown";
 import pkg from "./package.json" with { type: "json" };
 import { visualizer } from "rollup-plugin-visualizer";
 const peerDeps = Object.keys(pkg.peerDependencies ?? {});
+const deps = Object.keys(pkg.dependencies ?? {});
 
 export default defineConfig((input) => ({
   entry: "./src/index.tsx",
@@ -12,8 +13,10 @@ export default defineConfig((input) => ({
   format: ["esm"],
   minify: input.minify,
   external: (id) =>
-    // exclude all peer dependencies from the bundle
-    peerDeps.some((dep) => id === dep || id.startsWith(`${dep}/`)),
+    // exclude all peer dependencies and regular dependencies from the bundle
+    [...peerDeps, ...deps].some(
+      (dep) => id === dep || id.startsWith(`${dep}/`),
+    ),
   plugins: [
     visualizer({
       filename: "dist/stats.html",
