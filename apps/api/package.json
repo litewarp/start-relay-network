@@ -8,13 +8,13 @@
     "@graphile-contrib/pg-many-to-many": "^2.0.0-rc.1",
     "cors": "^2.8.6",
     "express": "^5.2.1",
-    "pg": "^8.13.1",
-    "postgraphile": "^5.0.0-rc.6"
+    "pg": "^8.19.0",
+    "postgraphile": "^5.0.0-rc.9"
   },
   "devDependencies": {
     "@graphile/simplify-inflection": "^8.0.0-rc.3",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
-    "@types/pg": "^8.6.7"
+    "@types/pg": "^8.18.0"
   }
 }

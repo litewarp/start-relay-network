@@ -16,10 +16,10 @@
   "dependencies": {
     "@litewarp/start-relay-network": "workspace:*",
     "@lonik/themer": "^0.5.2",
-    "@tanstack/react-router": "^1.159.5",
-    "@tanstack/react-router-devtools": "^1.159.5",
-    "@tanstack/react-start": "^1.159.5",
-    "@types/react": "^19.2.4",
+    "@tanstack/react-router": "^1.163.3",
+    "@tanstack/react-router-devtools": "^1.163.3",
+    "@tanstack/react-start": "^1.164.0",
+    "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/react-relay": "^18.2.1",
     "@types/relay-runtime": "^20.1.1",
@@ -28,18 +28,18 @@
     "react-dom": "^19.2.4",
     "react-relay": "^20.1.1",
     "relay-runtime": "^20.1.1",
-    "tailwind-merge": "^3.4.0",
+    "tailwind-merge": "^3.5.0",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@heroui/react": "^3.0.0-beta.6",
     "@heroui/styles": "^3.0.0-beta.6",
-    "@tailwindcss/vite": "^4.1.18",
+    "@tailwindcss/vite": "^4.2.1",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^5.1.4",
     "relay-compiler": "^20.1.1",
-    "tailwindcss": "^4.1.18",
+    "tailwindcss": "^4.2.1",
     "vite": "catalog:"
   }
 }
