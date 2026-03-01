@@ -12,9 +12,6 @@ export { integrateRelayWithRouter } from "./setup/setup.js";
 // Middleware types
 export type { RelayMiddleware, ResponseTransform, RequestContext } from "./middleware/types.js";
 
-// Shipped response transform
-export { incrementalDeliveryTransform } from "./middleware/incremental-delivery.js";
-
 // Preload types
 export type { PreloadedQuery } from "./preload/types.js";
 

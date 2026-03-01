@@ -1,8 +1,6 @@
 import { createIsomorphicFn } from "@tanstack/react-start";
-import {
-  createRelayEnvironment,
-  incrementalDeliveryTransform,
-} from "@litewarp/start-relay-network";
+import { createRelayEnvironment } from "@litewarp/start-relay-network";
+import { grafastRelayTransform } from "@litewarp/start-relay-network/transforms/grafast-relay";
 
 function createConfig(isServer: boolean) {
   return {
@@ -20,7 +18,7 @@ function createConfig(isServer: boolean) {
         }),
       };
     },
-    responseTransforms: [incrementalDeliveryTransform],
+    responseTransforms: [grafastRelayTransform],
     isServer,
   };
 }

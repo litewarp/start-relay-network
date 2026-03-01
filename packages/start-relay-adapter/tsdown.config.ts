@@ -5,7 +5,11 @@ const peerDeps = Object.keys(pkg.peerDependencies ?? {});
 const deps = Object.keys(pkg.dependencies ?? {});
 
 export default defineConfig((input) => ({
-  entry: "./src/index.tsx",
+  entry: {
+    index: "./src/index.tsx",
+    "transforms/incremental-delivery": "./src/transforms/incremental-delivery.ts",
+    "transforms/grafast-relay": "./src/transforms/grafast-relay.ts",
+  },
   outDir: "./dist",
   watch: input.watch,
   name: "start-relay-adapter",
