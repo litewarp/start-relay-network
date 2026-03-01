@@ -1,15 +1,15 @@
 /// <reference types="vite/client" />
-import { HeadContent, Outlet, Scripts, createRootRouteWithContext } from '@tanstack/react-router';
+import { HeadContent, Link, Outlet, Scripts, createRootRouteWithContext } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { Fragment, type ReactNode } from 'react';
 import { DefaultCatchBoundary } from '#@/components/DefaultCatchBoundary.js';
 import { NotFound } from '#@/components/NotFound.js';
 import appCss from '#@/styles/app.css?url';
 import { seo } from '#@/utils/seo.js';
-import type { StartRelayContext } from '@litewarp/start-relay-network';
+import type { RelayRouterContext } from '@litewarp/start-relay-network';
 import { ThemeProvider } from '@lonik/themer';
 
-export const Route = createRootRouteWithContext<StartRelayContext>()({
+export const Route = createRootRouteWithContext<RelayRouterContext>()({
   head: () => ({
     meta: [
       {
@@ -73,6 +73,19 @@ function RootComponent() {
   return (
     <Fragment>
       <ThemeProvider enableSystem>
+        <nav className="flex items-center gap-6 border-b border-neutral-200 dark:border-neutral-800 px-6 py-3">
+          <Link to="/" className="font-semibold text-neutral-900 dark:text-neutral-100">
+            start-relay-network
+          </Link>
+          <Link
+            to="/docs/what-it-does"
+            className="text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+            activeOptions={{ includeSearch: false }}
+            activeProps={{ className: 'text-sm text-neutral-900 dark:text-neutral-100 font-medium' }}
+          >
+            Docs
+          </Link>
+        </nav>
         <Outlet />
       </ThemeProvider>
     </Fragment>

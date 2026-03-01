@@ -9,22 +9,19 @@ function createLogger(namespace: string, alwaysEnabled = false) {
   return fn;
 }
 
-// Core subsystems
-export const debugFetch = createLogger(`${PREFIX}:fetch`);
-export const debugPreload = createLogger(`${PREFIX}:preload`);
-export const debugCache = createLogger(`${PREFIX}:cache`);
-
 // Network layer
-export const debugNetwork = createLogger(`${PREFIX}:network`);
 export const debugNetworkClient = createLogger(`${PREFIX}:network:client`);
 export const debugNetworkServer = createLogger(`${PREFIX}:network:server`);
 
 // Transport layer
-export const debugTransport = createLogger(`${PREFIX}:transport`);
 export const debugTransportClient = createLogger(`${PREFIX}:transport:client`);
-export const debugTransportServer = createLogger(`${PREFIX}:transport:server`);
+
+// Hydration
 export const debugHydration = createLogger(`${PREFIX}:hydration`);
 
-// Warning and error loggers (always enabled unless explicitly disabled)
+// Preloading
+export const debugPreload = createLogger(`${PREFIX}:preload`);
+
+// Warning and error loggers (always enabled)
 export const warnRelay = createLogger(`${PREFIX}:warn`, true);
 export const errorRelay = createLogger(`${PREFIX}:error`, true);

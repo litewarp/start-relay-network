@@ -1,4 +1,3 @@
-import type { QueryCache } from "#@/query-cache.js";
 import type { EnvironmentProviderOptions, LoadQueryOptions } from "react-relay";
 
 import { debugPreload } from "#@/debug.js";
@@ -14,7 +13,6 @@ import type { PreloadedQuery } from "./types.js";
 
 export const createClientPreloader = (
   environment: Environment,
-  _queryCache: QueryCache,
 ) => {
   return <TQuery extends OperationType>(
     request: GraphQLTaggedNode,

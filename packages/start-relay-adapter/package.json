@@ -24,6 +24,14 @@
     ".": {
       "import": "./dist/index.mjs",
       "types": "./dist/index.d.mts"
+    },
+    "./transforms/incremental-delivery": {
+      "import": "./dist/transforms/incremental-delivery.mjs",
+      "types": "./dist/transforms/incremental-delivery.d.mts"
+    },
+    "./transforms/grafast-relay": {
+      "import": "./dist/transforms/grafast-relay.mjs",
+      "types": "./dist/transforms/grafast-relay.d.mts"
     }
   },
   "scripts": {

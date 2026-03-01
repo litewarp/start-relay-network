@@ -1,5 +1,5 @@
 import { getBoundary } from './multipart-utils.js';
-import { PatchResolver } from './patch-resolver.js';
+import { MultipartStreamParser } from './patch-resolver.js';
 
 import type { GraphQLResponse } from 'relay-runtime';
 
@@ -23,7 +23,7 @@ export async function multipartFetch(opts: MultipartFetchOptions): Promise<void>
   if (res.status < 300 && contentType.includes('multipart/mixed')) {
     if (!res.body) throw new Error('Malformed Response');
 
-    const patch = new PatchResolver<GraphQLResponse>({
+    const patch = new MultipartStreamParser<GraphQLResponse>({
       onNext: opts.onNext,
       boundary: getBoundary(contentType)
     });

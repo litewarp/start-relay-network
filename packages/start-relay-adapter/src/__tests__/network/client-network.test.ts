@@ -1,5 +1,5 @@
-import { ClientRelayNetwork } from '#@/network/client.js';
-import { QueryCache } from '#@/query-cache.js';
+import { createClientFetchFn } from '#@/network/client.js';
+import { QueryRegistry } from '#@/query-cache.js';
 import {
   createMockRequestParameters,
   createMultipartResponse,
@@ -43,7 +43,7 @@ function mockJsonFetchResponse(data: object) {
  * Subscribes to a Relay Observable and collects all emissions into a result object.
  * Resolves when the Observable completes or errors, or after a timeout.
  */
-function subscribeAndCollect(observable: ReturnType<ClientRelayNetwork['execute']>) {
+function subscribeAndCollect(observable: { subscribe: Function }) {
   return new Promise<{
     values: GraphQLResponse[];
     error: Error | null;
@@ -72,7 +72,7 @@ function subscribeAndCollect(observable: ReturnType<ClientRelayNetwork['execute'
   });
 }
 
-describe('ClientRelayNetwork', () => {
+describe('createClientFetchFn', () => {
   let originalFetch: typeof globalThis.fetch;
 
   beforeEach(() => {
@@ -84,15 +84,15 @@ describe('ClientRelayNetwork', () => {
     vi.restoreAllMocks();
   });
 
-  function createClientNetwork(queryCache?: QueryCache) {
-    return new ClientRelayNetwork({
+  function createClientNetwork(queryRegistry?: QueryRegistry) {
+    return createClientFetchFn({
       url: 'http://test.com/graphql',
       getFetchOptions: async () => ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: 'test' })
       }),
-      queryCache: queryCache ?? new QueryCache()
+      queryRegistry: queryRegistry ?? new QueryRegistry()
     });
   }
 
@@ -122,19 +122,21 @@ describe('ClientRelayNetwork', () => {
       const observable = network.execute(createMockRequestParameters(), {}, {}, null);
       const { values, completed } = await subscribeAndCollect(observable);
 
-      // Transformer converts 2023 spec → Relay format
+      // Raw multipart parts are passed through (no spec transformation in network layer)
       expect(values).toHaveLength(3);
-      expect(values[0]).toEqual({ data: { allUsersList: [] }, hasNext: true });
+      expect(values[0]).toEqual({
+        data: { allUsersList: [] },
+        hasNext: true,
+        pending: [{ id: '0', path: ['allUsersList'], label: 'users' }]
+      });
       expect(values[1]).toEqual({
-        items: [{ id: 1, name: 'Alice' }],
-        path: ['allUsersList'],
-        label: 'users',
+        incremental: [{ id: '0', items: [{ id: 1, name: 'Alice' }] }],
+        completed: [],
         hasNext: true
       });
       expect(values[2]).toEqual({
-        items: [{ id: 2, name: 'Bob' }],
-        path: ['allUsersList'],
-        label: 'users',
+        incremental: [{ id: '0', items: [{ id: 2, name: 'Bob' }] }],
+        completed: [{ id: '0' }],
         hasNext: false
       });
       expect(completed).toBe(true);
@@ -170,16 +172,12 @@ describe('ClientRelayNetwork', () => {
       );
       expect(values[1]).toEqual(
         expect.objectContaining({
-          items: [{ id: 1, name: 'Alice' }],
-          path: ['allUsersList'],
-          label: 'users'
+          incremental: [{ id: '0', items: [{ id: 1, name: 'Alice' }] }]
         })
       );
       expect(values[2]).toEqual(
         expect.objectContaining({
-          items: [{ id: 2, name: 'Bob' }],
-          path: ['allUsersList'],
-          label: 'users',
+          incremental: [{ id: '0', items: [{ id: 2, name: 'Bob' }] }],
           hasNext: false
         })
       );
@@ -215,9 +213,7 @@ describe('ClientRelayNetwork', () => {
       );
       expect(values[1]).toEqual(
         expect.objectContaining({
-          items: [{ id: 2, name: 'Bob' }],
-          path: ['allUsersList'],
-          label: 'users',
+          incremental: [{ id: '0', items: [{ id: 2, name: 'Bob' }] }],
           hasNext: false
         })
       );
@@ -245,9 +241,8 @@ describe('ClientRelayNetwork', () => {
       const observable = network.execute(createMockRequestParameters(), {}, {}, null);
       const { values, completed } = await subscribeAndCollect(observable);
 
-      // Bare { hasNext: false } is absorbed by the transformer (no data for Relay),
-      // completion comes from the multipart stream ending
-      expect(values).toHaveLength(2);
+      // All three parts are passed through as raw JSON (no transformation filtering)
+      expect(values).toHaveLength(3);
       expect(completed).toBe(true);
     });
 
@@ -300,16 +295,14 @@ describe('ClientRelayNetwork', () => {
       );
       expect(values[1]).toEqual(
         expect.objectContaining({
-          data: { name: 'Alice', email: 'alice@example.com' },
-          path: ['userById'],
-          label: 'details',
+          incremental: [{ id: '0', data: { name: 'Alice', email: 'alice@example.com' } }],
           hasNext: false
         })
       );
       expect(completed).toBe(true);
     });
 
-    it('emits initial payload without deferred fields first, then deferred data', async () => {
+    it('emits initial payload first, then deferred data', async () => {
       const parts = [
         {
           data: { userById: { id: 1, __typename: 'User' } },
@@ -331,19 +324,19 @@ describe('ClientRelayNetwork', () => {
       const observable = network.execute(createMockRequestParameters(), {}, {}, null);
       const { values, completed } = await subscribeAndCollect(observable);
 
-      // First emission: initial payload without deferred fields or pending
+      // First emission: initial payload (raw, including pending)
       expect(values[0]).toEqual(
         expect.objectContaining({
           data: { userById: { id: 1, __typename: 'User' } },
           hasNext: true
         })
       );
-      // Second emission: expanded deferred fragment data (Relay format)
+      // Second emission: raw incremental delivery payload
       expect(values[1]).toEqual(
         expect.objectContaining({
-          data: expect.objectContaining({ name: 'Alice', email: 'alice@example.com' }),
-          path: ['userById'],
-          label: 'UserDetails',
+          incremental: expect.arrayContaining([
+            expect.objectContaining({ data: expect.objectContaining({ name: 'Alice', email: 'alice@example.com' }) })
+          ]),
           hasNext: false
         })
       );
@@ -416,42 +409,29 @@ describe('ClientRelayNetwork', () => {
       const observable = network.execute(createMockRequestParameters(), {}, {}, null);
       const { values, completed } = await subscribeAndCollect(observable);
 
-      // Part 0: initial → { data, hasNext } (pending stripped)
-      // Part 1: incremental [id:0 items] → expanded to { items, path, label, hasNext }
-      // Part 2: incremental [id:1 data, id:0 items] → 2 expanded responses
-      // Part 3: incremental [id:2 data] → expanded
-      expect(values).toHaveLength(5);
+      // Raw multipart parts passed through — 4 parts, one per multipart chunk
+      expect(values).toHaveLength(4);
       expect(values[0]).toEqual(
         expect.objectContaining({ data: { allUsersList: [] }, hasNext: true })
       );
       expect(values[1]).toEqual(
         expect.objectContaining({
-          items: [{ id: 1 }],
-          path: ['allUsersList'],
-          label: 'users',
+          incremental: [{ id: '0', items: [{ id: 1 }] }],
           hasNext: true
         })
       );
-      // Part 2 has 2 incremental items expanded
       expect(values[2]).toEqual(
         expect.objectContaining({
-          data: { name: 'Alice', email: 'alice@example.com' },
-          path: ['allUsersList', 0],
-          label: 'UserDetails'
+          incremental: [
+            { id: '1', data: { name: 'Alice', email: 'alice@example.com' } },
+            { id: '0', items: [{ id: 2 }] }
+          ],
+          hasNext: true
         })
       );
       expect(values[3]).toEqual(
         expect.objectContaining({
-          items: [{ id: 2 }],
-          path: ['allUsersList'],
-          label: 'users'
-        })
-      );
-      expect(values[4]).toEqual(
-        expect.objectContaining({
-          data: { name: 'Bob', email: 'bob@example.com' },
-          path: ['allUsersList', 1],
-          label: 'UserDetails',
+          incremental: [{ id: '2', data: { name: 'Bob', email: 'bob@example.com' } }],
           hasNext: false
         })
       );
@@ -490,31 +470,25 @@ describe('ClientRelayNetwork', () => {
       const { values, completed } = await subscribeAndCollect(observable);
 
       expect(values).toHaveLength(4);
-      // Initial payload (pending stripped)
+      // Initial payload (raw, including pending)
       expect(values[0]).toEqual(
         expect.objectContaining({ data: { userById: { id: 1 } }, hasNext: true })
       );
-      // Deferred fragment with empty posts (Relay format)
+      // Deferred fragment with empty posts (raw incremental)
       expect(values[1]).toEqual(
         expect.objectContaining({
-          data: { posts: [] },
-          path: ['userById'],
-          label: 'UserWithPosts'
+          incremental: [{ id: '0', data: { posts: [] } }]
         })
       );
-      // Streamed post items (Relay format)
+      // Streamed post items (raw incremental)
       expect(values[2]).toEqual(
         expect.objectContaining({
-          items: [{ id: 101, title: 'Post 1' }],
-          path: ['userById', 'posts'],
-          label: 'PostItems'
+          incremental: [{ id: '1', items: [{ id: 101, title: 'Post 1' }] }]
         })
       );
       expect(values[3]).toEqual(
         expect.objectContaining({
-          items: [{ id: 102, title: 'Post 2' }],
-          path: ['userById', 'posts'],
-          label: 'PostItems',
+          incremental: [{ id: '1', items: [{ id: 102, title: 'Post 2' }] }],
           hasNext: false
         })
       );
@@ -574,17 +548,20 @@ describe('ClientRelayNetwork', () => {
       const observable = network.execute(createMockRequestParameters(), {}, {}, null);
       const { values, completed } = await subscribeAndCollect(observable);
 
-      // First value is the initial payload (pending stripped)
+      // First value is the initial payload (raw, including pending)
       expect(values[0]).toEqual(
         expect.objectContaining({ data: { userById: { id: 1 } }, hasNext: true })
       );
-      // Second value: expanded Relay format with error
+      // Second value: raw incremental delivery with error
       expect(values[1]).toEqual(
         expect.objectContaining({
-          data: null,
-          path: ['userById'],
-          label: 'details',
-          errors: [{ message: 'Deferred field failed' }],
+          incremental: [
+            {
+              id: '0',
+              data: null,
+              errors: [{ message: 'Deferred field failed' }]
+            }
+          ],
           hasNext: false
         })
       );
@@ -637,17 +614,17 @@ describe('ClientRelayNetwork', () => {
       const observable = network.execute(createMockRequestParameters(), {}, {}, null);
       const { values, completed } = await subscribeAndCollect(observable);
 
-      // With malformed JSON, the parser won't emit parts, stream closes → complete
+      // With malformed JSON, the parser won't emit parts, stream closes -> complete
       expect(completed).toBe(true);
       expect(values).toHaveLength(0);
     });
 
     it('propagates fetch rejection to sink.error for uncached queries', async () => {
-      const queryCache = new QueryCache(); // empty cache
+      const queryRegistry = new QueryRegistry(); // empty cache
 
       globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network failure'));
 
-      const network = createClientNetwork(queryCache);
+      const network = createClientNetwork(queryRegistry);
       const request = createMockRequestParameters({ id: 'fetch-reject-query' });
       const observable = network.execute(request, {}, {}, null);
       const { error, values } = await subscribeAndCollect(observable);
@@ -693,9 +670,9 @@ describe('ClientRelayNetwork', () => {
 
   describe('cache path', () => {
     it('returns Observable from cached query ReplaySubject (no fetch)', async () => {
-      const queryCache = new QueryCache();
+      const queryRegistry = new QueryRegistry();
       const operation = createMockOperationDescriptor({ id: 'cached-query' });
-      const query = queryCache.build(operation);
+      const query = queryRegistry.build(operation);
 
       // Pre-populate query with SSR data
       const ssrData = { data: { userById: { id: 1, name: 'Alice' } } } as GraphQLResponse;
@@ -704,7 +681,7 @@ describe('ClientRelayNetwork', () => {
 
       globalThis.fetch = vi.fn();
 
-      const network = createClientNetwork(queryCache);
+      const network = createClientNetwork(queryRegistry);
       const request = createMockRequestParameters({ id: 'cached-query' });
       const observable = network.execute(request, {}, {}, null);
       const { values, completed } = await subscribeAndCollect(observable);
@@ -717,12 +694,12 @@ describe('ClientRelayNetwork', () => {
     });
 
     it('falls back to multipartFetch when query is not in cache', async () => {
-      const queryCache = new QueryCache(); // empty cache
+      const queryRegistry = new QueryRegistry(); // empty cache
       const data = { data: { userById: { id: 1 } } };
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockJsonFetchResponse(data));
 
-      const network = createClientNetwork(queryCache);
+      const network = createClientNetwork(queryRegistry);
       const request = createMockRequestParameters({ id: 'uncached-query' });
       const observable = network.execute(request, {}, {}, null);
       const { values, completed } = await subscribeAndCollect(observable);
@@ -734,9 +711,9 @@ describe('ClientRelayNetwork', () => {
     });
 
     it('replays all previously-emitted incremental events to late subscriber', async () => {
-      const queryCache = new QueryCache();
+      const queryRegistry = new QueryRegistry();
       const operation = createMockOperationDescriptor({ id: 'replay-query' });
-      const query = queryCache.build(operation);
+      const query = queryRegistry.build(operation);
 
       // Simulate SSR: push multiple incremental events before subscribing
       const part1 = { data: { userById: { id: 1 } }, hasNext: true } as GraphQLResponse;
@@ -749,7 +726,7 @@ describe('ClientRelayNetwork', () => {
       query.next(part2);
       query.complete();
 
-      const network = createClientNetwork(queryCache);
+      const network = createClientNetwork(queryRegistry);
       const request = createMockRequestParameters({ id: 'replay-query' });
 
       // Subscribe after all events have been pushed
@@ -763,16 +740,16 @@ describe('ClientRelayNetwork', () => {
     });
 
     it('cached query with error replays error to subscriber', async () => {
-      const queryCache = new QueryCache();
+      const queryRegistry = new QueryRegistry();
       const operation = createMockOperationDescriptor({ id: 'error-cache-query' });
-      const query = queryCache.build(operation);
+      const query = queryRegistry.build(operation);
 
       // Simulate SSR: push data then error
       const part1 = { data: { userById: { id: 1 } }, hasNext: true } as GraphQLResponse;
       query.next(part1);
       query.error('Something went wrong');
 
-      const network = createClientNetwork(queryCache);
+      const network = createClientNetwork(queryRegistry);
       const request = createMockRequestParameters({ id: 'error-cache-query' });
       const observable = network.execute(request, {}, {}, null);
       const { values, error } = await subscribeAndCollect(observable);

@@ -2,7 +2,8 @@ import type { PreloadedQuery } from "#@/preload/types.js";
 import type { OperationType } from "relay-runtime";
 
 import { createMockOperationDescriptor } from "#@/__tests__/utils/index.js";
-import { createQueryCache } from "#@/query-cache.js";
+import { attachQueryRegistry } from "#@/environment.js";
+import { createQueryRegistry } from "#@/query-cache.js";
 import {
   dehydratePreloadedQuery,
   hydratePreloadedQuery,
@@ -44,6 +45,18 @@ describe("hydration", () => {
         operation,
       },
     } as unknown as PreloadedQuery<TQuery>;
+  }
+
+  /** Create a mock environment with a QueryRegistry attached */
+  function createMockEnvironmentWithRegistry(opts?: { isServer?: boolean }) {
+    const queryRegistry = createQueryRegistry(opts);
+    const mockEnvironment = {
+      getStore: vi.fn(),
+      getNetwork: vi.fn(),
+      options: undefined,
+    } as any;
+    attachQueryRegistry(mockEnvironment, queryRegistry);
+    return { mockEnvironment, queryRegistry };
   }
 
   describe("dehydratePreloadedQuery", () => {
@@ -122,14 +135,12 @@ describe("hydration", () => {
 
   describe("hydratePreloadedQuery", () => {
     let mockEnvironment: any;
-    let queryCache: ReturnType<typeof createQueryCache>;
+    let queryRegistry: ReturnType<typeof createQueryRegistry>;
 
     beforeEach(() => {
-      mockEnvironment = {
-        getStore: vi.fn(),
-        getNetwork: vi.fn(),
-      };
-      queryCache = createQueryCache({ isServer: false });
+      const result = createMockEnvironmentWithRegistry({ isServer: false });
+      mockEnvironment = result.mockEnvironment;
+      queryRegistry = result.queryRegistry;
       // Suppress console.log during tests
       vi.spyOn(console, "log").mockImplementation(() => {});
     });
@@ -141,11 +152,7 @@ describe("hydration", () => {
       });
       const dehydrated = dehydratePreloadedQuery(originalQuery);
 
-      const hydrated = hydratePreloadedQuery(
-        mockEnvironment,
-        dehydrated,
-        queryCache,
-      );
+      const hydrated = hydratePreloadedQuery(mockEnvironment, dehydrated);
 
       expect(hydrated.kind).toBe("PreloadedQuery");
       expect(hydrated.id).toBe("TestQuery");
@@ -157,11 +164,7 @@ describe("hydration", () => {
       const originalQuery = createMockStreamedPreloadedQuery();
       const dehydrated = dehydratePreloadedQuery(originalQuery);
 
-      const hydrated = hydratePreloadedQuery(
-        mockEnvironment,
-        dehydrated,
-        queryCache,
-      );
+      const hydrated = hydratePreloadedQuery(mockEnvironment, dehydrated);
 
       expect(typeof hydrated.dispose).toBe("function");
     });
@@ -170,11 +173,7 @@ describe("hydration", () => {
       const originalQuery = createMockStreamedPreloadedQuery();
       const dehydrated = dehydratePreloadedQuery(originalQuery);
 
-      const hydrated = hydratePreloadedQuery(
-        mockEnvironment,
-        dehydrated,
-        queryCache,
-      );
+      const hydrated = hydratePreloadedQuery(mockEnvironment, dehydrated);
 
       // Should not throw when called multiple times
       hydrated.dispose();
@@ -188,29 +187,25 @@ describe("hydration", () => {
       const originalQuery = createMockStreamedPreloadedQuery();
       const dehydrated = dehydratePreloadedQuery(originalQuery);
 
-      const hydrated = hydratePreloadedQuery(
-        mockEnvironment,
-        dehydrated,
-        queryCache,
-      );
+      const hydrated = hydratePreloadedQuery(mockEnvironment, dehydrated);
 
       expect(hydrated.isDisposed).toBe(false);
       hydrated.dispose();
       expect(hydrated.isDisposed).toBe(true);
     });
 
-    it("builds query in the query cache", () => {
+    it("builds query in the query registry", () => {
       const originalQuery = createMockStreamedPreloadedQuery({
         id: "CachedQuery",
         variables: { x: 1 },
       });
       const dehydrated = dehydratePreloadedQuery(originalQuery);
 
-      hydratePreloadedQuery(mockEnvironment, dehydrated, queryCache);
+      hydratePreloadedQuery(mockEnvironment, dehydrated);
 
-      // The query should now be in the cache
+      // The query should now be in the registry
       const queryKey = 'CachedQuery:{"x":1}';
-      expect(queryCache.get(queryKey)).toBeDefined();
+      expect(queryRegistry.get(queryKey)).toBeDefined();
     });
 
     it("preserves all metadata from dehydrated query", () => {
@@ -227,11 +222,7 @@ describe("hydration", () => {
       };
 
       const dehydrated = dehydratePreloadedQuery(originalQuery);
-      const hydrated = hydratePreloadedQuery(
-        mockEnvironment,
-        dehydrated,
-        queryCache,
-      );
+      const hydrated = hydratePreloadedQuery(mockEnvironment, dehydrated);
 
       expect(hydrated.fetchKey).toBe("unique-fetch-key");
       expect(hydrated.fetchPolicy).toBe("store-and-network");
@@ -242,8 +233,7 @@ describe("hydration", () => {
 
   describe("round-trip serialization", () => {
     it("preserves query identity through dehydrate/hydrate cycle", () => {
-      const queryCache = createQueryCache({ isServer: false });
-      const mockEnvironment = {} as any;
+      const { mockEnvironment } = createMockEnvironmentWithRegistry({ isServer: false });
 
       vi.spyOn(console, "log").mockImplementation(() => {});
 
@@ -253,11 +243,7 @@ describe("hydration", () => {
       });
 
       const dehydrated = dehydratePreloadedQuery(original);
-      const hydrated = hydratePreloadedQuery(
-        mockEnvironment,
-        dehydrated,
-        queryCache,
-      );
+      const hydrated = hydratePreloadedQuery(mockEnvironment, dehydrated);
 
       expect(hydrated.id).toBe(original.id);
       expect(hydrated.name).toBe(original.name);

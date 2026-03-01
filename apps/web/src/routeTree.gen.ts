@@ -9,21 +9,51 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DocsRouteImport } from './routes/docs'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FilmsIdRouteImport } from './routes/films.$id'
 import { Route as FilmIdRouteImport } from './routes/film.$id'
+import { Route as DocsWhatItDoesRouteImport } from './routes/docs/what-it-does'
+import { Route as DocsHowToUseRouteImport } from './routes/docs/how-to-use'
+import { Route as DocsDevSetupRouteImport } from './routes/docs/dev-setup'
 import { Route as PathlessLayoutNestedLayoutRouteImport } from './routes/_pathlessLayout/_nested-layout'
 import { Route as PathlessLayoutNestedLayoutRouteBRouteImport } from './routes/_pathlessLayout/_nested-layout/route-b'
 import { Route as PathlessLayoutNestedLayoutRouteARouteImport } from './routes/_pathlessLayout/_nested-layout/route-a'
 
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FilmsIdRoute = FilmsIdRouteImport.update({
+  id: '/films/$id',
+  path: '/films/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FilmIdRoute = FilmIdRouteImport.update({
   id: '/film/$id',
   path: '/film/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DocsWhatItDoesRoute = DocsWhatItDoesRouteImport.update({
+  id: '/what-it-does',
+  path: '/what-it-does',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsHowToUseRoute = DocsHowToUseRouteImport.update({
+  id: '/how-to-use',
+  path: '/how-to-use',
+  getParentRoute: () => DocsRoute,
+} as any)
+const DocsDevSetupRoute = DocsDevSetupRouteImport.update({
+  id: '/dev-setup',
+  path: '/dev-setup',
+  getParentRoute: () => DocsRoute,
 } as any)
 const PathlessLayoutNestedLayoutRoute =
   PathlessLayoutNestedLayoutRouteImport.update({
@@ -45,51 +75,105 @@ const PathlessLayoutNestedLayoutRouteARoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/docs': typeof DocsRouteWithChildren
+  '/docs/dev-setup': typeof DocsDevSetupRoute
+  '/docs/how-to-use': typeof DocsHowToUseRoute
+  '/docs/what-it-does': typeof DocsWhatItDoesRoute
   '/film/$id': typeof FilmIdRoute
+  '/films/$id': typeof FilmsIdRoute
   '/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/docs': typeof DocsRouteWithChildren
+  '/docs/dev-setup': typeof DocsDevSetupRoute
+  '/docs/how-to-use': typeof DocsHowToUseRoute
+  '/docs/what-it-does': typeof DocsWhatItDoesRoute
   '/film/$id': typeof FilmIdRoute
+  '/films/$id': typeof FilmsIdRoute
   '/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/docs': typeof DocsRouteWithChildren
   '/_pathlessLayout/_nested-layout': typeof PathlessLayoutNestedLayoutRouteWithChildren
+  '/docs/dev-setup': typeof DocsDevSetupRoute
+  '/docs/how-to-use': typeof DocsHowToUseRoute
+  '/docs/what-it-does': typeof DocsWhatItDoesRoute
   '/film/$id': typeof FilmIdRoute
+  '/films/$id': typeof FilmsIdRoute
   '/_pathlessLayout/_nested-layout/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/_pathlessLayout/_nested-layout/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/film/$id' | '/route-a' | '/route-b'
+  fullPaths:
+    | '/'
+    | '/docs'
+    | '/docs/dev-setup'
+    | '/docs/how-to-use'
+    | '/docs/what-it-does'
+    | '/film/$id'
+    | '/films/$id'
+    | '/route-a'
+    | '/route-b'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/film/$id' | '/route-a' | '/route-b'
+  to:
+    | '/'
+    | '/docs'
+    | '/docs/dev-setup'
+    | '/docs/how-to-use'
+    | '/docs/what-it-does'
+    | '/film/$id'
+    | '/films/$id'
+    | '/route-a'
+    | '/route-b'
   id:
     | '__root__'
     | '/'
+    | '/docs'
     | '/_pathlessLayout/_nested-layout'
+    | '/docs/dev-setup'
+    | '/docs/how-to-use'
+    | '/docs/what-it-does'
     | '/film/$id'
+    | '/films/$id'
     | '/_pathlessLayout/_nested-layout/route-a'
     | '/_pathlessLayout/_nested-layout/route-b'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DocsRoute: typeof DocsRouteWithChildren
   PathlessLayoutNestedLayoutRoute: typeof PathlessLayoutNestedLayoutRouteWithChildren
   FilmIdRoute: typeof FilmIdRoute
+  FilmsIdRoute: typeof FilmsIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/films/$id': {
+      id: '/films/$id'
+      path: '/films/$id'
+      fullPath: '/films/$id'
+      preLoaderRoute: typeof FilmsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/film/$id': {
@@ -98,6 +182,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/film/$id'
       preLoaderRoute: typeof FilmIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/docs/what-it-does': {
+      id: '/docs/what-it-does'
+      path: '/what-it-does'
+      fullPath: '/docs/what-it-does'
+      preLoaderRoute: typeof DocsWhatItDoesRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/how-to-use': {
+      id: '/docs/how-to-use'
+      path: '/how-to-use'
+      fullPath: '/docs/how-to-use'
+      preLoaderRoute: typeof DocsHowToUseRouteImport
+      parentRoute: typeof DocsRoute
+    }
+    '/docs/dev-setup': {
+      id: '/docs/dev-setup'
+      path: '/dev-setup'
+      fullPath: '/docs/dev-setup'
+      preLoaderRoute: typeof DocsDevSetupRouteImport
+      parentRoute: typeof DocsRoute
     }
     '/_pathlessLayout/_nested-layout': {
       id: '/_pathlessLayout/_nested-layout'
@@ -123,6 +228,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface DocsRouteChildren {
+  DocsDevSetupRoute: typeof DocsDevSetupRoute
+  DocsHowToUseRoute: typeof DocsHowToUseRoute
+  DocsWhatItDoesRoute: typeof DocsWhatItDoesRoute
+}
+
+const DocsRouteChildren: DocsRouteChildren = {
+  DocsDevSetupRoute: DocsDevSetupRoute,
+  DocsHowToUseRoute: DocsHowToUseRoute,
+  DocsWhatItDoesRoute: DocsWhatItDoesRoute,
+}
+
+const DocsRouteWithChildren = DocsRoute._addFileChildren(DocsRouteChildren)
+
 interface PathlessLayoutNestedLayoutRouteChildren {
   PathlessLayoutNestedLayoutRouteARoute: typeof PathlessLayoutNestedLayoutRouteARoute
   PathlessLayoutNestedLayoutRouteBRoute: typeof PathlessLayoutNestedLayoutRouteBRoute
@@ -143,8 +262,10 @@ const PathlessLayoutNestedLayoutRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DocsRoute: DocsRouteWithChildren,
   PathlessLayoutNestedLayoutRoute: PathlessLayoutNestedLayoutRouteWithChildren,
   FilmIdRoute: FilmIdRoute,
+  FilmsIdRoute: FilmsIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

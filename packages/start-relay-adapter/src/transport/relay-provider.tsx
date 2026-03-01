@@ -1,6 +1,5 @@
-import { DataTransportContext, WrapRelayProvider } from './wrap-relay-provider.jsx';
+import { WrapRelayProvider } from './wrap-relay-provider.jsx';
 
-import type { QueryCache } from '../query-cache.js';
 import type { Transport } from './types.js';
 import type { Environment } from 'relay-runtime';
 
@@ -9,38 +8,33 @@ const WrappedRelayProvider = WrapRelayProvider<{
 }>((props) => {
   const transport = props.context.transport;
 
-  if ('dispatchRequestStarted' in transport) {
-    if (!props.registerDispatchRequestStarted) {
-      throw new Error('registerDispatchRequestStarted is required in server');
+  if ('trackQuery' in transport) {
+    if (!props.registerTrackQuery) {
+      throw new Error('registerTrackQuery is required in server');
     }
-    props.registerDispatchRequestStarted(transport.dispatchRequestStarted);
+    props.registerTrackQuery(transport.trackQuery);
   } else {
-    if (!props.onQueryEvent || !props.rerunSimulatedQueries) {
-      throw new Error('onQueryEvent and rerunSimulatedQueries are required in client');
+    if (!props.onQueryEvent || !props.onStreamClosed) {
+      throw new Error('onQueryEvent and onStreamClosed are required in client');
     }
 
-    transport.onQueryEvent = props.onQueryEvent;
-    transport.rerunSimulatedQueries = props.rerunSimulatedQueries;
+    transport.subscribeToEvents({
+      next: props.onQueryEvent,
+      complete: props.onStreamClosed,
+    });
+    transport.onStreamClosed = props.onStreamClosed;
   }
-  return (
-    <DataTransportContext.Provider value={transport}>
-      {props.children}
-    </DataTransportContext.Provider>
-  );
+  return props.children;
 });
 
 export function RelayProvider(props: {
   environment: Environment;
-  queryCache: QueryCache;
   context: { transport: Transport };
   children: React.ReactNode;
 }) {
   return (
     <WrappedRelayProvider
-      getEnvironment={() => ({
-        environment: props.environment,
-        queryCache: props.queryCache
-      })}
+      getEnvironment={() => props.environment}
       context={props.context}
     >
       {props.children}

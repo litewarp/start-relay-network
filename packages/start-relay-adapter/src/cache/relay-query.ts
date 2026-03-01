@@ -1,4 +1,4 @@
-import { buildQueryKey, buildUniqueKey } from './query-utils';
+import { buildQueryKey } from './query-utils';
 
 import type { QueryProgressEvent } from '#@/transport/types.js';
 import type {
@@ -10,20 +10,14 @@ import type {
 
 import runtime from 'relay-runtime';
 
-export class RelayQuery implements Subscribable<QueryProgressEvent> {
-  private _uuid: string;
-  private _operation: OperationDescriptor;
+export class QueryRecord implements Subscribable<QueryProgressEvent> {
+  readonly operation: OperationDescriptor;
+  readonly queryKey: string;
   private _replaySubject: ReplaySubject<QueryProgressEvent>;
-  private _subscription: runtime.Subscription | null = null;
-  queryKey: string;
-
-  isComplete = false;
-  hasData = false;
 
   constructor(operation: OperationDescriptor) {
-    this._operation = operation;
-    this.queryKey = buildQueryKey(this._operation);
-    this._uuid = buildUniqueKey(this.queryKey);
+    this.operation = operation;
+    this.queryKey = buildQueryKey(this.operation);
     this._replaySubject = new runtime.ReplaySubject<QueryProgressEvent>();
   }
 
@@ -59,11 +53,12 @@ export class RelayQuery implements Subscribable<QueryProgressEvent> {
     });
   }
 
-  unsubscribe(): void {
+  dispose(): void {
     this._replaySubject.complete();
   }
-
-  getOperation(): OperationDescriptor {
-    return this._operation;
-  }
 }
+
+/** @deprecated Use `QueryRecord` instead */
+export const RelayQuery = QueryRecord;
+/** @deprecated Use `QueryRecord` instead */
+export type RelayQuery = QueryRecord;

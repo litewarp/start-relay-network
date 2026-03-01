@@ -4,7 +4,7 @@ import {
   flushMicrotasks
 } from '../utils/index.js';
 
-import { RelayQuery } from '#@/cache/relay-query.js';
+import { QueryRecord } from '#@/cache/relay-query.js';
 import { ClientTransport } from '#@/transport/client.js';
 import { transportSerializationAdapter } from '#@/transport/serialization-adapter.js';
 import { ServerTransport } from '#@/transport/server.js';
@@ -29,20 +29,20 @@ describe('ServerTransport', () => {
     });
   });
 
-  describe('dispatchRequestStarted', () => {
+  describe('trackQuery', () => {
     it('enqueues started event to stream', async () => {
       const transport = new ServerTransport();
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
-      const query = new RelayQuery(operation);
+      const query = new QueryRecord(operation);
 
-      transport.dispatchRequestStarted({
+      transport.trackQuery({
         event: { type: 'started', id: query.queryKey, operation },
         query
       });
 
       // Complete the query to allow stream to close
       query.complete();
-      transport.closeOnceFinished();
+      transport.drainAndClose();
 
       const events = await collectStream(transport.stream);
       expect(events[0]).toEqual({
@@ -55,9 +55,9 @@ describe('ServerTransport', () => {
     it('enqueues progress events from query subscription', async () => {
       const transport = new ServerTransport();
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
-      const query = new RelayQuery(operation);
+      const query = new QueryRecord(operation);
 
-      transport.dispatchRequestStarted({
+      transport.trackQuery({
         event: { type: 'started', id: query.queryKey, operation },
         query
       });
@@ -65,11 +65,11 @@ describe('ServerTransport', () => {
       query.next({ data: { user: { id: '1' } } });
       query.next({ data: { user: { id: '1', name: 'Alice' } } });
       query.complete();
-      transport.closeOnceFinished();
+      transport.drainAndClose();
 
       const events = await collectStream(transport.stream);
 
-      // started + 2 next (complete triggers finalize but RelayQuery.subscribe
+      // started + 2 next (complete triggers finalize but QueryRecord.subscribe
       // only forwards 'next' type events to observer.next; 'complete' triggers observer.complete())
       expect(events).toHaveLength(3);
       expect(events[0].type).toBe('started');
@@ -89,14 +89,14 @@ describe('ServerTransport', () => {
         variables: {}
       });
 
-      const query1 = new RelayQuery(operation1);
-      const query2 = new RelayQuery(operation2);
+      const query1 = new QueryRecord(operation1);
+      const query2 = new QueryRecord(operation2);
 
-      transport.dispatchRequestStarted({
+      transport.trackQuery({
         event: { type: 'started', id: query1.queryKey, operation: operation1 },
         query: query1
       });
-      transport.dispatchRequestStarted({
+      transport.trackQuery({
         event: { type: 'started', id: query2.queryKey, operation: operation2 },
         query: query2
       });
@@ -105,7 +105,7 @@ describe('ServerTransport', () => {
       query2.next({ data: { result: 2 } });
       query1.complete();
       query2.complete();
-      transport.closeOnceFinished();
+      transport.drainAndClose();
 
       const events = await collectStream(transport.stream);
 
@@ -114,28 +114,10 @@ describe('ServerTransport', () => {
     });
   });
 
-  describe('streamValue', () => {
-    it('enqueues value event to stream', async () => {
-      const transport = new ServerTransport();
-
-      transport.streamValue('test-id', { custom: 'data' });
-      transport.closeOnceFinished();
-
-      const events = await collectStream(transport.stream);
-
-      expect(events).toHaveLength(1);
-      expect(events[0]).toEqual({
-        type: 'value',
-        id: 'test-id',
-        value: { custom: 'data' }
-      });
-    });
-  });
-
-  describe('closeOnceFinished', () => {
+  describe('drainAndClose', () => {
     it('closes stream immediately when no ongoing requests', async () => {
       const transport = new ServerTransport();
-      transport.closeOnceFinished();
+      transport.drainAndClose();
 
       const events = await collectStream(transport.stream);
       expect(events).toEqual([]);
@@ -144,14 +126,14 @@ describe('ServerTransport', () => {
     it('waits for ongoing requests to complete before closing', async () => {
       const transport = new ServerTransport();
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
-      const query = new RelayQuery(operation);
+      const query = new QueryRecord(operation);
 
-      transport.dispatchRequestStarted({
+      transport.trackQuery({
         event: { type: 'started', id: query.queryKey, operation },
         query
       });
 
-      transport.closeOnceFinished();
+      transport.drainAndClose();
 
       // Stream should not close yet - query is still ongoing
       // Complete the query
@@ -190,16 +172,16 @@ describe('ClientTransport', () => {
       const client = new ClientTransport(stream);
       await flushMicrotasks();
 
-      // Events should be buffered
+      // Events should be replayed via ReplaySubject
       const received: any[] = [];
-      client.onQueryEvent = (event) => received.push(event);
+      client.subscribeToEvents({ next: (event) => received.push(event) });
 
       expect(received).toHaveLength(3);
     });
   });
 
-  describe('onQueryEvent', () => {
-    it('receives buffered events when set', async () => {
+  describe('subscribeToEvents', () => {
+    it('receives replayed events when subscribing after consumption', async () => {
       const events = [
         { type: 'started' as const, id: 'q1', operation: {} as any },
         { type: 'next' as const, id: 'q1', data: { x: 1 } }
@@ -218,12 +200,12 @@ describe('ClientTransport', () => {
       await flushMicrotasks();
 
       const received: any[] = [];
-      client.onQueryEvent = (event) => received.push(event);
+      client.subscribeToEvents({ next: (event) => received.push(event) });
 
       expect(received).toEqual(events);
     });
 
-    it('receives new events in real-time after set', async () => {
+    it('receives new events in real-time after subscribing', async () => {
       let controller!: ReadableStreamDefaultController;
       const stream = new ReadableStream({
         start(c) {
@@ -235,9 +217,9 @@ describe('ClientTransport', () => {
       await flushMicrotasks();
 
       const received: any[] = [];
-      client.onQueryEvent = (event) => received.push(event);
+      client.subscribeToEvents({ next: (event) => received.push(event) });
 
-      // Enqueue after callback is set
+      // Enqueue after subscribing
       controller.enqueue({ type: 'started', id: 'q1', operation: {} });
       await flushMicrotasks();
 
@@ -248,76 +230,6 @@ describe('ClientTransport', () => {
     });
   });
 
-  describe('value streaming', () => {
-    it('stores and retrieves streamed values', async () => {
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue({ type: 'value', id: ':id1:', value: 'test-value' });
-          controller.close();
-        }
-      });
-
-      const client = new ClientTransport(stream);
-      await flushMicrotasks();
-
-      expect(client.getStreamedValue(':id1:')).toBe('test-value');
-    });
-
-    it('returns undefined for non-existent values', async () => {
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.close();
-        }
-      });
-
-      const client = new ClientTransport(stream);
-      await flushMicrotasks();
-
-      expect(client.getStreamedValue('non-existent')).toBeUndefined();
-    });
-
-    it('can delete streamed values', async () => {
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue({ type: 'value', id: 'val1', value: 'data' });
-          controller.close();
-        }
-      });
-
-      const client = new ClientTransport(stream);
-      await flushMicrotasks();
-
-      expect(client.getStreamedValue('val1')).toBe('data');
-      client.deleteStreamedValue('val1');
-      expect(client.getStreamedValue('val1')).toBeUndefined();
-    });
-
-    it('separates value events from query events', async () => {
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue({ type: 'value', id: 'v1', value: 'stored' });
-          controller.enqueue({
-            type: 'started',
-            id: 'q1',
-            operation: {} as any
-          });
-          controller.close();
-        }
-      });
-
-      const client = new ClientTransport(stream);
-      await flushMicrotasks();
-
-      const queryEvents: any[] = [];
-      client.onQueryEvent = (event) => queryEvents.push(event);
-
-      // Value should be stored
-      expect(client.getStreamedValue('v1')).toBe('stored');
-      // Only query event should be emitted
-      expect(queryEvents).toHaveLength(1);
-      expect(queryEvents[0].type).toBe('started');
-    });
-  });
 });
 
 describe('transportSerializationAdapter', () => {

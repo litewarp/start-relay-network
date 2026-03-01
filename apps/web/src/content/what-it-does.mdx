@@ -1,0 +1,108 @@
+# What is start-relay-network?
+
+**`@litewarp/start-relay-network`** is a TanStack Start adapter for React Relay that enables
+full SSR streaming support. It bridges the gap between Relay's data-fetching model and
+TanStack Start's server-rendering pipeline, so your GraphQL queries are fetched on the server,
+streamed to the client, and hydrated seamlessly — with no manual wiring needed.
+
+## Why does this exist?
+
+React Relay has first-class support for Suspense and streaming, but it was designed around
+Meta's internal infrastructure. Integrating it with a modern SSR framework like TanStack Start
+requires solving several problems:
+
+- **Server-side query execution** — Relay queries need to run during SSR, not just on the client.
+- **Hydration** — Query results fetched on the server must transfer to the client's Relay store without refetching.
+- **Streaming** — Deferred fragments (`@defer`) should stream incrementally, not block the initial response.
+- **Router integration** — Preloaded queries must flow through the router's loader system.
+
+`start-relay-network` solves all of these in a single package.
+
+## Architecture overview
+
+### Dual-mode Relay environment
+
+The package creates a Relay environment that works on both server and client using
+`createRelayEnvironment()`. A single configuration object defines the GraphQL endpoint,
+fetch options, middleware, and response transforms — the function returns the appropriate
+environment for the current runtime.
+
+```tsx
+import { createRelayEnvironment } from "@litewarp/start-relay-network";
+import { createIsomorphicFn } from "@tanstack/react-start";
+
+export const getRelayEnvironment = createIsomorphicFn()
+  .client(() => createRelayEnvironment({ url, getFetchOptions, isServer: false }))
+  .server(() => createRelayEnvironment({ url, getFetchOptions, isServer: true }));
+```
+
+### Query preloading
+
+`createRelayEnvironment()` returns a `preloadQuery` function alongside the environment.
+On the server, this builds an operation descriptor and registers it in an internal
+**QueryRegistry** for streaming. On the client, it delegates to Relay's standard
+`loadQuery` with client-side caching.
+
+You use it directly in TanStack Router loaders:
+
+```tsx
+export const Route = createFileRoute("/")({
+  loader: ({ context }) => {
+    const preloadedQuery = context.preloadQuery(query, {});
+    return { preloadedQuery };
+  },
+});
+```
+
+### Router integration
+
+`integrateRelayWithRouter()` connects everything:
+
+- Wraps the router's inner component with Relay's `RelayEnvironmentProvider`
+- Configures hydration/dehydration hooks so query data transfers from server to client
+- Manages the transport layer (ServerTransport / ClientTransport) automatically
+
+```tsx
+integrateRelayWithRouter({ router, environment });
+```
+
+No manual `<RelayEnvironmentProvider>` setup is needed.
+
+### Response transforms
+
+GraphQL servers use different wire formats for incremental delivery (`@defer`, `@stream`).
+The package provides **response transforms** that normalize server responses into the format
+Relay expects:
+
+| Transform | Use case |
+|---|---|
+| `grafastRelayTransform` | PostGraphile v5 / Grafast servers (v16 incremental spec) |
+| `incrementalDeliveryTransform` | Servers using the 2023 incremental delivery spec |
+
+Transforms are factories — each network request gets a fresh instance to avoid state leakage
+across concurrent requests.
+
+### Middleware
+
+Middleware functions let you intercept and modify every GraphQL request before it's sent.
+Each middleware receives a `RequestContext` (containing the request, variables, fetch options,
+and URL) and returns a modified context:
+
+```tsx
+const authMiddleware: RelayMiddleware = async (ctx) => {
+  const token = await getAuthToken();
+  ctx.fetchOptions.headers = {
+    ...ctx.fetchOptions.headers,
+    Authorization: `Bearer ${token}`,
+  };
+  return ctx;
+};
+```
+
+## Package exports
+
+| Export path | What it provides |
+|---|---|
+| `@litewarp/start-relay-network` | `createRelayEnvironment`, `integrateRelayWithRouter`, `RelayRouterContext` type |
+| `.../transforms/grafast-relay` | `grafastRelayTransform` for PostGraphile/Grafast |
+| `.../transforms/incremental-delivery` | `incrementalDeliveryTransform` for 2023 spec servers |

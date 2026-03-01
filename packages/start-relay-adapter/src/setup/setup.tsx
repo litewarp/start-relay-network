@@ -2,18 +2,18 @@ import type { Transport } from "#@/transport/types.js";
 import type { AnyRouter } from "@tanstack/react-router";
 import { Fragment } from "react/jsx-runtime";
 import {
-  type RouterSsrRelayOptions,
-  setCoreRouterRelayIntegration,
+  type RouterRelayOptions,
+  configureRouterRelay,
 } from "./core";
 import { RelayProvider } from "#@/transport/relay-provider.js";
 
-export function setupRouterRelayIntegration<TRouter extends AnyRouter>(
-  opts: Omit<RouterSsrRelayOptions<TRouter>, "providerContext">,
+export function integrateRelayWithRouter<TRouter extends AnyRouter>(
+  opts: Omit<RouterRelayOptions<TRouter>, "providerContext">,
 ) {
   // oxlint-disable-next-line typescript/no-unsafe-type-assertion
   const providerContext = {} as { transport: Transport };
 
-  setCoreRouterRelayIntegration<TRouter>({ ...opts, providerContext });
+  configureRouterRelay<TRouter>({ ...opts, providerContext });
 
   const PreviousInnerWrap = opts.router.options.InnerWrap ?? Fragment;
 
@@ -21,7 +21,6 @@ export function setupRouterRelayIntegration<TRouter extends AnyRouter>(
     return (
       <RelayProvider
         environment={opts.environment}
-        queryCache={opts.queryCache}
         context={providerContext}
       >
         <PreviousInnerWrap>{children}</PreviousInnerWrap>
@@ -29,3 +28,6 @@ export function setupRouterRelayIntegration<TRouter extends AnyRouter>(
     );
   };
 }
+
+/** @deprecated Use `integrateRelayWithRouter` instead */
+export const setupRouterRelayIntegration = integrateRelayWithRouter;

@@ -4,6 +4,7 @@ import { PostGraphileRelayPreset } from 'postgraphile/presets/relay';
 import { PgSimplifyInflectionPreset } from '@graphile/simplify-inflection';
 import { StreamDeferPlugin } from 'postgraphile/graphile-build';
 import { PgManyToManyPreset } from '@graphile-contrib/pg-many-to-many';
+import { EnvironmentPlugin } from './plugins/environment-plugin.js';
 
 const IS_DEV = process.env.GRAPHILE_ENV === 'development';
 const HOST = process.env.HOST ?? 'localhost';
@@ -16,7 +17,7 @@ const preset = {
     PgSimplifyInflectionPreset,
     PgManyToManyPreset,
   ],
-  plugins: [StreamDeferPlugin],
+  plugins: [StreamDeferPlugin, EnvironmentPlugin],
   grafserv: {
     host: HOST,
     port: PORT,
@@ -27,6 +28,13 @@ const preset = {
   },
   grafast: {
     explain: IS_DEV,
+    context(requestContext, _args) {
+      const req = requestContext.expressv4?.req ?? requestContext.node?.req;
+      const header = req?.headers?.['x-relay-environment'];
+      return {
+        relayEnvironment: typeof header === 'string' ? header : undefined,
+      };
+    },
   },
   gather: {
     installWatchFixtures: IS_DEV,

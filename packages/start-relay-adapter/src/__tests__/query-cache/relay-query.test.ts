@@ -1,9 +1,9 @@
 import { createMockOperationDescriptor, createMockGraphQLResponse } from '../utils/index.js';
 
-import { RelayQuery } from '#@/cache/relay-query.js';
+import { QueryRecord } from '#@/cache/relay-query.js';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-describe('RelayQuery', () => {
+describe('QueryRecord', () => {
   let originalDateNow: typeof Date.now;
 
   beforeEach(() => {
@@ -16,34 +16,32 @@ describe('RelayQuery', () => {
   });
 
   describe('constructor', () => {
-    it('creates a RelayQuery from an operation descriptor', () => {
+    it('creates a QueryRecord from an operation descriptor', () => {
       const operation = createMockOperationDescriptor({
         id: 'TestQuery',
         variables: { id: '123' }
       });
 
-      const query = new RelayQuery(operation);
+      const query = new QueryRecord(operation);
 
       expect(query.queryKey).toBe('TestQuery:{"id":"123"}');
-      expect(query.isComplete).toBe(false);
-      expect(query.hasData).toBe(false);
     });
 
-    it('returns the operation descriptor via getOperation', () => {
+    it('exposes the operation descriptor via public readonly field', () => {
       const operation = createMockOperationDescriptor({
         id: 'MyQuery',
         variables: {}
       });
 
-      const query = new RelayQuery(operation);
-      expect(query.getOperation()).toBe(operation);
+      const query = new QueryRecord(operation);
+      expect(query.operation).toBe(operation);
     });
   });
 
   describe('next', () => {
     it('emits data to subscribers', () => {
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
-      const query = new RelayQuery(operation);
+      const query = new QueryRecord(operation);
       const mockNext = vi.fn();
 
       query.subscribe({ next: mockNext });
@@ -61,7 +59,7 @@ describe('RelayQuery', () => {
 
     it('replays data to late subscribers', () => {
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
-      const query = new RelayQuery(operation);
+      const query = new QueryRecord(operation);
 
       // Emit data before subscribing
       const response1 = createMockGraphQLResponse({ count: 1 });
@@ -90,7 +88,7 @@ describe('RelayQuery', () => {
   describe('complete', () => {
     it('signals completion to subscribers', () => {
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
-      const query = new RelayQuery(operation);
+      const query = new QueryRecord(operation);
       const mockComplete = vi.fn();
 
       query.subscribe({ complete: mockComplete });
@@ -101,10 +99,10 @@ describe('RelayQuery', () => {
 
     it('calls observer.complete() when complete event is received', () => {
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
-      const query = new RelayQuery(operation);
+      const query = new QueryRecord(operation);
       const events: string[] = [];
 
-      // Note: The RelayQuery.subscribe() wrapper intercepts events
+      // Note: The QueryRecord.subscribe() wrapper intercepts events
       // and converts them to observer method calls. When it receives
       // a 'complete' type event, it calls observer.complete() - NOT observer.next()
       query.subscribe({
@@ -122,7 +120,7 @@ describe('RelayQuery', () => {
   describe('error', () => {
     it('signals error to subscribers', () => {
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
-      const query = new RelayQuery(operation);
+      const query = new QueryRecord(operation);
       const mockError = vi.fn();
 
       query.subscribe({ error: mockError });
@@ -134,10 +132,10 @@ describe('RelayQuery', () => {
 
     it('calls observer.error() when error event is received', () => {
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
-      const query = new RelayQuery(operation);
+      const query = new QueryRecord(operation);
       const events: string[] = [];
 
-      // Note: The RelayQuery.subscribe() wrapper intercepts events
+      // Note: The QueryRecord.subscribe() wrapper intercepts events
       // and converts them to observer method calls. When it receives
       // an 'error' type event, it calls observer.error() - NOT observer.next()
       query.subscribe({
@@ -155,7 +153,7 @@ describe('RelayQuery', () => {
   describe('subscribe', () => {
     it('returns a subscription object', () => {
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
-      const query = new RelayQuery(operation);
+      const query = new QueryRecord(operation);
 
       const subscription = query.subscribe({});
 
@@ -165,7 +163,7 @@ describe('RelayQuery', () => {
 
     it('supports multiple concurrent subscribers', () => {
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
-      const query = new RelayQuery(operation);
+      const query = new QueryRecord(operation);
 
       const mockNext1 = vi.fn();
       const mockNext2 = vi.fn();
@@ -181,14 +179,14 @@ describe('RelayQuery', () => {
     });
   });
 
-  describe('unsubscribe', () => {
+  describe('dispose', () => {
     it('completes the internal replay subject', () => {
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
-      const query = new RelayQuery(operation);
+      const query = new QueryRecord(operation);
       let completeCalled = false;
 
-      // The wrapper in RelayQuery.subscribe() only passes through events
-      // of type 'next'. When unsubscribe() calls _replaySubject.complete(),
+      // The wrapper in QueryRecord.subscribe() only passes through events
+      // of type 'next'. When dispose() calls _replaySubject.complete(),
       // the ReplaySubject internally calls the subscriber's complete callback
       // but this goes through the wrapper's internal subscriber, not our observer.
       // So we verify the query state changes instead.
@@ -198,7 +196,7 @@ describe('RelayQuery', () => {
         }
       });
 
-      query.unsubscribe();
+      query.dispose();
 
       // The ReplaySubject.complete() triggers the internal subscription's
       // cleanup but does NOT call the observer's complete() because

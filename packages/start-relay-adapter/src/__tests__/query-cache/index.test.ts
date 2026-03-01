@@ -1,10 +1,10 @@
 import { createMockOperationDescriptor, createMockGraphQLResponse } from '../utils/index.js';
 
-import { RelayQuery } from '#@/cache/relay-query.js';
-import { QueryCache, createQueryCache } from '#@/query-cache.js';
+import { QueryRecord } from '#@/cache/relay-query.js';
+import { QueryRegistry, createQueryRegistry } from '#@/query-cache.js';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-describe('QueryCache', () => {
+describe('QueryRegistry', () => {
   let originalDateNow: typeof Date.now;
 
   beforeEach(() => {
@@ -16,52 +16,52 @@ describe('QueryCache', () => {
     Date.now = originalDateNow;
   });
 
-  describe('createQueryCache', () => {
-    it('creates a QueryCache instance', () => {
-      const cache = createQueryCache();
-      expect(cache).toBeInstanceOf(QueryCache);
+  describe('createQueryRegistry', () => {
+    it('creates a QueryRegistry instance', () => {
+      const registry = createQueryRegistry();
+      expect(registry).toBeInstanceOf(QueryRegistry);
     });
 
-    it('creates a server-side cache when isServer is true', () => {
-      const cache = createQueryCache({ isServer: true });
-      expect(cache._isServer).toBe(true);
+    it('creates a server-side registry when isServer is true', () => {
+      const registry = createQueryRegistry({ isServer: true });
+      expect(registry._isServer).toBe(true);
     });
 
-    it('creates a client-side cache when isServer is false', () => {
-      const cache = createQueryCache({ isServer: false });
-      expect(cache._isServer).toBe(false);
+    it('creates a client-side registry when isServer is false', () => {
+      const registry = createQueryRegistry({ isServer: false });
+      expect(registry._isServer).toBe(false);
     });
   });
 
   describe('build', () => {
-    it('creates a new RelayQuery for a new operation', () => {
-      const cache = createQueryCache();
+    it('creates a new QueryRecord for a new operation', () => {
+      const registry = createQueryRegistry();
       const operation = createMockOperationDescriptor({
         id: 'TestQuery',
         variables: { id: '1' }
       });
 
-      const query = cache.build(operation);
+      const query = registry.build(operation);
 
-      expect(query).toBeInstanceOf(RelayQuery);
+      expect(query).toBeInstanceOf(QueryRecord);
       expect(query.queryKey).toBe('TestQuery:{"id":"1"}');
     });
 
     it('returns existing query if operation already cached', () => {
-      const cache = createQueryCache();
+      const registry = createQueryRegistry();
       const operation = createMockOperationDescriptor({
         id: 'TestQuery',
         variables: { id: '1' }
       });
 
-      const query1 = cache.build(operation);
-      const query2 = cache.build(operation);
+      const query1 = registry.build(operation);
+      const query2 = registry.build(operation);
 
       expect(query1).toBe(query2);
     });
 
     it('creates different queries for different variables', () => {
-      const cache = createQueryCache();
+      const registry = createQueryRegistry();
       const operation1 = createMockOperationDescriptor({
         id: 'TestQuery',
         variables: { id: '1' }
@@ -71,41 +71,41 @@ describe('QueryCache', () => {
         variables: { id: '2' }
       });
 
-      const query1 = cache.build(operation1);
-      const query2 = cache.build(operation2);
+      const query1 = registry.build(operation1);
+      const query2 = registry.build(operation2);
 
       expect(query1).not.toBe(query2);
     });
 
     it('stores the query in the queries map', () => {
-      const cache = createQueryCache();
+      const registry = createQueryRegistry();
       const operation = createMockOperationDescriptor({
         id: 'TestQuery',
         variables: {}
       });
 
-      const query = cache.build(operation);
+      const query = registry.build(operation);
 
-      expect(cache.queries.has(query.queryKey)).toBe(true);
-      expect(cache.queries.get(query.queryKey)).toBe(query);
+      expect(registry.queries.has(query.queryKey)).toBe(true);
+      expect(registry.queries.get(query.queryKey)).toBe(query);
     });
   });
 
   describe('get', () => {
     it('returns undefined for non-existent query', () => {
-      const cache = createQueryCache();
-      expect(cache.get('non-existent-query')).toBeUndefined();
+      const registry = createQueryRegistry();
+      expect(registry.get('non-existent-query')).toBeUndefined();
     });
 
     it('returns the query for an existing query key', () => {
-      const cache = createQueryCache();
+      const registry = createQueryRegistry();
       const operation = createMockOperationDescriptor({
         id: 'TestQuery',
         variables: {}
       });
 
-      const query = cache.build(operation);
-      const retrieved = cache.get(query.queryKey);
+      const query = registry.build(operation);
+      const retrieved = registry.get(query.queryKey);
 
       expect(retrieved).toBe(query);
     });
@@ -113,11 +113,11 @@ describe('QueryCache', () => {
 
   describe('onQueryStarted (client-side)', () => {
     it('throws error when called on server', () => {
-      const cache = createQueryCache({ isServer: true });
+      const registry = createQueryRegistry({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
 
       expect(() =>
-        cache.onQueryStarted({
+        registry.onQueryStarted({
           type: 'started',
           id: 'TestQuery:{}',
           operation
@@ -126,27 +126,27 @@ describe('QueryCache', () => {
     });
 
     it('creates/gets a query and stores it for simulated streaming', () => {
-      const cache = createQueryCache({ isServer: false });
+      const registry = createQueryRegistry({ isServer: false });
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
       const queryId = 'TestQuery:{}';
 
-      cache.onQueryStarted({
+      registry.onQueryStarted({
         type: 'started',
         id: queryId,
         operation
       });
 
       // The query should be retrievable
-      expect(cache.get(queryId)).toBeDefined();
+      expect(registry.get(queryId)).toBeDefined();
     });
   });
 
   describe('onQueryProgress (client-side)', () => {
     it('throws error when called on server', () => {
-      const cache = createQueryCache({ isServer: true });
+      const registry = createQueryRegistry({ isServer: true });
 
       expect(() =>
-        cache.onQueryProgress({
+        registry.onQueryProgress({
           type: 'complete',
           id: 'test'
         })
@@ -154,28 +154,28 @@ describe('QueryCache', () => {
     });
 
     it('throws error when query not found', () => {
-      const cache = createQueryCache({ isServer: false });
+      const registry = createQueryRegistry({ isServer: false });
 
       expect(() =>
-        cache.onQueryProgress({
+        registry.onQueryProgress({
           type: 'complete',
           id: 'non-existent'
         })
-      ).toThrow('RelayQuery with id non-existent not found');
+      ).toThrow('QueryRecord with id non-existent not found');
     });
 
     it('forwards next events to the query', () => {
-      const cache = createQueryCache({ isServer: false });
+      const registry = createQueryRegistry({ isServer: false });
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
       const queryId = 'TestQuery:{}';
 
-      cache.onQueryStarted({ type: 'started', id: queryId, operation });
+      registry.onQueryStarted({ type: 'started', id: queryId, operation });
 
       const mockNext = vi.fn();
-      cache.get(queryId)!.subscribe({ next: mockNext });
+      registry.get(queryId)!.subscribe({ next: mockNext });
 
       const response = createMockGraphQLResponse({ user: { id: '1' } });
-      cache.onQueryProgress({ type: 'next', id: queryId, data: response });
+      registry.onQueryProgress({ type: 'next', id: queryId, data: response });
 
       expect(mockNext).toHaveBeenCalledWith({
         type: 'next',
@@ -185,31 +185,31 @@ describe('QueryCache', () => {
     });
 
     it('forwards complete events and removes from simulated queries', () => {
-      const cache = createQueryCache({ isServer: false });
+      const registry = createQueryRegistry({ isServer: false });
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
       const queryId = 'TestQuery:{}';
 
-      cache.onQueryStarted({ type: 'started', id: queryId, operation });
+      registry.onQueryStarted({ type: 'started', id: queryId, operation });
 
       const mockComplete = vi.fn();
-      cache.get(queryId)!.subscribe({ complete: mockComplete });
+      registry.get(queryId)!.subscribe({ complete: mockComplete });
 
-      cache.onQueryProgress({ type: 'complete', id: queryId });
+      registry.onQueryProgress({ type: 'complete', id: queryId });
 
       expect(mockComplete).toHaveBeenCalled();
     });
 
     it('forwards error events and removes from simulated queries', () => {
-      const cache = createQueryCache({ isServer: false });
+      const registry = createQueryRegistry({ isServer: false });
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
       const queryId = 'TestQuery:{}';
 
-      cache.onQueryStarted({ type: 'started', id: queryId, operation });
+      registry.onQueryStarted({ type: 'started', id: queryId, operation });
 
       const mockError = vi.fn();
-      cache.get(queryId)!.subscribe({ error: mockError });
+      registry.get(queryId)!.subscribe({ error: mockError });
 
-      cache.onQueryProgress({
+      registry.onQueryProgress({
         type: 'error',
         id: queryId,
         error: 'test error'
@@ -220,15 +220,15 @@ describe('QueryCache', () => {
   });
 
   describe('watchQuery (server-side)', () => {
-    it('pushes query started event to watch queue', () => {
-      const cache = createQueryCache({ isServer: true });
+    it('pushes query started event to subscribeToQueries observer', () => {
+      const registry = createQueryRegistry({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
-      const query = cache.build(operation);
+      const query = registry.build(operation);
 
-      const events: Array<{ event: any; query: RelayQuery }> = [];
-      cache.watchQueryQueue.register((item) => events.push(item));
+      const events: Array<{ event: any; query: QueryRecord }> = [];
+      registry.subscribeToQueries({ next: (item) => events.push(item) });
 
-      cache.watchQuery(query);
+      registry.watchQuery(query);
 
       expect(events).toHaveLength(1);
       expect(events[0].event.type).toBe('started');
@@ -237,24 +237,24 @@ describe('QueryCache', () => {
     });
   });
 
-  describe('watchQueryQueue backpressure', () => {
-    it('queues events when no callback registered', () => {
-      const cache = createQueryCache({ isServer: true });
+  describe('subscribeToQueries (ReplaySubject)', () => {
+    it('replays events to late subscribers', () => {
+      const registry = createQueryRegistry({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
-      const query = cache.build(operation);
+      const query = registry.build(operation);
 
-      // Push before registering callback
-      cache.watchQuery(query);
+      // Push before subscribing
+      registry.watchQuery(query);
 
-      // Register callback - should receive queued event
-      const events: Array<{ event: any; query: RelayQuery }> = [];
-      cache.watchQueryQueue.register((item) => events.push(item));
+      // Subscribe - should receive replayed event
+      const events: Array<{ event: any; query: QueryRecord }> = [];
+      registry.subscribeToQueries({ next: (item) => events.push(item) });
 
       expect(events).toHaveLength(1);
     });
 
-    it('drains queue when callback is registered', () => {
-      const cache = createQueryCache({ isServer: true });
+    it('replays multiple events to late subscribers', () => {
+      const registry = createQueryRegistry({ isServer: true });
       const operation1 = createMockOperationDescriptor({
         id: 'Query1',
         variables: {}
@@ -264,14 +264,14 @@ describe('QueryCache', () => {
         variables: {}
       });
 
-      const query1 = cache.build(operation1);
-      const query2 = cache.build(operation2);
+      const query1 = registry.build(operation1);
+      const query2 = registry.build(operation2);
 
-      cache.watchQuery(query1);
-      cache.watchQuery(query2);
+      registry.watchQuery(query1);
+      registry.watchQuery(query2);
 
-      const events: Array<{ event: any; query: RelayQuery }> = [];
-      cache.watchQueryQueue.register((item) => events.push(item));
+      const events: Array<{ event: any; query: QueryRecord }> = [];
+      registry.subscribeToQueries({ next: (item) => events.push(item) });
 
       expect(events).toHaveLength(2);
       expect(events[0].event.id).toBe(query1.queryKey);
