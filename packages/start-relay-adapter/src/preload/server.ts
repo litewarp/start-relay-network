@@ -1,6 +1,6 @@
 import { debugPreload } from "../debug.js";
 
-import type { QueryCache } from "../query-cache.js";
+import type { QueryRegistry } from "../query-cache.js";
 import type { EnvironmentProviderOptions, LoadQueryOptions } from "react-relay";
 
 import relay from "react-relay";
@@ -15,7 +15,7 @@ const { getRequest, createOperationDescriptor } = runtime;
 
 export const createServerPreloader = (
   environment: Environment,
-  queryCache: QueryCache,
+  queryRegistry: QueryRegistry,
 ) => {
   return <TQuery extends OperationType>(
     request: GraphQLTaggedNode,
@@ -33,8 +33,8 @@ export const createServerPreloader = (
       options?.networkCacheConfig,
     );
 
-    // store the operation in the queryCache
-    queryCache.build(operation);
+    // store the operation in the queryRegistry
+    queryRegistry.build(operation);
 
     // Always use network-only on the server to ensure fresh data is fetched.
     // The default 'store-or-network' combined with partial rendering policy

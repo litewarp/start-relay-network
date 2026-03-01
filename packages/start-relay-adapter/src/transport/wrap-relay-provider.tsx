@@ -1,7 +1,7 @@
-import type { QueryCache } from '#@/query-cache.js';
+import type { QueryRegistry } from '#@/query-cache.js';
 import type {
-  DataTransportAbstraction,
-  DataTransportProviderImplementation
+  TransportAdapter,
+  TransportProviderComponent
 } from './types.js';
 
 import { createContext, useMemo } from 'react';
@@ -12,7 +12,7 @@ const { RelayEnvironmentProvider } = relay;
 
 export type GetEnvironmentFn = () => {
   environment: Environment;
-  queryCache: QueryCache;
+  queryRegistry: QueryRegistry;
 };
 
 export type WrappedRelayProviderProps<P> = {
@@ -20,26 +20,28 @@ export type WrappedRelayProviderProps<P> = {
   children: React.ReactNode;
 } & P;
 
-export const DataTransportContext = createContext<DataTransportAbstraction | null>(null);
+export const DataTransportContext = createContext<TransportAdapter | null>(null);
 
 export function WrapRelayProvider<P>(
-  TransportProvider: DataTransportProviderImplementation<P>
+  TransportProvider: TransportProviderComponent<P>
 ) {
   const WrappedRelayProvider = (props: WrappedRelayProviderProps<P>) => {
     const { getEnvironment, children, ...extraProps } = props;
 
-    const { environment, queryCache } = useMemo(() => getEnvironment(), [getEnvironment]);
+    const { environment, queryRegistry } = useMemo(() => getEnvironment(), [getEnvironment]);
 
     return (
       <RelayEnvironmentProvider environment={environment}>
         <TransportProvider
           onQueryEvent={(event) =>
             event.type === 'started'
-              ? queryCache.onQueryStarted(event)
-              : queryCache.onQueryProgress(event)
+              ? queryRegistry.onQueryStarted(event)
+              : queryRegistry.onQueryProgress(event)
           }
-          rerunSimulatedQueries={() => queryCache.rerunSimulatedQueries(environment)}
-          registerDispatchRequestStarted={queryCache.watchQueryQueue?.register}
+          onStreamClosed={() => queryRegistry.onStreamClosed(environment)}
+          registerTrackQuery={(callback) => {
+            queryRegistry.subscribeToQueries({ next: callback });
+          }}
           // oxlint-disable-next-line typescript/no-unsafe-type-assertion
           {...(extraProps as P)}
         >

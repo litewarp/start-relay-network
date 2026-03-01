@@ -1,17 +1,17 @@
-import type { RelayQuery } from '#@/cache/relay-query.js';
+import type { QueryRecord } from '#@/cache/relay-query.js';
 import type {
-  Transported,
+  TransportStream,
   QueryEvent,
   ValueEvent,
-  DataTransportAbstraction
+  TransportAdapter
 } from './types.js';
 
 import { useId, useRef } from 'react';
 
-export class ServerTransport implements DataTransportAbstraction {
-  stream: Transported;
+export class ServerTransport implements TransportAdapter {
+  stream: TransportStream;
   private controller!: ReadableStreamDefaultController<QueryEvent | ValueEvent>;
-  private ongoingStreams = new Set<Extract<QueryEvent, { type: 'started' }>>();
+  private pendingQueries = new Set<Extract<QueryEvent, { type: 'started' }>>();
 
   private closed = false;
   private shouldClose = false;
@@ -24,30 +24,29 @@ export class ServerTransport implements DataTransportAbstraction {
     });
   }
 
-  closeOnceFinished() {
+  drainAndClose() {
     this.shouldClose = true;
     this.closeIfFinished();
   }
 
   private closeIfFinished() {
-    if (this.shouldClose && this.ongoingStreams.size === 0 && !this.closed) {
+    if (this.shouldClose && this.pendingQueries.size === 0 && !this.closed) {
       this.controller.close();
       this.closed = true;
     }
   }
 
-  // TODO: FIX mismatch between queryprogressevent and graphqlresponse
-  dispatchRequestStarted = ({
+  trackQuery = ({
     event,
     query
   }: {
     event: Extract<QueryEvent, { type: 'started' }>;
-    query: RelayQuery;
+    query: QueryRecord;
   }): void => {
     this.controller.enqueue(event);
-    this.ongoingStreams.add(event);
+    this.pendingQueries.add(event);
     const finalize = () => {
-      this.ongoingStreams.delete(event);
+      this.pendingQueries.delete(event);
       this.closeIfFinished();
     };
     query.subscribe({

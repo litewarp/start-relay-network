@@ -2,11 +2,11 @@ import { createRouter } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen';
 import { DefaultCatchBoundary } from './components/DefaultCatchBoundary';
 import { NotFound } from './components/NotFound';
-import { setupRouterRelayIntegration } from '@litewarp/start-relay-network';
-import { createRelayEnvironment } from './lib/relay/environment';
+import { integrateRelayWithRouter } from '@litewarp/start-relay-network';
+import { getRelayEnvironment } from './lib/relay/environment';
 
 export function getRouter() {
-  const { environment, preloadQuery, queryCache } = createRelayEnvironment();
+  const { environment, preloadQuery } = getRelayEnvironment();
 
   const router = createRouter({
     routeTree,
@@ -17,14 +17,12 @@ export function getRouter() {
     context: {
       environment,
       preloadQuery,
-      queryCache,
     },
   });
 
-  setupRouterRelayIntegration({
+  integrateRelayWithRouter({
     router,
     environment,
-    queryCache,
   });
 
   return router;

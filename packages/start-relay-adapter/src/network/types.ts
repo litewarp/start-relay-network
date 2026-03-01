@@ -1,4 +1,5 @@
-import type { QueryCache } from "#@/query-cache.js";
+import type { QueryRegistry } from "#@/query-cache.js";
+import type { RelayMiddleware, ResponseTransform } from "#@/middleware/types.js";
 import type { ExecuteFunction, FetchFunction } from "relay-runtime";
 
 export type GetFetchOptionsFn = (
@@ -8,11 +9,13 @@ export type GetFetchOptionsFn = (
 export interface RelayNetworkConfig {
   url: string;
   getFetchOptions: GetFetchOptionsFn;
-  queryCache: QueryCache;
+  queryRegistry: QueryRegistry;
+  middleware?: RelayMiddleware[];
+  responseTransforms?: ResponseTransform[];
 }
 
 export interface StartSsrRelayNetwork {
   execute: ExecuteFunction;
 }
 
-export type CreateNetworkInit = Omit<RelayNetworkConfig, "queryCache">;
+export type CreateNetworkInit = Omit<RelayNetworkConfig, "queryRegistry">;

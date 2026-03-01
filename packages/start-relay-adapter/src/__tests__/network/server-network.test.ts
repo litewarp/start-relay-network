@@ -1,5 +1,5 @@
-import { ServerRelayNetwork } from '#@/network/server.js';
-import { QueryCache } from '#@/query-cache.js';
+import { createServerFetchFn } from '#@/network/server.js';
+import { QueryRegistry } from '#@/query-cache.js';
 import {
   createMockRequestParameters,
   createMultipartResponse,
@@ -30,7 +30,7 @@ function mockMultipartFetchResponse(parts: object[], boundary = '----abc123') {
 /**
  * Subscribes to a Relay Observable and collects all emissions.
  */
-function subscribeAndCollect(observable: ReturnType<ServerRelayNetwork['execute']>) {
+function subscribeAndCollect(observable: { subscribe: Function }) {
   return new Promise<{
     values: GraphQLResponse[];
     error: Error | null;
@@ -59,7 +59,7 @@ function subscribeAndCollect(observable: ReturnType<ServerRelayNetwork['execute'
   });
 }
 
-describe('ServerRelayNetwork', () => {
+describe('createServerFetchFn', () => {
   let originalFetch: typeof globalThis.fetch;
 
   beforeEach(() => {
@@ -71,23 +71,23 @@ describe('ServerRelayNetwork', () => {
     vi.restoreAllMocks();
   });
 
-  function createServerNetwork(queryCache: QueryCache) {
-    return new ServerRelayNetwork({
+  function createServerNetwork(queryRegistry: QueryRegistry) {
+    return createServerFetchFn({
       url: 'http://test.com/graphql',
       getFetchOptions: async () => ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: 'test' })
       }),
-      queryCache
+      queryRegistry
     });
   }
 
-  describe('cache-hit pipeline (multipartFetch → query → Observable)', () => {
+  describe('cache-hit pipeline (multipartFetch -> query -> Observable)', () => {
     it('forwards multipart @stream parts through query.next to Observable sink', async () => {
-      const queryCache = new QueryCache({ isServer: true });
+      const queryRegistry = new QueryRegistry({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'stream-server' });
-      queryCache.build(operation);
+      queryRegistry.build(operation);
 
       const parts = [
         {
@@ -109,33 +109,35 @@ describe('ServerRelayNetwork', () => {
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
 
-      const network = createServerNetwork(queryCache);
+      const network = createServerNetwork(queryRegistry);
       const request = createMockRequestParameters({ id: 'stream-server' });
       const observable = network.execute(request, {}, {}, null);
       const { values, completed } = await subscribeAndCollect(observable);
 
-      // Transformer converts 2023 spec → Relay format
+      // Raw multipart parts passed through (no spec transformation in network layer)
       expect(values).toHaveLength(3);
-      expect(values[0]).toEqual({ data: { allUsersList: [] }, hasNext: true });
+      expect(values[0]).toEqual({
+        data: { allUsersList: [] },
+        hasNext: true,
+        pending: [{ id: '0', path: ['allUsersList'], label: 'users' }]
+      });
       expect(values[1]).toEqual({
-        items: [{ id: 1, name: 'Alice' }],
-        path: ['allUsersList'],
-        label: 'users',
+        incremental: [{ id: '0', items: [{ id: 1, name: 'Alice' }] }],
+        completed: [],
         hasNext: true
       });
       expect(values[2]).toEqual({
-        items: [{ id: 2, name: 'Bob' }],
-        path: ['allUsersList'],
-        label: 'users',
+        incremental: [{ id: '0', items: [{ id: 2, name: 'Bob' }] }],
+        completed: [{ id: '0' }],
         hasNext: false
       });
       expect(completed).toBe(true);
     });
 
     it('forwards multipart @defer parts through query.next to Observable sink', async () => {
-      const queryCache = new QueryCache({ isServer: true });
+      const queryRegistry = new QueryRegistry({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'defer-server' });
-      queryCache.build(operation);
+      queryRegistry.build(operation);
 
       const parts = [
         {
@@ -152,7 +154,7 @@ describe('ServerRelayNetwork', () => {
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
 
-      const network = createServerNetwork(queryCache);
+      const network = createServerNetwork(queryRegistry);
       const request = createMockRequestParameters({ id: 'defer-server' });
       const observable = network.execute(request, {}, {}, null);
       const { values, completed } = await subscribeAndCollect(observable);
@@ -163,9 +165,7 @@ describe('ServerRelayNetwork', () => {
       );
       expect(values[1]).toEqual(
         expect.objectContaining({
-          data: { name: 'Alice', email: 'alice@example.com' },
-          path: ['userById'],
-          label: 'details',
+          incremental: [{ id: '0', data: { name: 'Alice', email: 'alice@example.com' } }],
           hasNext: false
         })
       );
@@ -173,16 +173,16 @@ describe('ServerRelayNetwork', () => {
     });
 
     it('calls watchQuery when query is found in cache', async () => {
-      const queryCache = new QueryCache({ isServer: true });
+      const queryRegistry = new QueryRegistry({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'watch-query' });
-      queryCache.build(operation);
+      queryRegistry.build(operation);
 
-      const watchQuerySpy = vi.spyOn(queryCache, 'watchQuery');
+      const watchQuerySpy = vi.spyOn(queryRegistry, 'watchQuery');
 
       const parts = [{ data: { test: true }, hasNext: false }];
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
 
-      const network = createServerNetwork(queryCache);
+      const network = createServerNetwork(queryRegistry);
       const request = createMockRequestParameters({ id: 'watch-query' });
       const observable = network.execute(request, {}, {}, null);
       await subscribeAndCollect(observable);
@@ -191,9 +191,9 @@ describe('ServerRelayNetwork', () => {
     });
 
     it('query completion triggers Observable complete', async () => {
-      const queryCache = new QueryCache({ isServer: true });
+      const queryRegistry = new QueryRegistry({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'complete-server' });
-      queryCache.build(operation);
+      queryRegistry.build(operation);
 
       const parts = [
         {
@@ -210,7 +210,7 @@ describe('ServerRelayNetwork', () => {
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
 
-      const network = createServerNetwork(queryCache);
+      const network = createServerNetwork(queryRegistry);
       const request = createMockRequestParameters({ id: 'complete-server' });
       const observable = network.execute(request, {}, {}, null);
       const { completed } = await subscribeAndCollect(observable);
@@ -221,17 +221,17 @@ describe('ServerRelayNetwork', () => {
 
   describe('non-preloaded queries (cache miss)', () => {
     it('returns a never-resolving Observable when query is not in cache', async () => {
-      const queryCache = new QueryCache({ isServer: true }); // empty cache
+      const queryRegistry = new QueryRegistry({ isServer: true }); // empty cache
 
       globalThis.fetch = vi.fn();
 
-      const network = createServerNetwork(queryCache);
+      const network = createServerNetwork(queryRegistry);
       const request = createMockRequestParameters({ id: 'uncached-server-query' });
       const observable = network.execute(request, {}, {}, null);
 
       const { values, completed, error } = await subscribeAndCollect(observable);
 
-      // Observable should never emit, complete, or error — it stays suspended
+      // Observable should never emit, complete, or error -- it stays suspended
       expect(values).toHaveLength(0);
       expect(completed).toBe(false);
       expect(error).toBeNull();
@@ -240,12 +240,12 @@ describe('ServerRelayNetwork', () => {
     });
 
     it('does not call watchQuery for non-preloaded queries', async () => {
-      const queryCache = new QueryCache({ isServer: true });
-      const watchQuerySpy = vi.spyOn(queryCache, 'watchQuery');
+      const queryRegistry = new QueryRegistry({ isServer: true });
+      const watchQuerySpy = vi.spyOn(queryRegistry, 'watchQuery');
 
       globalThis.fetch = vi.fn();
 
-      const network = createServerNetwork(queryCache);
+      const network = createServerNetwork(queryRegistry);
       const request = createMockRequestParameters({ id: 'unwatched-query' });
       network.execute(request, {}, {}, null);
 
@@ -255,13 +255,13 @@ describe('ServerRelayNetwork', () => {
 
   describe('error handling', () => {
     it('pipes multipartFetch rejection to query.error then Observable.error', async () => {
-      const queryCache = new QueryCache({ isServer: true });
+      const queryRegistry = new QueryRegistry({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'fetch-error-server' });
-      queryCache.build(operation);
+      queryRegistry.build(operation);
 
       globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
-      const network = createServerNetwork(queryCache);
+      const network = createServerNetwork(queryRegistry);
       const request = createMockRequestParameters({ id: 'fetch-error-server' });
       const observable = network.execute(request, {}, {}, null);
       const { error } = await subscribeAndCollect(observable);
@@ -271,9 +271,9 @@ describe('ServerRelayNetwork', () => {
     });
 
     it('pipes stream error to query.error then Observable.error', async () => {
-      const queryCache = new QueryCache({ isServer: true });
+      const queryRegistry = new QueryRegistry({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'stream-error-server' });
-      queryCache.build(operation);
+      queryRegistry.build(operation);
 
       let chunkCount = 0;
       const stream = new ReadableStream<Uint8Array>({
@@ -299,7 +299,7 @@ describe('ServerRelayNetwork', () => {
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockResponse);
 
-      const network = createServerNetwork(queryCache);
+      const network = createServerNetwork(queryRegistry);
       const request = createMockRequestParameters({ id: 'stream-error-server' });
       const observable = network.execute(request, {}, {}, null);
       const { error } = await subscribeAndCollect(observable);
@@ -311,16 +311,16 @@ describe('ServerRelayNetwork', () => {
 
   describe('AbortSignal forwarding', () => {
     it('forwards AbortSignal from cacheConfig.metadata to fetch', async () => {
-      const queryCache = new QueryCache({ isServer: true });
+      const queryRegistry = new QueryRegistry({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'abort-server' });
-      queryCache.build(operation);
+      queryRegistry.build(operation);
 
       const controller = new AbortController();
 
       const parts = [{ data: { test: true }, hasNext: false }];
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
 
-      const network = createServerNetwork(queryCache);
+      const network = createServerNetwork(queryRegistry);
       const request = createMockRequestParameters({ id: 'abort-server' });
       const cacheConfig = { metadata: { abortSignal: controller.signal } };
       const observable = network.execute(request, {}, cacheConfig, null);
@@ -334,14 +334,14 @@ describe('ServerRelayNetwork', () => {
     });
 
     it('does not include signal when cacheConfig has no abortSignal', async () => {
-      const queryCache = new QueryCache({ isServer: true });
+      const queryRegistry = new QueryRegistry({ isServer: true });
       const operation = createMockOperationDescriptor({ id: 'no-abort-server' });
-      queryCache.build(operation);
+      queryRegistry.build(operation);
 
       const parts = [{ data: { test: true }, hasNext: false }];
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
 
-      const network = createServerNetwork(queryCache);
+      const network = createServerNetwork(queryRegistry);
       const request = createMockRequestParameters({ id: 'no-abort-server' });
       const observable = network.execute(request, {}, {}, null);
       await subscribeAndCollect(observable);

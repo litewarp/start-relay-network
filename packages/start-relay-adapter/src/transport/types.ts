@@ -1,7 +1,7 @@
 import { ClientTransport } from './client.js';
 import { ServerTransport } from './server.js';
 
-import type { RelayQuery } from '#@/cache/relay-query.js';
+import type { QueryRecord } from '#@/cache/relay-query.js';
 import type { FC } from 'react';
 import type { GraphQLResponse, OperationDescriptor } from 'relay-runtime';
 
@@ -27,19 +27,22 @@ export interface ValueEvent<T = unknown> {
 }
 export type QueryProgressEvent = Exclude<QueryEvent, { type: 'started' }>;
 
-export type Transported = ReadableStream<QueryEvent | ValueEvent>;
+export type TransportStream = ReadableStream<QueryEvent | ValueEvent>;
 
-export type DataTransportProviderImplementation<TExtraProps> = FC<
+/** @deprecated Use `TransportStream` instead */
+export type Transported = TransportStream;
+
+export type TransportProviderComponent<TExtraProps> = FC<
   {
     /** will be present in the Browser */
     onQueryEvent?: (event: QueryEvent) => void;
     /** will be present in the Browser */
-    rerunSimulatedQueries?: () => void;
+    onStreamClosed?: () => void;
     /** will be present during SSR */
-    registerDispatchRequestStarted?: (
+    registerTrackQuery?: (
       callback: (query: {
         event: Extract<QueryEvent, { type: 'started' }>;
-        query: RelayQuery;
+        query: QueryRecord;
       }) => void
     ) => void;
     /** will always be present */
@@ -47,16 +50,14 @@ export type DataTransportProviderImplementation<TExtraProps> = FC<
   } & TExtraProps
 >;
 
+/** @deprecated Use `TransportProviderComponent` instead */
+export type DataTransportProviderImplementation<T> = TransportProviderComponent<T>;
+
 export type Transport = ServerTransport | ClientTransport;
 
-/**
- * TODO: IMPLEMENT AND TEST OR REMOVE
- */
-export interface DataTransportAbstraction {
-  /**
-   * This hook should always return the first value it was called with.
-   *
-   * If used in the browser and SSR happened, it should return the value passed to it on the server.
-   */
+export interface TransportAdapter {
   useStaticValueRef<T>(value: T): { current: T };
 }
+
+/** @deprecated Use `TransportAdapter` instead */
+export type DataTransportAbstraction = TransportAdapter;

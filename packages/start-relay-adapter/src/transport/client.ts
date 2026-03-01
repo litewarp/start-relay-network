@@ -1,59 +1,61 @@
-import type { DataTransportAbstraction, QueryEvent, Transported } from './types.js';
+import type { TransportAdapter, QueryEvent, TransportStream } from './types.js';
 
 import { debugTransportClient, errorRelay } from '#@/debug.js';
 import { observableFromStream } from '#@/stream.js';
 import { type RefObject, useId, useEffect, useRef } from 'react';
+import runtime from 'relay-runtime';
 
-export class ClientTransport implements DataTransportAbstraction {
-  private bufferedEvents: QueryEvent[] = [];
+export class ClientTransport implements TransportAdapter {
+  private _eventSubject = new runtime.ReplaySubject<QueryEvent>();
   private receivedValues: Record<string, unknown> = {};
+  private streamClosed = false;
 
-  constructor(stream: Transported) {
+  constructor(stream: TransportStream) {
     void this.consume(stream);
   }
 
-  private async consume(stream: Transported) {
+  private async consume(stream: TransportStream) {
     debugTransportClient('Consuming stream');
     observableFromStream(stream).subscribe({
       next: (event) => {
         if (event.type === 'value') {
           this.receivedValues[event.id] = event.value;
         } else {
-          debugTransportClient('Pushing event:', event);
-          this.bufferedEvents.push(event);
+          debugTransportClient('Received event:', event);
+          this._eventSubject.next(event);
         }
       },
       complete: () => {
-        // this.rerunSimulatedQueries?.();
+        this.streamClosed = true;
+        this._eventSubject.complete();
       },
       error: (error: unknown) => {
         errorRelay('Error in ClientTransport:', error);
+        this._eventSubject.error(error instanceof Error ? error : new Error(String(error)));
       }
     });
   }
-  // this will be set from the `WrapApolloProvider` data transport
 
-  public set onQueryEvent(cb: (event: QueryEvent) => void) {
-    let event: QueryEvent | undefined;
-    while ((event = this.bufferedEvents.shift())) {
-      cb(event);
-    }
-    this.bufferedEvents.push = (...events: QueryEvent[]) => {
-      for (const event of events) {
-        cb(event);
-      }
-      return 0;
-    };
+  /**
+   * Subscribe to query events. Late subscribers receive all past events
+   * via the ReplaySubject, then get new events as they arrive.
+   */
+  subscribeToEvents(observer: runtime.Observer<QueryEvent>): runtime.Subscription {
+    return this._eventSubject.subscribe(observer);
   }
-  // this will be set from the `WrapApolloProvider` data transport
-  public rerunSimulatedQueries?: () => void;
+
+  /** Called when the transport stream closes to re-execute incomplete queries. */
+  public onStreamClosed?: () => void;
 
   public getStreamedValue<T>(id: string): T | undefined {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
     return this.receivedValues[id] as T | undefined;
   }
-  public deleteStreamedValue(id: string) {
+
+  public consumeStreamedValue<T>(id: string): T | undefined {
+    const value = this.getStreamedValue<T>(id);
     delete this.receivedValues[id];
+    return value;
   }
 
   useStaticValueRef = <T>(value: T): RefObject<T> => {
@@ -62,7 +64,7 @@ export class ClientTransport implements DataTransportAbstraction {
     const dataValue = streamedValue !== undefined ? streamedValue : value;
 
     useEffect(() => {
-      this.deleteStreamedValue(id);
+      this.consumeStreamedValue(id);
     }, [id]);
     return useRef(dataValue);
   };

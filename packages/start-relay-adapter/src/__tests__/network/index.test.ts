@@ -1,7 +1,4 @@
-import { createClientNetwork } from '#@/client.js';
-import { createServerNetwork } from '#@/server.js';
-import { ClientRelayNetwork } from '#@/network/client.js';
-import { ServerRelayNetwork } from '#@/network/server.js';
+import { createRelayEnvironment } from '#@/environment.js';
 import { describe, it, expect } from 'vitest';
 
 const config = {
@@ -9,26 +6,28 @@ const config = {
   getFetchOptions: async () => ({ method: 'POST' as const }),
 };
 
-describe('createClientNetwork', () => {
-  it('returns a ClientRelayNetwork instance', () => {
-    const { network } = createClientNetwork(config);
-    expect(network).toBeInstanceOf(ClientRelayNetwork);
+describe('createRelayEnvironment', () => {
+  describe('client mode (isServer: false)', () => {
+    it('returns an environment', () => {
+      const { environment } = createRelayEnvironment({ ...config, isServer: false });
+      expect(environment).toBeDefined();
+    });
+
+    it('returns a preloadQuery function', () => {
+      const { preloadQuery } = createRelayEnvironment({ ...config, isServer: false });
+      expect(typeof preloadQuery).toBe('function');
+    });
   });
 
-  it('returns a createPreloader function', () => {
-    const { createPreloader } = createClientNetwork(config);
-    expect(typeof createPreloader).toBe('function');
-  });
-});
+  describe('server mode (isServer: true)', () => {
+    it('returns an environment', () => {
+      const { environment } = createRelayEnvironment({ ...config, isServer: true });
+      expect(environment).toBeDefined();
+    });
 
-describe('createServerNetwork', () => {
-  it('returns a ServerRelayNetwork instance', () => {
-    const { network } = createServerNetwork(config);
-    expect(network).toBeInstanceOf(ServerRelayNetwork);
-  });
-
-  it('returns a createPreloader function', () => {
-    const { createPreloader } = createServerNetwork(config);
-    expect(typeof createPreloader).toBe('function');
+    it('returns a preloadQuery function', () => {
+      const { preloadQuery } = createRelayEnvironment({ ...config, isServer: true });
+      expect(typeof preloadQuery).toBe('function');
+    });
   });
 });

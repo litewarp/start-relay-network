@@ -1,7 +1,7 @@
 import { debugHydration } from "../debug.js";
 
 import type { PreloadedQuery } from "../preload/types.js";
-import type { QueryCache } from "../query-cache.js";
+import type { QueryRegistry } from "../query-cache.js";
 
 import { createSerializationAdapter } from "@tanstack/react-router";
 import { type Environment, type OperationType } from "relay-runtime";
@@ -54,15 +54,15 @@ export function dehydratePreloadedQuery<TQuery extends OperationType>(
 export function hydratePreloadedQuery<TQuery extends OperationType>(
   environment: Environment,
   dehydratedQuery: DehydratedPreloadedQuery<TQuery>,
-  queryCache: QueryCache,
+  queryRegistry: QueryRegistry,
 ): PreloadedQuery<TQuery> {
   let isDisposed = false;
   let isReleased = false;
 
   debugHydration("Hydrating query");
-  // if we have a ref, add it to the cache
+  // if we have a ref, add it to the registry
   if (dehydratedQuery.$__relay_queryRef) {
-    const _query = queryCache.build(
+    queryRegistry.build(
       dehydratedQuery.$__relay_queryRef.operation,
     );
   }
@@ -91,7 +91,7 @@ export function hydratePreloadedQuery<TQuery extends OperationType>(
 
 export function createPreloadedQuerySerializer<TQuery extends OperationType>(
   environment: Environment,
-  queryCache: QueryCache,
+  queryRegistry: QueryRegistry,
 ) {
   return createSerializationAdapter<
     PreloadedQuery<TQuery>,
@@ -103,7 +103,7 @@ export function createPreloadedQuerySerializer<TQuery extends OperationType>(
       return dehydratePreloadedQuery(value);
     },
     fromSerializable: (value) => {
-      return hydratePreloadedQuery(environment, value, queryCache);
+      return hydratePreloadedQuery(environment, value, queryRegistry);
     },
   });
 }

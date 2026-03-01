@@ -6,10 +6,10 @@ import { DefaultCatchBoundary } from '#@/components/DefaultCatchBoundary.js';
 import { NotFound } from '#@/components/NotFound.js';
 import appCss from '#@/styles/app.css?url';
 import { seo } from '#@/utils/seo.js';
-import type { StartRelayContext } from '@litewarp/start-relay-network';
+import type { RelayRouterContext } from '@litewarp/start-relay-network';
 import { ThemeProvider } from '@lonik/themer';
 
-export const Route = createRootRouteWithContext<StartRelayContext>()({
+export const Route = createRootRouteWithContext<RelayRouterContext>()({
   head: () => ({
     meta: [
       {

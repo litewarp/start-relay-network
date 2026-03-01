@@ -1,12 +1,12 @@
 import { multipartFetch } from '../fetch/refetch.js';
-import { queryKeyFromIdAndVariables, type QueryCache } from '../query-cache.js';
+import { applyMiddleware, createResponseTransform } from '../middleware/compose.js';
+import { queryKeyFromIdAndVariables } from '../query-cache.js';
 
 import type { RelayNetworkConfig } from './types.js';
 
 import { debugNetworkServer } from '#@/debug.js';
 import runtime, {
   type CacheConfig,
-  type ExecuteFunction,
   type FetchFunction,
   type GraphQLResponse
 } from 'relay-runtime';
@@ -18,73 +18,76 @@ const getAbortSignal = (cacheConfig: CacheConfig): AbortSignal | undefined => {
   return signal instanceof AbortSignal ? signal : undefined;
 };
 
-export class ServerRelayNetwork {
-  #url: string;
-  #queryCache: QueryCache;
-  #fetchFn: FetchFunction;
+export function createServerFetchFn(config: RelayNetworkConfig) {
+  const { getFetchOptions, url, queryRegistry, middleware = [], responseTransforms = [] } = config;
 
-  public execute: ExecuteFunction;
+  const fetchFn: FetchFunction = (request, variables, cacheConfig, _uploadables) => {
+    debugNetworkServer('Executing request:', request);
+    const queryKey = queryKeyFromIdAndVariables(request.id ?? request.cacheID, variables);
 
-  constructor({ getFetchOptions, url, queryCache }: RelayNetworkConfig) {
-    this.#url = url;
-    this.#queryCache = queryCache;
+    const query = queryRegistry.get(queryKey);
+    if (!query) {
+      debugNetworkServer(
+        'Query not preloaded — skipping server fetch for queryKey:',
+        queryKey
+      );
+      return Observable.create<GraphQLResponse>(() => {});
+    }
 
-    this.#fetchFn = (request, variables, cacheConfig, _uploadables) => {
-      debugNetworkServer('Executing request:', request);
-      // const forceFetch = cacheConfig?.force ?? false;
-      const queryKey = queryKeyFromIdAndVariables(request.id ?? request.cacheID, variables);
+    queryRegistry.watchQuery(query);
 
-      const wrappedGetRequestInit = async () => {
-        const res = await getFetchOptions(request, variables, cacheConfig);
-        const signal = getAbortSignal(cacheConfig);
-        return { ...res, signal };
-      };
-      const query = this.#queryCache.get(queryKey);
-      if (!query) {
-        debugNetworkServer(
-          'Query not preloaded — skipping server fetch for queryKey:',
-          queryKey
-        );
-        // Return an Observable that never emits. The component stays suspended
-        // during SSR and the client will re-fetch via ClientRelayNetwork.
-        return Observable.create<GraphQLResponse>(() => {});
-      }
+    debugNetworkServer('Starting fetch for queryKey:', queryKey);
 
-      // subscribe to the query's replay subject to get updates
-      this.#queryCache.watchQuery(query);
+    const signal = getAbortSignal(cacheConfig);
 
-      debugNetworkServer('Starting multipart fetch for queryKey:', queryKey);
-
-      multipartFetch({
-        url: this.#url,
-        getRequestInit: () => wrappedGetRequestInit(),
-        onComplete: () => query.complete(),
-        onError: (error) => query.error(error.message),
-        onNext: (responses) => responses.forEach((r) => query.next(r))
-      }).catch((e) => query.error(e.message));
-
-      return Observable.create<GraphQLResponse>((sink) => {
-        query.subscribe({
-          next: (event) => {
-            switch (event.type) {
-              case 'next':
-                debugNetworkServer('Received next event for queryKey:', queryKey, event.data);
-                sink.next(event.data);
-                break;
-              case 'error':
-                sink.error(new Error(JSON.stringify(event.error)));
-                break;
-              case 'complete':
-                sink.complete();
-                break;
-            }
-          },
-          error: (err) => sink.error(err),
-          complete: () => sink.complete()
+    // Build context, apply request middleware, then fetch with streaming
+    getFetchOptions(request, variables, cacheConfig)
+      .then(async (baseFetchOptions) => {
+        const ctx = await applyMiddleware(middleware, {
+          request,
+          variables,
+          cacheConfig,
+          fetchOptions: { ...baseFetchOptions, signal },
+          url,
         });
+
+        // Create a per-request response transform pipeline
+        const transform = createResponseTransform(responseTransforms);
+
+        return multipartFetch({
+          url: ctx.url,
+          getRequestInit: () => Promise.resolve(ctx.fetchOptions),
+          onNext: (responses) => {
+            const transformed = responses.flatMap(transform);
+            transformed.forEach((r) => query.next(r));
+          },
+          onComplete: () => query.complete(),
+          onError: (error) => query.error(error.message),
+        });
+      })
+      .catch((e) => query.error(e instanceof Error ? e.message : String(e)));
+
+    return Observable.create<GraphQLResponse>((sink) => {
+      query.subscribe({
+        next: (event) => {
+          switch (event.type) {
+            case 'next':
+              debugNetworkServer('Received next event for queryKey:', queryKey, event.data);
+              sink.next(event.data);
+              break;
+            case 'error':
+              sink.error(new Error(JSON.stringify(event.error)));
+              break;
+            case 'complete':
+              sink.complete();
+              break;
+          }
+        },
+        error: (err) => sink.error(err),
+        complete: () => sink.complete()
       });
-    };
-    const network = Network.create(this.#fetchFn);
-    this.execute = network.execute;
-  }
+    });
+  };
+
+  return Network.create(fetchFn);
 }

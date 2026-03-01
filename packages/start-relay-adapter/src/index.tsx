@@ -1,16 +1,34 @@
 import type RelayModernEnvironment from "relay-runtime/lib/store/RelayModernEnvironment.js";
-import type { RelayStartQueryCache } from "./query-cache.js";
 import type { ServerPreloadFunction } from "./preload/server.js";
 import type { ClientPreloadFunction } from "./preload/client.js";
 
-export { setupRouterRelayIntegration } from "./setup/setup.js";
+// Main entry point
+export { createRelayEnvironment, getQueryRegistry } from "./environment.js";
+export type { CreateRelayEnvironmentOptions } from "./environment.js";
 
-export interface StartRelayContext {
+// Router integration
+export { integrateRelayWithRouter } from "./setup/setup.js";
+
+// Middleware types
+export type { RelayMiddleware, ResponseTransform, RequestContext } from "./middleware/types.js";
+
+// Shipped response transform
+export { incrementalDeliveryTransform } from "./middleware/incremental-delivery.js";
+
+// Preload types
+export type { PreloadedQuery } from "./preload/types.js";
+
+// Network types (for advanced use)
+export type { GetFetchOptionsFn, CreateNetworkInit } from "./network/types.js";
+
+// Router context type
+export interface RelayRouterContext {
   environment: RelayModernEnvironment;
-  queryCache: RelayStartQueryCache;
   preloadQuery: ServerPreloadFunction | ClientPreloadFunction;
 }
 
-export * from "./network/types.js";
-export { createClientNetwork } from "./client.js";
-export { createServerNetwork } from "./server.js";
+/** @deprecated Use `RelayRouterContext` instead */
+export type StartRelayContext = RelayRouterContext;
+
+/** @deprecated Use `integrateRelayWithRouter` instead */
+export { setupRouterRelayIntegration } from "./setup/setup.js";
