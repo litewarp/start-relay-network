@@ -1,6 +1,6 @@
 import { debugPreload } from "../debug.js";
+import { getQueryRegistry } from "../environment.js";
 
-import type { QueryRegistry } from "../query-cache.js";
 import type { EnvironmentProviderOptions, LoadQueryOptions } from "react-relay";
 
 import relay from "react-relay";
@@ -15,8 +15,9 @@ const { getRequest, createOperationDescriptor } = runtime;
 
 export const createServerPreloader = (
   environment: Environment,
-  queryRegistry: QueryRegistry,
 ) => {
+  const queryRegistry = getQueryRegistry(environment);
+
   return <TQuery extends OperationType>(
     request: GraphQLTaggedNode,
     variables: VariablesOf<TQuery>,

@@ -6,7 +6,6 @@ import {
   configureRouterRelay,
 } from "./core";
 import { RelayProvider } from "#@/transport/relay-provider.js";
-import { getQueryRegistry } from "#@/environment.js";
 
 export function integrateRelayWithRouter<TRouter extends AnyRouter>(
   opts: Omit<RouterRelayOptions<TRouter>, "providerContext">,
@@ -14,7 +13,6 @@ export function integrateRelayWithRouter<TRouter extends AnyRouter>(
   // oxlint-disable-next-line typescript/no-unsafe-type-assertion
   const providerContext = {} as { transport: Transport };
 
-  const queryRegistry = getQueryRegistry(opts.environment);
   configureRouterRelay<TRouter>({ ...opts, providerContext });
 
   const PreviousInnerWrap = opts.router.options.InnerWrap ?? Fragment;
@@ -23,7 +21,6 @@ export function integrateRelayWithRouter<TRouter extends AnyRouter>(
     return (
       <RelayProvider
         environment={opts.environment}
-        queryRegistry={queryRegistry}
         context={providerContext}
       >
         <PreviousInnerWrap>{children}</PreviousInnerWrap>

@@ -11,6 +11,26 @@ import { Environment } from 'relay-runtime';
 
 const QUERY_REGISTRY_KEY = Symbol('start-relay-queryRegistry');
 
+/**
+ * Shape of the `options` bag we attach to the Relay Environment.
+ * Kept internal — consumers use `getQueryRegistry(env)` to access.
+ */
+interface RelayEnvironmentOptions {
+  [QUERY_REGISTRY_KEY]: QueryRegistry;
+}
+
+/**
+ * Type-safe accessor for the environment's options bag.
+ * Centralises the single unavoidable cast in one place.
+ */
+function getOptions(environment: Environment): RelayEnvironmentOptions | undefined {
+  return environment.options as RelayEnvironmentOptions | undefined;
+}
+
+function setOptions(environment: Environment, opts: RelayEnvironmentOptions): void {
+  environment.options = opts;
+}
+
 export interface CreateRelayEnvironmentOptions {
   url: string;
   getFetchOptions: GetFetchOptionsFn;
@@ -45,8 +65,8 @@ export function createRelayEnvironment(options: CreateRelayEnvironmentOptions) {
   attachQueryRegistry(environment, queryRegistry);
 
   const preloadQuery = isServer
-    ? createServerPreloader(environment, queryRegistry)
-    : createClientPreloader(environment, queryRegistry);
+    ? createServerPreloader(environment)
+    : createClientPreloader(environment);
 
   return { environment, preloadQuery };
 }
@@ -55,13 +75,11 @@ export function createRelayEnvironment(options: CreateRelayEnvironmentOptions) {
  * Attach a QueryRegistry to a Relay Environment's `options` bag.
  */
 export function attachQueryRegistry(environment: Environment, registry: QueryRegistry): void {
-  // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-  const existing = (environment as any).options as Record<symbol, unknown> | undefined;
-  // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-  (environment as any).options = {
+  const existing = getOptions(environment);
+  setOptions(environment, {
     ...existing,
     [QUERY_REGISTRY_KEY]: registry,
-  };
+  });
 }
 
 /**
@@ -69,8 +87,7 @@ export function attachQueryRegistry(environment: Environment, registry: QueryReg
  * Throws if not found (environment was not created via `createRelayEnvironment`).
  */
 export function getQueryRegistry(environment: Environment): QueryRegistry {
-  // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-  const registry = (environment as any).options?.[QUERY_REGISTRY_KEY] as QueryRegistry | undefined;
+  const registry = getOptions(environment)?.[QUERY_REGISTRY_KEY];
   if (!registry) {
     throw new Error(
       'QueryRegistry not found on Environment. ' +

@@ -4,7 +4,6 @@ import { transportSerializationAdapter } from '../transport/serialization-adapte
 import type { Transport } from '#@/transport/types.js';
 import type { AnyRouter } from '@tanstack/react-router';
 
-import { getQueryRegistry } from '#@/environment.js';
 import { ServerTransport } from '#@/transport/server.js';
 import { RecordSource, type Environment } from 'relay-runtime';
 
@@ -25,7 +24,6 @@ export function configureRouterRelay<TRouter extends AnyRouter>(
   options: RouterRelayOptions<TRouter>
 ) {
   const { router, environment, providerContext } = options;
-  const queryRegistry = getQueryRegistry(environment);
 
   const ogHydrate = router.options.hydrate;
   const ogDehydrate = router.options.dehydrate;
@@ -55,7 +53,7 @@ export function configureRouterRelay<TRouter extends AnyRouter>(
 
   router.options.serializationAdapters = [
     ...(router.options.serializationAdapters ?? []),
-    createPreloadedQuerySerializer(environment, queryRegistry),
+    createPreloadedQuerySerializer(environment),
     transportSerializationAdapter
   ];
 }

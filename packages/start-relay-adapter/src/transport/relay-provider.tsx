@@ -1,6 +1,5 @@
 import { DataTransportContext, WrapRelayProvider } from './wrap-relay-provider.jsx';
 
-import type { QueryRegistry } from '../query-cache.js';
 import type { Transport } from './types.js';
 import type { Environment } from 'relay-runtime';
 
@@ -34,16 +33,12 @@ const WrappedRelayProvider = WrapRelayProvider<{
 
 export function RelayProvider(props: {
   environment: Environment;
-  queryRegistry: QueryRegistry;
   context: { transport: Transport };
   children: React.ReactNode;
 }) {
   return (
     <WrappedRelayProvider
-      getEnvironment={() => ({
-        environment: props.environment,
-        queryRegistry: props.queryRegistry
-      })}
+      getEnvironment={() => props.environment}
       context={props.context}
     >
       {props.children}

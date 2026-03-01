@@ -1,19 +1,16 @@
-import type { QueryRegistry } from '#@/query-cache.js';
 import type {
   TransportAdapter,
   TransportProviderComponent
 } from './types.js';
 
+import { getQueryRegistry } from '#@/environment.js';
 import { createContext, useMemo } from 'react';
 import relay from 'react-relay';
 import { Environment } from 'relay-runtime';
 
 const { RelayEnvironmentProvider } = relay;
 
-export type GetEnvironmentFn = () => {
-  environment: Environment;
-  queryRegistry: QueryRegistry;
-};
+export type GetEnvironmentFn = () => Environment;
 
 export type WrappedRelayProviderProps<P> = {
   getEnvironment: GetEnvironmentFn;
@@ -28,7 +25,8 @@ export function WrapRelayProvider<P>(
   const WrappedRelayProvider = (props: WrappedRelayProviderProps<P>) => {
     const { getEnvironment, children, ...extraProps } = props;
 
-    const { environment, queryRegistry } = useMemo(() => getEnvironment(), [getEnvironment]);
+    const environment = useMemo(() => getEnvironment(), [getEnvironment]);
+    const queryRegistry = useMemo(() => getQueryRegistry(environment), [environment]);
 
     return (
       <RelayEnvironmentProvider environment={environment}>
