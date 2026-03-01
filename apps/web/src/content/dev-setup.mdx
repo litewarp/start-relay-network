@@ -1,0 +1,184 @@
+# Development setup
+
+This guide covers setting up the `start-relay-network` monorepo for local development.
+
+## Prerequisites
+
+- **[proto](https://moonrepo.dev/proto)** — Toolchain manager (installs bun and moon)
+- **[Docker](https://www.docker.com/)** — For running PostgreSQL
+- **Git**
+
+## Clone and install
+
+```bash
+git clone https://github.com/litewarp/start-relay-network.git
+cd start-relay-network
+
+# Install the correct versions of bun and moon
+proto use
+
+# Install all dependencies
+bun install
+```
+
+`proto use` reads the `.prototools` file and installs the pinned versions of `bun` and `moon`.
+
+## Start the database
+
+The API app uses PostgreSQL. Start it with Docker Compose:
+
+```bash
+moon run api:db:up
+```
+
+This starts a PostgreSQL container with the default connection string:
+
+```
+postgres://postgres:postgres@localhost:5432/app
+```
+
+Other database commands:
+
+| Command | Description |
+|---|---|
+| `moon run api:db:up` | Start PostgreSQL container |
+| `moon run api:db:down` | Stop the container |
+| `moon run api:db:reset` | Stop container and remove volumes (full reset) |
+
+## Run the API
+
+```bash
+moon run api:dev
+```
+
+This starts the PostGraphile v5 GraphQL API on **port 4000**. You can access:
+
+- GraphQL endpoint: `http://localhost:4000/graphql`
+- GraphiQL IDE: `http://localhost:4000/graphiql`
+
+## Run the web app
+
+In a separate terminal:
+
+```bash
+moon run web:dev
+```
+
+This starts the TanStack Start development server on **port 3000**. The web app connects
+to the API at `http://localhost:4000/graphql`.
+
+## Run everything at once
+
+From the repo root:
+
+```bash
+bun dev
+```
+
+This starts both the API and web app concurrently.
+
+## Testing
+
+### Unit tests (Vitest)
+
+```bash
+# Run all unit tests
+bun test
+
+# Watch mode
+moon run :test-watch
+
+# With coverage
+moon run :test-coverage
+```
+
+### End-to-end tests (Playwright)
+
+E2E tests require both the API and web app to be running.
+
+```bash
+# Run e2e tests
+moon run e2e-testing:test
+
+# UI mode (interactive test runner)
+moon run e2e-testing:test-ui
+
+# Headed mode (see the browser)
+moon run e2e-testing:test-headed
+```
+
+## Code quality
+
+### Linting (oxlint)
+
+This project uses **oxlint**, not ESLint:
+
+```bash
+# Check for lint errors
+bun lint
+
+# Auto-fix
+moon run :lint-fix
+```
+
+### Formatting (oxfmt)
+
+This project uses **oxfmt**, not Prettier:
+
+```bash
+# Check formatting
+bun format
+
+# Auto-format
+moon run :format-write
+```
+
+### Type checking
+
+```bash
+bun typecheck
+```
+
+Uses TypeScript's native preview mode for fast type checking across the monorepo.
+
+## Project structure
+
+```
+start-relay-network/
+├── apps/
+│   ├── api/                  # PostGraphile v5 GraphQL API
+│   ├── web/                  # TanStack Start example app
+│   └── e2e-testing/          # Playwright tests
+├── packages/
+│   └── start-relay-adapter/  # Core library (@litewarp/start-relay-network)
+├── .moon/                    # Moon task definitions
+├── .prototools               # Toolchain versions (bun, moon)
+└── CLAUDE.md                 # AI assistant instructions
+```
+
+## Moon task system
+
+Moon manages tasks across the monorepo. Common patterns:
+
+```bash
+# Run a task for all projects
+moon run :task-name
+
+# Run a task for a specific project
+moon run project-name:task-name
+
+# View all projects
+moon query projects
+```
+
+## Building
+
+```bash
+# Build all packages
+bun build
+
+# Build a specific project
+moon run web:build
+```
+
+The `start-relay-adapter` package builds with **tsdown** and outputs to `dist/`.

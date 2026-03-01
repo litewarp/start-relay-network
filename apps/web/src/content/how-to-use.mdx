@@ -1,0 +1,240 @@
+# How to use start-relay-network
+
+This guide walks through integrating `@litewarp/start-relay-network` into a TanStack Start
+application with React Relay.
+
+## Install
+
+```bash
+bun add @litewarp/start-relay-network react-relay relay-runtime
+bun add -d @types/react-relay @types/relay-runtime relay-compiler
+```
+
+You'll also need the Relay Babel plugin for your Vite config:
+
+```bash
+bun add -d babel-plugin-relay
+```
+
+## 1. Configure Relay compiler
+
+Create a `relay.config.json` in your app root:
+
+```json
+{
+  "artifactDirectory": "./src/__generated__",
+  "src": "./src",
+  "schema": "./path/to/schema.graphql",
+  "language": "typescript",
+  "eagerEsModules": true,
+  "useImportTypeSyntax": true
+}
+```
+
+Add the Relay Babel plugin to your Vite config so `graphql` tagged templates are compiled
+at build time:
+
+```tsx
+// vite.config.ts
+import viteReact from "@vitejs/plugin-react";
+
+export default defineConfig({
+  plugins: [
+    viteReact({
+      babel: { plugins: ["relay"] },
+    }),
+  ],
+});
+```
+
+## 2. Create the Relay environment
+
+Use `createRelayEnvironment` with `createIsomorphicFn` from TanStack Start to create
+platform-specific environments:
+
+```tsx
+// src/lib/relay/environment.ts
+import { createIsomorphicFn } from "@tanstack/react-start";
+import { createRelayEnvironment } from "@litewarp/start-relay-network";
+import { grafastRelayTransform } from "@litewarp/start-relay-network/transforms/grafast-relay";
+
+function createConfig(isServer: boolean) {
+  return {
+    url: "http://localhost:4000/graphql",
+    getFetchOptions: async (request, variables) => ({
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: request.text,
+        variables,
+      }),
+    }),
+    responseTransforms: [grafastRelayTransform],
+    isServer,
+  };
+}
+
+export const getRelayEnvironment = createIsomorphicFn()
+  .client(() => createRelayEnvironment(createConfig(false)))
+  .server(() => createRelayEnvironment(createConfig(true)));
+```
+
+### Configuration options
+
+| Option | Type | Description |
+|---|---|---|
+| `url` | `string` | GraphQL endpoint URL |
+| `getFetchOptions` | `(request, variables, cacheConfig) => Promise<RequestInit>` | Builds the fetch options for each request |
+| `responseTransforms` | `ResponseTransform[]` | Normalize server responses to Relay's format |
+| `middleware` | `RelayMiddleware[]` | Intercept/modify requests before they're sent |
+| `isServer` | `boolean` | Explicitly set the runtime mode |
+
+## 3. Integrate with the router
+
+In your router setup file, call `integrateRelayWithRouter` to wire Relay into TanStack Start:
+
+```tsx
+// src/router.tsx
+import { createRouter } from "@tanstack/react-router";
+import { integrateRelayWithRouter } from "@litewarp/start-relay-network";
+import type { RelayRouterContext } from "@litewarp/start-relay-network";
+import { routeTree } from "./routeTree.gen";
+import { getRelayEnvironment } from "./lib/relay/environment";
+
+export function getRouter() {
+  const { environment, preloadQuery } = getRelayEnvironment();
+
+  const router = createRouter({
+    routeTree,
+    defaultPreload: "intent",
+    scrollRestoration: true,
+    context: { environment, preloadQuery },
+  });
+
+  integrateRelayWithRouter({ router, environment });
+
+  return router;
+}
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: ReturnType<typeof getRouter>;
+  }
+}
+```
+
+Your root route should use `createRootRouteWithContext<RelayRouterContext>()` so that
+`context.preloadQuery` and `context.environment` are available in all route loaders.
+
+## 4. Use preloadQuery in route loaders
+
+Preload data in route loaders using `context.preloadQuery`, then consume it with
+Relay's `usePreloadedQuery` hook:
+
+```tsx
+// src/routes/index.tsx
+import { createFileRoute } from "@tanstack/react-router";
+import relay from "react-relay";
+import type { indexQuery } from "../__generated__/indexQuery.graphql";
+
+const { graphql, usePreloadedQuery } = relay;
+
+const query = graphql`
+  query indexQuery {
+    viewer {
+      name
+      email
+    }
+  }
+`;
+
+export const Route = createFileRoute("/")({
+  loader: ({ context }) => {
+    const preloadedQuery = context.preloadQuery<indexQuery>(query, {});
+    return { preloadedQuery };
+  },
+  component: HomePage,
+});
+
+function HomePage() {
+  const { preloadedQuery } = Route.useLoaderData();
+  const data = usePreloadedQuery<indexQuery>(query, preloadedQuery);
+
+  return <h1>Hello, {data.viewer?.name}</h1>;
+}
+```
+
+## 5. Choose a response transform
+
+Pick the transform that matches your GraphQL server:
+
+### PostGraphile v5 / Grafast
+
+```tsx
+import { grafastRelayTransform } from "@litewarp/start-relay-network/transforms/grafast-relay";
+
+createRelayEnvironment({
+  // ...
+  responseTransforms: [grafastRelayTransform],
+});
+```
+
+Converts Grafast's v16 incremental delivery format (`hasNext`, `path`, `label`) into Relay's
+expected wire format (`extensions.is_final`).
+
+### 2023 Incremental Delivery spec
+
+```tsx
+import { incrementalDeliveryTransform } from "@litewarp/start-relay-network/transforms/incremental-delivery";
+
+createRelayEnvironment({
+  // ...
+  responseTransforms: [incrementalDeliveryTransform],
+});
+```
+
+Converts the 2023 spec format (`pending`/`incremental`/`completed`) into Relay's format.
+
+### Standard GraphQL servers
+
+If your server already returns responses in the format Relay expects (or doesn't use
+`@defer`/`@stream`), you don't need any response transforms.
+
+## 6. Write middleware
+
+Middleware lets you modify requests before they're sent. Common use cases include
+authentication, logging, and request tagging:
+
+```tsx
+import type { RelayMiddleware } from "@litewarp/start-relay-network";
+
+const authMiddleware: RelayMiddleware = async (ctx) => {
+  const token = await getAuthToken();
+  return {
+    ...ctx,
+    fetchOptions: {
+      ...ctx.fetchOptions,
+      headers: {
+        ...ctx.fetchOptions.headers,
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  };
+};
+
+createRelayEnvironment({
+  // ...
+  middleware: [authMiddleware],
+});
+```
+
+Middleware runs sequentially in the order provided. Each middleware receives and returns
+a `RequestContext` containing:
+
+- `request` — GraphQL request metadata (query text, operation name)
+- `variables` — Query variables
+- `cacheConfig` — Relay cache configuration
+- `fetchOptions` — Standard `RequestInit` for the fetch call
+- `url` — The GraphQL endpoint URL
