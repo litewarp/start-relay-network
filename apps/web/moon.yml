@@ -23,7 +23,6 @@ tasks:
     outputs:
       - .output/**/*
     deps:
-      - relay
       - start-relay-adapter:build
 
   preview:
@@ -41,4 +40,7 @@ tasks:
 
   relay:
     command: bun run relay-compiler
-    inputs: ['./src/**/*.{ts,tsx}']
+    inputs:
+      - src/**/*.{ts,tsx}
+      - src/**/*.graphql
+    outputs: ["src/__generated__/**/*"]

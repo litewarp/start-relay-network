@@ -1,41 +1,30 @@
-import debug from 'debug';
+const PREFIX = 'start-relay-network';
 
-/**
- * Debug logger configuration for start-relay-network package
- *
- * Enable debug logging by setting the DEBUG environment variable:
- *
- * - `DEBUG=start-relay-network:*` - Enable all logs
- * - `DEBUG=start-relay-network:fetch` - Enable fetch logs only
- * - `DEBUG=start-relay-network:network:*` - Enable all network logs
- * - `DEBUG=start-relay-network:*,-start-relay-network:transport` - Enable all except transport logs
- *
- * Example usage:
- * ```bash
- * DEBUG=start-relay-network:* npm run dev
- * ```
- */
+function createLogger(namespace: string, alwaysEnabled = false) {
+  const tag = `[${namespace}]`;
+  const fn = (...args: unknown[]) => {
+    if (fn.enabled) console.debug(tag, ...args);
+  };
+  fn.enabled = alwaysEnabled;
+  return fn;
+}
 
 // Core subsystems
-export const debugFetch = debug('start-relay-network:fetch');
-export const debugPreload = debug('start-relay-network:preload');
-export const debugCache = debug('start-relay-network:cache');
+export const debugFetch = createLogger(`${PREFIX}:fetch`);
+export const debugPreload = createLogger(`${PREFIX}:preload`);
+export const debugCache = createLogger(`${PREFIX}:cache`);
 
 // Network layer
-export const debugNetwork = debug('start-relay-network:network');
-export const debugNetworkClient = debug('start-relay-network:network:client');
-export const debugNetworkServer = debug('start-relay-network:network:server');
+export const debugNetwork = createLogger(`${PREFIX}:network`);
+export const debugNetworkClient = createLogger(`${PREFIX}:network:client`);
+export const debugNetworkServer = createLogger(`${PREFIX}:network:server`);
 
 // Transport layer
-export const debugTransport = debug('start-relay-network:transport');
-export const debugTransportClient = debug('start-relay-network:transport:client');
-export const debugTransportServer = debug('start-relay-network:transport:server');
-export const debugHydration = debug('start-relay-network:hydration');
+export const debugTransport = createLogger(`${PREFIX}:transport`);
+export const debugTransportClient = createLogger(`${PREFIX}:transport:client`);
+export const debugTransportServer = createLogger(`${PREFIX}:transport:server`);
+export const debugHydration = createLogger(`${PREFIX}:hydration`);
 
 // Warning and error loggers (always enabled unless explicitly disabled)
-export const warnRelay = debug('start-relay-network:warn');
-export const errorRelay = debug('start-relay-network:error');
-
-// Enable warn and error by default
-warnRelay.enabled = true;
-errorRelay.enabled = true;
+export const warnRelay = createLogger(`${PREFIX}:warn`, true);
+export const errorRelay = createLogger(`${PREFIX}:error`, true);

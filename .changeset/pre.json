@@ -7,7 +7,10 @@
     "@litewarp/start-relay-network": "0.0.1-alpha.1"
   },
   "changesets": [
+    "chatty-monkeys-work",
     "cold-moments-nail",
-    "goofy-phones-study"
+    "fix-debug-external",
+    "goofy-phones-study",
+    "twenty-readers-pump"
   ]
 }
