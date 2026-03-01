@@ -114,24 +114,6 @@ describe('ServerTransport', () => {
     });
   });
 
-  describe('streamValue', () => {
-    it('enqueues value event to stream', async () => {
-      const transport = new ServerTransport();
-
-      transport.streamValue('test-id', { custom: 'data' });
-      transport.drainAndClose();
-
-      const events = await collectStream(transport.stream);
-
-      expect(events).toHaveLength(1);
-      expect(events[0]).toEqual({
-        type: 'value',
-        id: 'test-id',
-        value: { custom: 'data' }
-      });
-    });
-  });
-
   describe('drainAndClose', () => {
     it('closes stream immediately when no ongoing requests', async () => {
       const transport = new ServerTransport();
@@ -248,76 +230,6 @@ describe('ClientTransport', () => {
     });
   });
 
-  describe('value streaming', () => {
-    it('stores and retrieves streamed values', async () => {
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue({ type: 'value', id: ':id1:', value: 'test-value' });
-          controller.close();
-        }
-      });
-
-      const client = new ClientTransport(stream);
-      await flushMicrotasks();
-
-      expect(client.getStreamedValue(':id1:')).toBe('test-value');
-    });
-
-    it('returns undefined for non-existent values', async () => {
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.close();
-        }
-      });
-
-      const client = new ClientTransport(stream);
-      await flushMicrotasks();
-
-      expect(client.getStreamedValue('non-existent')).toBeUndefined();
-    });
-
-    it('can consume streamed values', async () => {
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue({ type: 'value', id: 'val1', value: 'data' });
-          controller.close();
-        }
-      });
-
-      const client = new ClientTransport(stream);
-      await flushMicrotasks();
-
-      expect(client.getStreamedValue('val1')).toBe('data');
-      client.consumeStreamedValue('val1');
-      expect(client.getStreamedValue('val1')).toBeUndefined();
-    });
-
-    it('separates value events from query events', async () => {
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue({ type: 'value', id: 'v1', value: 'stored' });
-          controller.enqueue({
-            type: 'started',
-            id: 'q1',
-            operation: {} as any
-          });
-          controller.close();
-        }
-      });
-
-      const client = new ClientTransport(stream);
-      await flushMicrotasks();
-
-      const queryEvents: any[] = [];
-      client.subscribeToEvents({ next: (event) => queryEvents.push(event) });
-
-      // Value should be stored
-      expect(client.getStreamedValue('v1')).toBe('stored');
-      // Only query event should be emitted
-      expect(queryEvents).toHaveLength(1);
-      expect(queryEvents[0].type).toBe('started');
-    });
-  });
 });
 
 describe('transportSerializationAdapter', () => {

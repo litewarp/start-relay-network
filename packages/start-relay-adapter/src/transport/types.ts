@@ -20,14 +20,9 @@ export type QueryEvent =
       id: string;
     });
 
-export interface ValueEvent<T = unknown> {
-  type: 'value';
-  value: T;
-  id: string;
-}
 export type QueryProgressEvent = Exclude<QueryEvent, { type: 'started' }>;
 
-export type TransportStream = ReadableStream<QueryEvent | ValueEvent>;
+export type TransportStream = ReadableStream<QueryEvent>;
 
 /** @deprecated Use `TransportStream` instead */
 export type Transported = TransportStream;
@@ -54,10 +49,3 @@ export type TransportProviderComponent<TExtraProps> = FC<
 export type DataTransportProviderImplementation<T> = TransportProviderComponent<T>;
 
 export type Transport = ServerTransport | ClientTransport;
-
-export interface TransportAdapter {
-  useStaticValueRef<T>(value: T): { current: T };
-}
-
-/** @deprecated Use `TransportAdapter` instead */
-export type DataTransportAbstraction = TransportAdapter;

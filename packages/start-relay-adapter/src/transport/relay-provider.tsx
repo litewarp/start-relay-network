@@ -1,4 +1,4 @@
-import { DataTransportContext, WrapRelayProvider } from './wrap-relay-provider.jsx';
+import { WrapRelayProvider } from './wrap-relay-provider.jsx';
 
 import type { Transport } from './types.js';
 import type { Environment } from 'relay-runtime';
@@ -24,11 +24,7 @@ const WrappedRelayProvider = WrapRelayProvider<{
     });
     transport.onStreamClosed = props.onStreamClosed;
   }
-  return (
-    <DataTransportContext.Provider value={transport}>
-      {props.children}
-    </DataTransportContext.Provider>
-  );
+  return props.children;
 });
 
 export function RelayProvider(props: {

@@ -4,23 +4,27 @@ import {
   incrementalDeliveryTransform,
 } from "@litewarp/start-relay-network";
 
-const config = {
-  url: "http://localhost:4000/graphql",
-  getFetchOptions: async (request: { text: string | null | undefined }, variables: Record<string, unknown>) => {
-    return {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: request.text,
-        variables,
-      }),
-    };
-  },
-  responseTransforms: [incrementalDeliveryTransform],
-};
+function createConfig(isServer: boolean) {
+  return {
+    url: "http://localhost:4000/graphql",
+    getFetchOptions: async (request: { text: string | null | undefined }, variables: Record<string, unknown>) => {
+      return {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Relay-Environment": isServer ? "server" : "client",
+        },
+        body: JSON.stringify({
+          query: request.text,
+          variables,
+        }),
+      };
+    },
+    responseTransforms: [incrementalDeliveryTransform],
+    isServer,
+  };
+}
 
 export const getRelayEnvironment = createIsomorphicFn()
-  .client(() => createRelayEnvironment({ ...config, isServer: false }))
-  .server(() => createRelayEnvironment({ ...config, isServer: true }));
+  .client(() => createRelayEnvironment(createConfig(false)))
+  .server(() => createRelayEnvironment(createConfig(true)));

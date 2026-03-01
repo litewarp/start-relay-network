@@ -1,10 +1,9 @@
 import type {
-  TransportAdapter,
   TransportProviderComponent
 } from './types.js';
 
 import { getQueryRegistry } from '#@/environment.js';
-import { createContext, useMemo } from 'react';
+import { useMemo } from 'react';
 import relay from 'react-relay';
 import { Environment } from 'relay-runtime';
 
@@ -16,8 +15,6 @@ export type WrappedRelayProviderProps<P> = {
   getEnvironment: GetEnvironmentFn;
   children: React.ReactNode;
 } & P;
-
-export const DataTransportContext = createContext<TransportAdapter | null>(null);
 
 export function WrapRelayProvider<P>(
   TransportProvider: TransportProviderComponent<P>
