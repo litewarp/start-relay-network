@@ -87,11 +87,6 @@ describe('createClientFetchFn', () => {
   function createClientNetwork(queryRegistry?: QueryRegistry) {
     return createClientFetchFn({
       url: 'http://test.com/graphql',
-      getFetchOptions: async () => ({
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: 'test' })
-      }),
       queryRegistry: queryRegistry ?? new QueryRegistry()
     });
   }

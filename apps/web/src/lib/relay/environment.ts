@@ -5,19 +5,6 @@ import { grafastRelayTransform } from "@litewarp/start-relay-network/transforms/
 function createConfig(isServer: boolean) {
   return {
     url: "http://localhost:4000/graphql",
-    getFetchOptions: async (request: { text: string | null | undefined }, variables: Record<string, unknown>) => {
-      return {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Relay-Environment": isServer ? "server" : "client",
-        },
-        body: JSON.stringify({
-          query: request.text,
-          variables,
-        }),
-      };
-    },
     responseTransforms: [grafastRelayTransform],
     isServer,
   };

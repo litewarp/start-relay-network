@@ -5,7 +5,6 @@ import { createServerPreloader } from './preload/server.js';
 import { createClientPreloader } from './preload/client.js';
 
 import type { RelayMiddleware, ResponseTransform } from './middleware/types.js';
-import type { GetFetchOptionsFn } from './network/types.js';
 
 import { Environment } from 'relay-runtime';
 
@@ -33,7 +32,6 @@ function setOptions(environment: Environment, opts: RelayEnvironmentOptions): vo
 
 export interface CreateRelayEnvironmentOptions {
   url: string;
-  getFetchOptions: GetFetchOptionsFn;
   middleware?: RelayMiddleware[];
   responseTransforms?: ResponseTransform[];
   /** Explicitly set server/client mode. If omitted, uses `typeof window === 'undefined'`. */
@@ -43,14 +41,13 @@ export interface CreateRelayEnvironmentOptions {
 export function createRelayEnvironment(options: CreateRelayEnvironmentOptions) {
   const {
     url,
-    getFetchOptions,
     middleware,
     responseTransforms,
     isServer = typeof window === 'undefined',
   } = options;
 
   const queryRegistry = createQueryRegistry({ isServer });
-  const networkConfig = { url, getFetchOptions, queryRegistry, middleware, responseTransforms };
+  const networkConfig = { url, queryRegistry, middleware, responseTransforms };
 
   const network = isServer
     ? createServerFetchFn(networkConfig)

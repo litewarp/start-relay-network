@@ -86,7 +86,7 @@ export function hydratePreloadedQuery<TQuery extends OperationType>(
     name: dehydratedQuery.name,
     variables: dehydratedQuery.variables,
     $__relay_queryRef: dehydratedQuery.$__relay_queryRef,
-  } as unknown as PreloadedQuery<TQuery>;
+  };
 }
 
 export function createPreloadedQuerySerializer<TQuery extends OperationType>(
@@ -98,9 +98,8 @@ export function createPreloadedQuerySerializer<TQuery extends OperationType>(
   >({
     key: "relay-ssr-preloaded-query",
     test: isStreamedPreloadedQuery,
-    toSerializable: (value) => {
-      return dehydratePreloadedQuery(value);
-    },
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+    toSerializable: (value) => dehydratePreloadedQuery(value) as any,
     fromSerializable: (value) => {
       return hydratePreloadedQuery(environment, value);
     },

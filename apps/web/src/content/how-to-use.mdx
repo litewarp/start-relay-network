@@ -18,21 +18,8 @@ bun add -d babel-plugin-relay
 
 ## 1. Configure Relay compiler
 
-Create a `relay.config.json` in your app root:
-
-```json
-{
-  "artifactDirectory": "./src/__generated__",
-  "src": "./src",
-  "schema": "./path/to/schema.graphql",
-  "language": "typescript",
-  "eagerEsModules": true,
-  "useImportTypeSyntax": true
-}
-```
-
-Add the Relay Babel plugin to your Vite config so `graphql` tagged templates are compiled
-at build time:
+Follow the official [Relay installation guide](https://relay.dev/docs/getting-started/installation-and-setup/)
+to set up the compiler, then add the Babel plugin to your Vite config:
 
 ```tsx
 // vite.config.ts
@@ -61,16 +48,6 @@ import { grafastRelayTransform } from "@litewarp/start-relay-network/transforms/
 function createConfig(isServer: boolean) {
   return {
     url: "http://localhost:4000/graphql",
-    getFetchOptions: async (request, variables) => ({
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: request.text,
-        variables,
-      }),
-    }),
     responseTransforms: [grafastRelayTransform],
     isServer,
   };
@@ -86,14 +63,15 @@ export const getRelayEnvironment = createIsomorphicFn()
 | Option | Type | Description |
 |---|---|---|
 | `url` | `string` | GraphQL endpoint URL |
-| `getFetchOptions` | `(request, variables, cacheConfig) => Promise<RequestInit>` | Builds the fetch options for each request |
 | `responseTransforms` | `ResponseTransform[]` | Normalize server responses to Relay's format |
 | `middleware` | `RelayMiddleware[]` | Intercept/modify requests before they're sent |
 | `isServer` | `boolean` | Explicitly set the runtime mode |
 
 ## 3. Integrate with the router
 
-In your router setup file, call `integrateRelayWithRouter` to wire Relay into TanStack Start:
+Wire Relay into TanStack Start by calling `integrateRelayWithRouter` in your router setup.
+Your root route should use `createRootRouteWithContext<RelayRouterContext>()` so that
+`context.preloadQuery` and `context.environment` are available in all route loaders.
 
 ```tsx
 // src/router.tsx
@@ -125,8 +103,15 @@ declare module "@tanstack/react-router" {
 }
 ```
 
-Your root route should use `createRootRouteWithContext<RelayRouterContext>()` so that
-`context.preloadQuery` and `context.environment` are available in all route loaders.
+```tsx
+// src/routes/__root.tsx
+import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import type { RelayRouterContext } from "@litewarp/start-relay-network";
+
+export const Route = createRootRouteWithContext<RelayRouterContext>()({
+  component: () => <Outlet />,
+});
+```
 
 ## 4. Use preloadQuery in route loaders
 
@@ -204,13 +189,37 @@ If your server already returns responses in the format Relay expects (or doesn't
 
 ## 6. Write middleware
 
-Middleware lets you modify requests before they're sent. Common use cases include
-authentication, logging, and request tagging:
+Middleware lets you modify requests before they're sent. Use `createMiddleware` for
+type-safe middleware with an optional generic for custom `meta` properties.
+
+Each request starts with these default fetch options:
+
+```ts
+{
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ query: request.text, variables }),
+}
+```
+
+Middleware runs sequentially in the order provided. Each middleware receives and returns
+a `RequestContext` containing:
+
+- `request` — GraphQL request metadata (query text, operation name)
+- `variables` — Query variables
+- `cacheConfig` — Relay cache configuration
+- `fetchOptions` — Standard `RequestInit` for the fetch call
+- `url` — The GraphQL endpoint URL
+- `meta` — A shared bag for passing data between middleware
+
+### Auth token middleware
+
+Add an `Authorization` header to every request:
 
 ```tsx
-import type { RelayMiddleware } from "@litewarp/start-relay-network";
+import { createMiddleware } from "@litewarp/start-relay-network";
 
-const authMiddleware: RelayMiddleware = async (ctx) => {
+const authMiddleware = createMiddleware(async (ctx) => {
   const token = await getAuthToken();
   return {
     ...ctx,
@@ -222,19 +231,88 @@ const authMiddleware: RelayMiddleware = async (ctx) => {
       },
     },
   };
-};
+});
 
 createRelayEnvironment({
-  // ...
+  url: "http://localhost:4000/graphql",
   middleware: [authMiddleware],
 });
 ```
 
-Middleware runs sequentially in the order provided. Each middleware receives and returns
-a `RequestContext` containing:
+### Passing data between middleware with `meta`
 
-- `request` — GraphQL request metadata (query text, operation name)
-- `variables` — Query variables
-- `cacheConfig` — Relay cache configuration
-- `fetchOptions` — Standard `RequestInit` for the fetch call
-- `url` — The GraphQL endpoint URL
+The `meta` bag is typed as `Record<string, unknown>`. Use the generic parameter on
+`createMiddleware` to narrow `ctx.meta` within a single middleware callback. When reading
+`meta` in a later middleware, pass the same generic — the types aren't automatically
+chained across the middleware array, so you'll need to cast:
+
+```tsx
+import { createMiddleware } from "@litewarp/start-relay-network";
+
+interface AppMeta {
+  authService: AuthService;
+}
+
+// First middleware: stash a service in meta
+const serviceMiddleware = createMiddleware<AppMeta>(async (ctx) => ({
+  ...ctx,
+  meta: { ...ctx.meta, authService: await resolveAuthService() },
+}));
+
+// Second middleware: read from meta (same generic to get typed access)
+const tokenMiddleware = createMiddleware<AppMeta>(async (ctx) => {
+  const token = await ctx.meta.authService.getToken();
+  return {
+    ...ctx,
+    fetchOptions: {
+      ...ctx.fetchOptions,
+      headers: {
+        ...ctx.fetchOptions.headers,
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  };
+});
+
+createRelayEnvironment({
+  url: "http://localhost:4000/graphql",
+  middleware: [serviceMiddleware, tokenMiddleware],
+});
+```
+
+### Persisted queries middleware
+
+Replace the full query text with a document ID:
+
+```tsx
+const persistedQueriesMiddleware = createMiddleware((ctx) => ({
+  ...ctx,
+  fetchOptions: {
+    ...ctx.fetchOptions,
+    body: JSON.stringify({
+      documentId: ctx.request.id,
+      variables: ctx.variables,
+    }),
+  },
+}));
+```
+
+### Custom request body middleware
+
+For servers that expect a different request shape:
+
+```tsx
+const customBodyMiddleware = createMiddleware((ctx) => ({
+  ...ctx,
+  fetchOptions: {
+    ...ctx.fetchOptions,
+    body: JSON.stringify({
+      query: ctx.request.text,
+      variables: ctx.variables,
+      extensions: {
+        operationName: ctx.request.name,
+      },
+    }),
+  },
+}));
+```

@@ -24,7 +24,7 @@ requires solving several problems:
 
 The package creates a Relay environment that works on both server and client using
 `createRelayEnvironment()`. A single configuration object defines the GraphQL endpoint,
-fetch options, middleware, and response transforms — the function returns the appropriate
+middleware, and response transforms — the function returns the appropriate
 environment for the current runtime.
 
 ```tsx
@@ -32,8 +32,8 @@ import { createRelayEnvironment } from "@litewarp/start-relay-network";
 import { createIsomorphicFn } from "@tanstack/react-start";
 
 export const getRelayEnvironment = createIsomorphicFn()
-  .client(() => createRelayEnvironment({ url, getFetchOptions, isServer: false }))
-  .server(() => createRelayEnvironment({ url, getFetchOptions, isServer: true }));
+  .client(() => createRelayEnvironment({ url, isServer: false }))
+  .server(() => createRelayEnvironment({ url, isServer: true }));
 ```
 
 ### Query preloading
