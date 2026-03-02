@@ -13,6 +13,7 @@ export default defineConfig({
     { enforce: 'pre' as const, ...mdx() },
     tanstackStart({
       srcDirectory: 'src',
+      server: { entry: './server/entry.ts' },
     }),
     viteReact({
       babel: {

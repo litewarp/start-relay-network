@@ -10,16 +10,18 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build && tsc --noEmit",
-    "preview": "vite preview",
-    "start": "node .output/server/index.mjs"
+    "preview": "vite preview"
   },
   "dependencies": {
+    "@graphile-contrib/pg-many-to-many": "^2.0.0-rc.2",
     "@litewarp/start-relay-network": "workspace:*",
     "@lonik/themer": "^0.5.4",
     "@tanstack/react-router": "^1.170.36",
     "@tanstack/react-router-devtools": "^1.167.2",
     "@tanstack/react-start": "^1.168.54",
     "nanoid": "^5.1.16",
+    "pg": "^8.23.0",
+    "postgraphile": "^5.1.5",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-relay": "^21.0.1",
@@ -28,6 +30,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@graphile/simplify-inflection": "^8.0.0",
     "@heroui/react": "^3.2.5",
     "@heroui/styles": "^3.2.5",
     "@mdx-js/react": "^3.1.1",
@@ -35,6 +38,7 @@
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.3",
     "@types/mdx": "^2.0.14",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^5.2.0",

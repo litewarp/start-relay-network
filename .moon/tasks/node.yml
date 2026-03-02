@@ -59,7 +59,7 @@ tasks:
       - 'tsconfig.json'
 
   test:
-    command: 'bun run vitest run'
+    command: 'bun run vitest run --passWithNoTests'
     inputs:
       - '@globs(sources)'
       - '@globs(tests)'
@@ -72,7 +72,7 @@ tasks:
       persistent: true
 
   test-coverage:
-    command: 'bun run vitest run --coverage'
+    command: 'bun run vitest run --coverage --passWithNoTests'
     inputs:
       - '@globs(sources)'
       - '@globs(tests)'

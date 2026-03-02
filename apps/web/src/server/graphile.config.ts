@@ -6,9 +6,13 @@ import { StreamDeferPlugin } from 'postgraphile/graphile-build';
 import { PgManyToManyPreset } from '@graphile-contrib/pg-many-to-many';
 import { EnvironmentPlugin } from './plugins/environment-plugin.js';
 
-const IS_DEV = process.env.GRAPHILE_ENV === 'development';
-const HOST = process.env.HOST ?? 'localhost';
-const PORT = process.env.PORT ? parseInt(process.env.PORT) : 4000;
+declare global {
+  namespace Grafast {
+    interface RequestContext {
+      relayEnvironment?: string;
+    }
+  }
+}
 
 const preset = {
   extends: [
@@ -18,35 +22,20 @@ const preset = {
     PgManyToManyPreset,
   ],
   plugins: [StreamDeferPlugin, EnvironmentPlugin],
-  grafserv: {
-    host: HOST,
-    port: PORT,
-    graphiql: IS_DEV,
-    watch: IS_DEV,
-    graphiqlPath: '/graphiql',
-    graphiqlOnGraphQLGET: IS_DEV,
-  },
   grafast: {
-    explain: IS_DEV,
     context(requestContext, _args) {
-      const req = requestContext.expressv4?.req ?? requestContext.node?.req;
-      const header = req?.headers?.['x-relay-environment'];
       return {
-        relayEnvironment: typeof header === 'string' ? header : undefined,
+        relayEnvironment: requestContext.relayEnvironment,
       };
     },
   },
-  gather: {
-    installWatchFixtures: IS_DEV,
-  },
-  schema: {
-    exportSchemaSDLPath: IS_DEV ? './schema.graphql' : undefined,
-  },
   pgServices: [
     makePgService({
-      connectionString: process.env.CONNECTION_STRING,
+      connectionString:
+        process.env.CONNECTION_STRING ??
+        process.env.DATABASE_URL ??
+        'postgres://postgres:postgres@localhost:6432/starwars',
       schemas: ['app_public'],
-      superuserConnectionString: process.env.SUPERUSER_CONNECTION_STRING,
     }),
   ],
 } satisfies GraphileConfig.Preset;

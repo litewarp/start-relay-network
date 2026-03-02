@@ -18,10 +18,10 @@ tasks:
     command: bun run vite build
     inputs:
       - src/**/*
-      - app.config.ts
+      - vite.config.ts
       - tsconfig.json
     outputs:
-      - .output/**/*
+      - dist/**/*
     deps:
       - start-relay-adapter:build
 
@@ -31,12 +31,11 @@ tasks:
       persistent: true
       cache: false
 
-  start:
-    command: bun run .output/server/index.mjs
+  # The adapter's build wipes dist/ before re-emitting types, so typecheck
+  # must wait for it rather than race it.
+  typecheck:
     deps:
-      - build
-    options:
-      persistent: true
+      - start-relay-adapter:build
 
   relay:
     command: bun run relay-compiler

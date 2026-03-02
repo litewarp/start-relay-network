@@ -12,8 +12,8 @@ A monorepo for Start Relay Network - a TanStack Start adapter for React Relay wi
 
 Managed by **moonrepo** with **bun** as the package manager and runtime.
 
-- `apps/api` - PostGraphile v5 GraphQL API with PostgreSQL backend
-- `apps/web` - TanStack Start frontend application demonstrating Relay integration (with MDX docs under `/docs`)
+- `apps/api` - Standalone PostGraphile v5 GraphQL API (Express). Owns the Postgres Docker setup, migrations, and the exported `schema.graphql` that relay-compiler reads. The web app no longer calls it at runtime.
+- `apps/web` - TanStack Start frontend application demonstrating Relay integration (with MDX docs under `/docs`). It embeds a PostGraphile handler at `/api/graphql` via a custom server entry (`src/server/entry.ts`), so it only needs Postgres, not the API app.
 - `packages/start-relay-adapter` - Core library for TanStack Start + Relay SSR integration, published as `@litewarp/start-relay-network`
 
 ### Key Technologies
@@ -66,6 +66,7 @@ Located in `apps/web/`:
 - **Router Setup**: `src/router.tsx` configures router with error boundaries and 404 handling
 - **Styling**: Tailwind CSS v4 with HeroUI
 - **Relay artifacts**: `src/__generated__/` is produced by `moon run web:relay` (relay-compiler) from `apps/api/schema.graphql`. Re-run it after changing queries or the schema.
+- **Embedded GraphQL**: `src/server/entry.ts` intercepts `POST /api/graphql` and hands it to `src/server/graphile-handler.ts` (Grafast execute with inlined Relay response transforms and multipart streaming); everything else goes to the TanStack Start handler. The preset lives in `src/server/graphile.config.ts`. Import graphile presets by name (`import { PostGraphileAmberPreset } ...`); default imports arrive as a CommonJS namespace under Vite SSR. The Start plugin resolves `server.entry` relative to `srcDirectory`. The server-side Relay environment resolves `/api/graphql` against the incoming request URL with `getRequestUrl()`.
 
 ## Common Development Commands
 
@@ -151,7 +152,7 @@ moon query tasks
 
 1. **Setup**: Run `proto use` to install toolchain (moon, bun), then `bun install`
 2. **API Development**: Copy `apps/api/.env.example` to `.env`, then `moon run api:dev` (starts the Postgres container and the API). First time, run `moon run api:reset` to load the schema and seed data.
-3. **Frontend Development**: Ensure API is running, then `moon run web:dev`
+3. **Frontend Development**: Ensure Postgres is running (`moon run api:db-up`), copy `apps/web/.env.example` to `.env`, then `moon run web:dev`. The web server answers GraphQL itself at `/api/graphql`; the API app is only needed for GraphiQL or to regenerate `schema.graphql`.
 4. **Tests**: Unit tests with Vitest (`bun run test`)
 5. **CI**: `.github/workflows/ci.yml` runs format check, lint, typecheck, test, and build on pushes and PRs; `deploy.yml` runs Neon migrations and deploys to Vercel on pushes to `main`
 
