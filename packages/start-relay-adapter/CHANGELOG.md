@@ -1,5 +1,11 @@
 # @litewarp/start-relay-network
 
+## 1.0.0-beta.7
+
+### Major Changes
+
+- Beta refactor: remove getFetchOptions, fix PreloadedQuery types, add createMiddleware
+
 ## 1.0.0-alpha.6
 
 ### Patch Changes
