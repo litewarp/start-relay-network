@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import express from 'express';
-import { grafserv } from 'grafserv/express/v4';
+import { grafserv } from 'postgraphile/grafserv/express/v4';
 import { pgl } from './pgl';
 import preset from './graphile.config.js';
 import cors from 'cors';

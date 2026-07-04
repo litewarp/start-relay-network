@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as FilmsIdRouteImport } from './routes/films.$id'
 import { Route as FilmIdRouteImport } from './routes/film.$id'
 import { Route as PathlessLayoutNestedLayoutRouteImport } from './routes/_pathlessLayout/_nested-layout'
 import { Route as PathlessLayoutNestedLayoutRouteBRouteImport } from './routes/_pathlessLayout/_nested-layout/route-b'
@@ -18,6 +19,11 @@ import { Route as PathlessLayoutNestedLayoutRouteARouteImport } from './routes/_
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FilmsIdRoute = FilmsIdRouteImport.update({
+  id: '/films/$id',
+  path: '/films/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FilmIdRoute = FilmIdRouteImport.update({
@@ -46,12 +52,14 @@ const PathlessLayoutNestedLayoutRouteARoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/film/$id': typeof FilmIdRoute
+  '/films/$id': typeof FilmsIdRoute
   '/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/film/$id': typeof FilmIdRoute
+  '/films/$id': typeof FilmsIdRoute
   '/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
 }
@@ -60,19 +68,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_pathlessLayout/_nested-layout': typeof PathlessLayoutNestedLayoutRouteWithChildren
   '/film/$id': typeof FilmIdRoute
+  '/films/$id': typeof FilmsIdRoute
   '/_pathlessLayout/_nested-layout/route-a': typeof PathlessLayoutNestedLayoutRouteARoute
   '/_pathlessLayout/_nested-layout/route-b': typeof PathlessLayoutNestedLayoutRouteBRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/film/$id' | '/route-a' | '/route-b'
+  fullPaths: '/' | '/film/$id' | '/films/$id' | '/route-a' | '/route-b'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/film/$id' | '/route-a' | '/route-b'
+  to: '/' | '/film/$id' | '/films/$id' | '/route-a' | '/route-b'
   id:
     | '__root__'
     | '/'
     | '/_pathlessLayout/_nested-layout'
     | '/film/$id'
+    | '/films/$id'
     | '/_pathlessLayout/_nested-layout/route-a'
     | '/_pathlessLayout/_nested-layout/route-b'
   fileRoutesById: FileRoutesById
@@ -81,6 +91,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PathlessLayoutNestedLayoutRoute: typeof PathlessLayoutNestedLayoutRouteWithChildren
   FilmIdRoute: typeof FilmIdRoute
+  FilmsIdRoute: typeof FilmsIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -90,6 +101,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/films/$id': {
+      id: '/films/$id'
+      path: '/films/$id'
+      fullPath: '/films/$id'
+      preLoaderRoute: typeof FilmsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/film/$id': {
@@ -145,6 +163,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PathlessLayoutNestedLayoutRoute: PathlessLayoutNestedLayoutRouteWithChildren,
   FilmIdRoute: FilmIdRoute,
+  FilmsIdRoute: FilmsIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

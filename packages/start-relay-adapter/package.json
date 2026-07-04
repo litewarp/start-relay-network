@@ -30,18 +30,18 @@
     "build": "tsdown"
   },
   "devDependencies": {
-    "@tanstack/react-router": "^1.163.3",
-    "@tanstack/react-router-devtools": "^1.163.3",
-    "@tanstack/react-start": "^1.164.0",
-    "@types/react": "^19.2.14",
+    "@tanstack/react-router": "^1.170.17",
+    "@tanstack/react-router-devtools": "^1.167.0",
+    "@tanstack/react-start": "^1.168.27",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@types/react-relay": "^18.2.1",
     "@types/relay-runtime": "^20.1.1",
     "graphql": "^16.13.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-relay": "^20.1.1",
-    "relay-runtime": "^20.1.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-relay": "^21.0.1",
+    "relay-runtime": "^21.0.1",
     "rollup-plugin-visualizer": "^6.0.8",
     "tailwind-merge": "^3.5.0",
     "vite": "catalog:",
@@ -49,12 +49,12 @@
     "zod": "catalog:"
   },
   "peerDependencies": {
-    "@tanstack/react-router": "^1.163.3",
-    "@tanstack/react-start": "^1.164.0",
+    "@tanstack/react-router": "^1.170.17",
+    "@tanstack/react-start": "^1.168.27",
     "graphql": "catalog:",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-relay": "^20.1.1",
-    "relay-runtime": "^20.1.1"
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-relay": "^21.0.1",
+    "relay-runtime": "^21.0.1"
   }
 }
