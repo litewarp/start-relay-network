@@ -25,7 +25,8 @@ export function relay(): Plugin {
         plugins: ['babel-plugin-relay'],
       });
       if (!result?.code) return null;
-      return { code: result.code, map: result.map ?? undefined };
+      // Babel 8's map type differs from Vite's SourceMapInput; a JSON string is accepted by both.
+      return { code: result.code, map: result.map ? JSON.stringify(result.map) : null };
     },
   };
 }
