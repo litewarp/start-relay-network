@@ -16,9 +16,11 @@ export default defineConfig((input) => ({
   dts: true,
   format: ['esm'],
   minify: input.minify,
-  external: (id) =>
-    // exclude all peer dependencies and regular dependencies from the bundle
-    [...peerDeps, ...deps].some((dep) => id === dep || id.startsWith(`${dep}/`)),
+  deps: {
+    // never bundle peer dependencies or regular dependencies (including subpaths)
+    neverBundle: (id) =>
+      [...peerDeps, ...deps].some((dep) => id === dep || id.startsWith(`${dep}/`)),
+  },
   plugins: [
     visualizer({
       filename: 'dist/stats.html',
