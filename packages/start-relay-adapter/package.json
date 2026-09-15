@@ -13,6 +13,8 @@
   "author": "litewarp",
   "files": [
     "dist",
+    "!dist/stats.html",
+    "!dist/stats.json",
     "README.md",
     "tsconfig.json"
   ],
