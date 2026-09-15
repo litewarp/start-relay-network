@@ -19,7 +19,7 @@
     "@tanstack/react-router": "^1.170.36",
     "@tanstack/react-router-devtools": "^1.167.2",
     "@tanstack/react-start": "^1.168.54",
-    "nanoid": "^5.1.16",
+    "nanoid": "^6.0.1",
     "pg": "^8.23.0",
     "postgraphile": "^5.1.5",
     "react": "^19.3.0",
@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
-    "@graphile/simplify-inflection": "^8.0.0",
+    "@graphile/simplify-inflection": "^9.0.0",
     "@heroui/react": "^3.2.5",
     "@heroui/styles": "^3.2.5",
     "@mdx-js/react": "^3.1.1",

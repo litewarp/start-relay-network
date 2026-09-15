@@ -98,17 +98,17 @@ type Query implements Node {
     id: ID!
   ): PersonVehicle
 
-  """Reads a single `Person` using its globally unique `ID`."""
-  personById(
-    """The globally unique `ID` to be used in selecting a single `Person`."""
-    id: ID!
-  ): Person
-
   """Reads a single `Film` using its globally unique `ID`."""
   filmById(
     """The globally unique `ID` to be used in selecting a single `Film`."""
     id: ID!
   ): Film
+
+  """Reads a single `Person` using its globally unique `ID`."""
+  personById(
+    """The globally unique `ID` to be used in selecting a single `Person`."""
+    id: ID!
+  ): Person
 
   """Reads a single `Planet` using its globally unique `ID`."""
   planetById(
@@ -337,35 +337,6 @@ type Query implements Node {
     orderBy: [PersonVehicleOrderBy!] = [PRIMARY_KEY_ASC]
   ): PersonVehicleConnection
 
-  """Reads and enables pagination through a set of `Person`."""
-  people(
-    """Only read the first `n` values of the set."""
-    first: Int
-
-    """Only read the last `n` values of the set."""
-    last: Int
-
-    """
-    Skip the first `n` values from our `after` cursor, an alternative to cursor
-    based pagination. May not be used with `last`.
-    """
-    offset: Int
-
-    """Read all values in the set before (above) this cursor."""
-    before: Cursor
-
-    """Read all values in the set after (below) this cursor."""
-    after: Cursor
-
-    """
-    A condition to be used in determining which values should be returned by the collection.
-    """
-    condition: PersonCondition
-
-    """The method to use when ordering `Person`."""
-    orderBy: [PersonOrderBy!] = [PRIMARY_KEY_ASC]
-  ): PersonConnection
-
   """Reads and enables pagination through a set of `Film`."""
   films(
     """Only read the first `n` values of the set."""
@@ -394,6 +365,35 @@ type Query implements Node {
     """The method to use when ordering `Film`."""
     orderBy: [FilmOrderBy!] = [PRIMARY_KEY_ASC]
   ): FilmConnection
+
+  """Reads and enables pagination through a set of `Person`."""
+  people(
+    """Only read the first `n` values of the set."""
+    first: Int
+
+    """Only read the last `n` values of the set."""
+    last: Int
+
+    """
+    Skip the first `n` values from our `after` cursor, an alternative to cursor
+    based pagination. May not be used with `last`.
+    """
+    offset: Int
+
+    """Read all values in the set before (above) this cursor."""
+    before: Cursor
+
+    """Read all values in the set after (below) this cursor."""
+    after: Cursor
+
+    """
+    A condition to be used in determining which values should be returned by the collection.
+    """
+    condition: PersonCondition
+
+    """The method to use when ordering `Person`."""
+    orderBy: [PersonOrderBy!] = [PRIMARY_KEY_ASC]
+  ): PersonConnection
 
   """Reads and enables pagination through a set of `Planet`."""
   planets(
@@ -495,6 +495,7 @@ type Query implements Node {
     """The method to use when ordering `Starship`."""
     orderBy: [StarshipOrderBy!] = [PRIMARY_KEY_ASC]
   ): StarshipConnection
+  executionEnvironment: String!
 }
 
 """An object with a globally unique `ID`."""
@@ -2755,14 +2756,6 @@ type Mutation {
     input: CreatePersonVehicleInput!
   ): CreatePersonVehiclePayload
 
-  """Creates a single `Person`."""
-  createPerson(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: CreatePersonInput!
-  ): CreatePersonPayload
-
   """Creates a single `Film`."""
   createFilm(
     """
@@ -2770,6 +2763,14 @@ type Mutation {
     """
     input: CreateFilmInput!
   ): CreateFilmPayload
+
+  """Creates a single `Person`."""
+  createPerson(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: CreatePersonInput!
+  ): CreatePersonPayload
 
   """Creates a single `Planet`."""
   createPlanet(
@@ -2873,14 +2874,6 @@ type Mutation {
     input: UpdatePersonVehicleByIdInput!
   ): UpdatePersonVehiclePayload
 
-  """Updates a single `Person` using its globally unique id and a patch."""
-  updatePersonById(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: UpdatePersonByIdInput!
-  ): UpdatePersonPayload
-
   """Updates a single `Film` using its globally unique id and a patch."""
   updateFilmById(
     """
@@ -2888,6 +2881,14 @@ type Mutation {
     """
     input: UpdateFilmByIdInput!
   ): UpdateFilmPayload
+
+  """Updates a single `Person` using its globally unique id and a patch."""
+  updatePersonById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: UpdatePersonByIdInput!
+  ): UpdatePersonPayload
 
   """Updates a single `Planet` using its globally unique id and a patch."""
   updatePlanetById(
@@ -2977,14 +2978,6 @@ type Mutation {
     input: DeletePersonVehicleByIdInput!
   ): DeletePersonVehiclePayload
 
-  """Deletes a single `Person` using its globally unique id."""
-  deletePersonById(
-    """
-    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
-    """
-    input: DeletePersonByIdInput!
-  ): DeletePersonPayload
-
   """Deletes a single `Film` using its globally unique id."""
   deleteFilmById(
     """
@@ -2992,6 +2985,14 @@ type Mutation {
     """
     input: DeleteFilmByIdInput!
   ): DeleteFilmPayload
+
+  """Deletes a single `Person` using its globally unique id."""
+  deletePersonById(
+    """
+    The exclusive input argument for this mutation. An object type, make sure to see documentation for this object’s fields.
+    """
+    input: DeletePersonByIdInput!
+  ): DeletePersonPayload
 
   """Deletes a single `Planet` using its globally unique id."""
   deletePlanetById(
@@ -3313,6 +3314,54 @@ input PersonVehicleInput {
   vehicle: ID!
 }
 
+"""The output of our create `Film` mutation."""
+type CreateFilmPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Film` that was created by this mutation."""
+  film: Film
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Film`. May be used by Relay 1."""
+  filmEdge(
+    """The method to use when ordering `Film`."""
+    orderBy: [FilmOrderBy!]! = [PRIMARY_KEY_ASC]
+  ): FilmEdge
+}
+
+"""All input for the create `Film` mutation."""
+input CreateFilmInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """The `Film` to be created by this mutation."""
+  film: FilmInput!
+}
+
+"""An input for mutations affecting `Film`"""
+input FilmInput {
+  rowId: Int!
+  title: String!
+  episodeId: Int!
+  openingCrawl: String
+  director: String!
+  producer: [String]
+  releaseDate: Date
+  createdAt: Datetime
+  updatedAt: Datetime
+}
+
 """The output of our create `Person` mutation."""
 type CreatePersonPayload {
   """
@@ -3363,54 +3412,6 @@ input PersonInput {
   updatedAt: Datetime
   homeworld: ID
   species: ID
-}
-
-"""The output of our create `Film` mutation."""
-type CreateFilmPayload {
-  """
-  The exact same `clientMutationId` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
-  """
-  clientMutationId: String
-
-  """The `Film` that was created by this mutation."""
-  film: Film
-
-  """
-  Our root query field type. Allows us to run any query from our mutation payload.
-  """
-  query: Query
-
-  """An edge for our `Film`. May be used by Relay 1."""
-  filmEdge(
-    """The method to use when ordering `Film`."""
-    orderBy: [FilmOrderBy!]! = [PRIMARY_KEY_ASC]
-  ): FilmEdge
-}
-
-"""All input for the create `Film` mutation."""
-input CreateFilmInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-
-  """The `Film` to be created by this mutation."""
-  film: FilmInput!
-}
-
-"""An input for mutations affecting `Film`"""
-input FilmInput {
-  rowId: Int!
-  title: String!
-  episodeId: Int!
-  openingCrawl: String
-  director: String!
-  producer: [String]
-  releaseDate: Date
-  createdAt: Datetime
-  updatedAt: Datetime
 }
 
 """The output of our create `Planet` mutation."""
@@ -3974,6 +3975,60 @@ input PersonVehiclePatch {
   vehicle: ID
 }
 
+"""The output of our update `Film` mutation."""
+type UpdateFilmPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Film` that was updated by this mutation."""
+  film: Film
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Film`. May be used by Relay 1."""
+  filmEdge(
+    """The method to use when ordering `Film`."""
+    orderBy: [FilmOrderBy!]! = [PRIMARY_KEY_ASC]
+  ): FilmEdge
+}
+
+"""All input for the `updateFilmById` mutation."""
+input UpdateFilmByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Film` to be updated.
+  """
+  id: ID!
+
+  """
+  An object where the defined keys will be set on the `Film` being updated.
+  """
+  patch: FilmPatch!
+}
+
+"""Represents an update to a `Film`. Fields that are set will be updated."""
+input FilmPatch {
+  title: String
+  episodeId: Int
+  openingCrawl: String
+  director: String
+  producer: [String]
+  releaseDate: Date
+  createdAt: Datetime
+  updatedAt: Datetime
+}
+
 """The output of our update `Person` mutation."""
 type UpdatePersonPayload {
   """
@@ -4032,60 +4087,6 @@ input PersonPatch {
   updatedAt: Datetime
   homeworld: ID
   species: ID
-}
-
-"""The output of our update `Film` mutation."""
-type UpdateFilmPayload {
-  """
-  The exact same `clientMutationId` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
-  """
-  clientMutationId: String
-
-  """The `Film` that was updated by this mutation."""
-  film: Film
-
-  """
-  Our root query field type. Allows us to run any query from our mutation payload.
-  """
-  query: Query
-
-  """An edge for our `Film`. May be used by Relay 1."""
-  filmEdge(
-    """The method to use when ordering `Film`."""
-    orderBy: [FilmOrderBy!]! = [PRIMARY_KEY_ASC]
-  ): FilmEdge
-}
-
-"""All input for the `updateFilmById` mutation."""
-input UpdateFilmByIdInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-
-  """
-  The globally unique `ID` which will identify a single `Film` to be updated.
-  """
-  id: ID!
-
-  """
-  An object where the defined keys will be set on the `Film` being updated.
-  """
-  patch: FilmPatch!
-}
-
-"""Represents an update to a `Film`. Fields that are set will be updated."""
-input FilmPatch {
-  title: String
-  episodeId: Int
-  openingCrawl: String
-  director: String
-  producer: [String]
-  releaseDate: Date
-  createdAt: Datetime
-  updatedAt: Datetime
 }
 
 """The output of our update `Planet` mutation."""
@@ -4597,44 +4598,6 @@ input DeletePersonVehicleByIdInput {
   id: ID!
 }
 
-"""The output of our delete `Person` mutation."""
-type DeletePersonPayload {
-  """
-  The exact same `clientMutationId` that was provided in the mutation input,
-  unchanged and unused. May be used by a client to track mutations.
-  """
-  clientMutationId: String
-
-  """The `Person` that was deleted by this mutation."""
-  person: Person
-  deletedPersonId: ID
-
-  """
-  Our root query field type. Allows us to run any query from our mutation payload.
-  """
-  query: Query
-
-  """An edge for our `Person`. May be used by Relay 1."""
-  personEdge(
-    """The method to use when ordering `Person`."""
-    orderBy: [PersonOrderBy!]! = [PRIMARY_KEY_ASC]
-  ): PersonEdge
-}
-
-"""All input for the `deletePersonById` mutation."""
-input DeletePersonByIdInput {
-  """
-  An arbitrary string value with no semantic meaning. Will be included in the
-  payload verbatim. May be used to track mutations by the client.
-  """
-  clientMutationId: String
-
-  """
-  The globally unique `ID` which will identify a single `Person` to be deleted.
-  """
-  id: ID!
-}
-
 """The output of our delete `Film` mutation."""
 type DeleteFilmPayload {
   """
@@ -4669,6 +4632,44 @@ input DeleteFilmByIdInput {
 
   """
   The globally unique `ID` which will identify a single `Film` to be deleted.
+  """
+  id: ID!
+}
+
+"""The output of our delete `Person` mutation."""
+type DeletePersonPayload {
+  """
+  The exact same `clientMutationId` that was provided in the mutation input,
+  unchanged and unused. May be used by a client to track mutations.
+  """
+  clientMutationId: String
+
+  """The `Person` that was deleted by this mutation."""
+  person: Person
+  deletedPersonId: ID
+
+  """
+  Our root query field type. Allows us to run any query from our mutation payload.
+  """
+  query: Query
+
+  """An edge for our `Person`. May be used by Relay 1."""
+  personEdge(
+    """The method to use when ordering `Person`."""
+    orderBy: [PersonOrderBy!]! = [PRIMARY_KEY_ASC]
+  ): PersonEdge
+}
+
+"""All input for the `deletePersonById` mutation."""
+input DeletePersonByIdInput {
+  """
+  An arbitrary string value with no semantic meaning. Will be included in the
+  payload verbatim. May be used to track mutations by the client.
+  """
+  clientMutationId: String
+
+  """
+  The globally unique `ID` which will identify a single `Person` to be deleted.
   """
   id: ID!
 }

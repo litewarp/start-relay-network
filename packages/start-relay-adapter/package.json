@@ -50,7 +50,7 @@
     "react-dom": "^19.3.0",
     "react-relay": "^21.0.1",
     "relay-runtime": "^21.0.1",
-    "rollup-plugin-visualizer": "^6.0.11",
+    "rollup-plugin-visualizer": "^7.1.1",
     "tailwind-merge": "^3.7.0",
     "vite": "catalog:",
     "vitest": "catalog:",
