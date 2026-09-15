@@ -73,11 +73,12 @@
     },
     "packages/start-relay-adapter": {
       "name": "@litewarp/start-relay-network",
-      "version": "1.0.0-alpha.6",
+      "version": "1.0.0-beta.7",
       "devDependencies": {
         "@tanstack/react-router": "^1.163.3",
         "@tanstack/react-router-devtools": "^1.163.3",
         "@tanstack/react-start": "^1.164.0",
+        "@tanstack/router-core": "^1.163.3",
         "@types/react": "^19.2.14",
         "@types/react-dom": "^19.2.3",
         "@types/react-relay": "^18.2.1",
@@ -96,6 +97,7 @@
       "peerDependencies": {
         "@tanstack/react-router": "^1.163.3",
         "@tanstack/react-start": "^1.164.0",
+        "@tanstack/router-core": "^1.163.3",
         "graphql": "catalog:",
         "react": "^19.2.4",
         "react-dom": "^19.2.4",

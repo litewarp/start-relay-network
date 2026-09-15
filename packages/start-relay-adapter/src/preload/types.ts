@@ -11,7 +11,7 @@ export type PreloadedQuery<TQuery extends OperationType> =
     };
   };
 
-declare module "@tanstack/react-router" {
+declare module "@tanstack/router-core" {
   interface SerializableExtensions {
     RelayPreloadedQuery: PreloadedQuery<OperationType>;
   }
