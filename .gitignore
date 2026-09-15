@@ -10,6 +10,7 @@ node_modules/
 
 # Testing
 coverage/
+.vitest/
 
 # Build outputs
 dist/

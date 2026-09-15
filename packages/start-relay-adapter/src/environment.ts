@@ -39,12 +39,7 @@ export interface CreateRelayEnvironmentOptions {
 }
 
 export function createRelayEnvironment(options: CreateRelayEnvironmentOptions) {
-  const {
-    url,
-    middleware,
-    responseTransforms,
-    isServer = typeof window === 'undefined',
-  } = options;
+  const { url, middleware, responseTransforms, isServer = typeof window === 'undefined' } = options;
 
   const queryRegistry = createQueryRegistry({ isServer });
   const networkConfig = { url, queryRegistry, middleware, responseTransforms };
@@ -88,7 +83,7 @@ export function getQueryRegistry(environment: Environment): QueryRegistry {
   if (!registry) {
     throw new Error(
       'QueryRegistry not found on Environment. ' +
-      'Did you create the environment with createRelayEnvironment()?'
+        'Did you create the environment with createRelayEnvironment()?',
     );
   }
   return registry;

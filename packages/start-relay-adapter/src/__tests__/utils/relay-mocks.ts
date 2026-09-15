@@ -2,21 +2,21 @@ import type {
   ConcreteRequest,
   GraphQLResponse,
   OperationDescriptor,
-  RequestParameters
+  RequestParameters,
 } from 'relay-runtime';
 
 /**
  * Creates a mock RequestParameters object for testing
  */
 export function createMockRequestParameters(
-  overrides: Partial<RequestParameters & { cacheID?: string }> = {}
+  overrides: Partial<RequestParameters & { cacheID?: string }> = {},
 ): RequestParameters {
   return {
     id: overrides.id ?? overrides.cacheID ?? 'test-query-id',
     name: overrides.name ?? 'TestQuery',
     operationKind: overrides.operationKind ?? 'query',
     text: null,
-    metadata: overrides.metadata ?? {}
+    metadata: overrides.metadata ?? {},
   } as RequestParameters;
 }
 
@@ -26,7 +26,7 @@ export function createMockRequestParameters(
 export function createMockConcreteRequest(
   overrides: Partial<{
     params: Partial<RequestParameters>;
-  }> = {}
+  }> = {},
 ): ConcreteRequest {
   return {
     kind: 'Request',
@@ -36,15 +36,15 @@ export function createMockConcreteRequest(
       type: 'Query',
       metadata: null,
       argumentDefinitions: [],
-      selections: []
+      selections: [],
     },
     operation: {
       kind: 'Operation',
       name: 'TestQuery',
       argumentDefinitions: [],
-      selections: []
+      selections: [],
     },
-    params: createMockRequestParameters(overrides.params)
+    params: createMockRequestParameters(overrides.params),
   };
 }
 
@@ -56,11 +56,11 @@ export function createMockOperationDescriptor(
     id?: string;
     name?: string;
     variables?: Record<string, unknown>;
-  }> = {}
+  }> = {},
 ): OperationDescriptor {
   const params = createMockRequestParameters({
     id: overrides.id,
-    name: overrides.name
+    name: overrides.name,
   });
 
   const request = createMockConcreteRequest({ params });
@@ -73,19 +73,19 @@ export function createMockOperationDescriptor(
       node: request.fragment,
       variables,
       isWithinUnmatchedTypeRefinement: false,
-      owner: {} as OperationDescriptor['fragment']['owner']
+      owner: {} as OperationDescriptor['fragment']['owner'],
     },
     request: {
       identifier: `${params.id}:${JSON.stringify(variables)}`,
       node: request,
       variables,
-      cacheConfig: {}
+      cacheConfig: {},
     },
     root: {
       dataID: 'client:root',
       node: request.operation,
-      variables
-    }
+      variables,
+    },
   } as OperationDescriptor;
 }
 
@@ -99,14 +99,14 @@ export function createMockGraphQLResponse<TData = Record<string, unknown>>(
     extensions: Record<string, unknown>;
     label?: string;
     path?: (string | number)[];
-  }> = {}
+  }> = {},
 ): GraphQLResponse {
   return {
     data,
     errors: options.errors,
     extensions: options.extensions,
     label: options.label,
-    path: options.path
+    path: options.path,
   } as GraphQLResponse;
 }
 
@@ -138,7 +138,7 @@ export function createMockStream<T>(chunks: T[]): ReadableStream<T> {
         controller.enqueue(chunk);
       }
       controller.close();
-    }
+    },
   });
 }
 

@@ -17,5 +17,5 @@ export const transportSerializationAdapter = createSerializationAdapter<
   },
   fromSerializable(data) {
     return new ClientTransport(data);
-  }
+  },
 });

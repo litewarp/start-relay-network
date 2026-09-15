@@ -1,9 +1,6 @@
 import type { OperationDescriptor } from 'relay-runtime';
 
-export function queryKeyFromIdAndVariables(
-  id: string,
-  variables: Record<string, any>
-): string {
+export function queryKeyFromIdAndVariables(id: string, variables: Record<string, any>): string {
   return `${id}:${JSON.stringify(variables)}`;
 }
 

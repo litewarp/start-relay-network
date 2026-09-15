@@ -5,7 +5,7 @@ import type {
   Subscribable,
   OperationDescriptor,
   ReplaySubject,
-  GraphQLResponse
+  GraphQLResponse,
 } from 'relay-runtime';
 
 import runtime from 'relay-runtime';
@@ -49,7 +49,7 @@ export class QueryRecord implements Subscribable<QueryProgressEvent> {
             observer.next?.(event);
             break;
         }
-      }
+      },
     });
   }
 

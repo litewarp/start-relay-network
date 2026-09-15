@@ -1,15 +1,14 @@
-import { buildQueryKey } from "./cache/query-utils.js";
-import { QueryRecord } from "./cache/relay-query.js";
+import { buildQueryKey } from './cache/query-utils.js';
+import { QueryRecord } from './cache/relay-query.js';
 
-import type { QueryEvent, QueryProgressEvent } from "#@/transport/types.js";
+import type { QueryEvent, QueryProgressEvent } from '#@/transport/types.js';
 
-import { warnRelay } from "#@/debug.js";
-import runtime, { Environment, type OperationDescriptor } from "relay-runtime";
+import { warnRelay } from '#@/debug.js';
+import runtime, { Environment, type OperationDescriptor } from 'relay-runtime';
 
-export * from "./cache/query-utils.js";
+export * from './cache/query-utils.js';
 
-export const createQueryRegistry = (opts?: { isServer?: boolean }) =>
-  new QueryRegistry(opts);
+export const createQueryRegistry = (opts?: { isServer?: boolean }) => new QueryRegistry(opts);
 
 /** @deprecated Use `createQueryRegistry` instead */
 export const createQueryCache = createQueryRegistry;
@@ -23,15 +22,15 @@ export class QueryRegistry {
 
   // server side subscription to query events via ReplaySubject
   private _querySubject = new runtime.ReplaySubject<{
-    event: Extract<QueryEvent, { type: "started" }>;
+    event: Extract<QueryEvent, { type: 'started' }>;
     query: QueryRecord;
   }>();
 
   subscribeToQueries(
     observer: runtime.Observer<{
-      event: Extract<QueryEvent, { type: "started" }>;
+      event: Extract<QueryEvent, { type: 'started' }>;
       query: QueryRecord;
-    }>
+    }>,
   ): runtime.Subscription {
     return this._querySubject.subscribe(observer);
   }
@@ -58,9 +57,9 @@ export class QueryRegistry {
     return this.queries.get(queryId);
   }
 
-  onQueryStarted(event: Extract<QueryEvent, { type: "started" }>): void {
+  onQueryStarted(event: Extract<QueryEvent, { type: 'started' }>): void {
     if (this._isServer) {
-      throw new Error("onQueryStarted should not be called on the server");
+      throw new Error('onQueryStarted should not be called on the server');
     }
     const query = this.build(event.operation);
     this.simulatedStreamingQueries.set(event.id, query);
@@ -68,21 +67,21 @@ export class QueryRegistry {
 
   onQueryProgress(event: QueryProgressEvent) {
     if (this._isServer) {
-      throw new Error("onQueryProgress should not be called on the server");
+      throw new Error('onQueryProgress should not be called on the server');
     }
     const query = this.simulatedStreamingQueries.get(event.id);
     if (!query) {
       throw new Error(`QueryRecord with id ${event.id} not found`);
     }
     switch (event.type) {
-      case "next":
+      case 'next':
         query.next(event.data);
         break;
-      case "error":
+      case 'error':
         this.simulatedStreamingQueries.delete(event.id);
         query.error(JSON.stringify(event.error));
         break;
-      case "complete":
+      case 'complete':
         this.simulatedStreamingQueries.delete(event.id);
         query.complete();
         break;
@@ -98,7 +97,7 @@ export class QueryRegistry {
     for (const [id, query] of this.simulatedStreamingQueries) {
       this.simulatedStreamingQueries.delete(id);
       warnRelay(
-        "Streaming connection closed before server query could be fully transported, rerunning:",
+        'Streaming connection closed before server query could be fully transported, rerunning:',
         query.operation.request,
       );
 
@@ -110,7 +109,7 @@ export class QueryRegistry {
   watchQuery(query: QueryRecord) {
     const event = {
       id: query.queryKey,
-      type: "started" as const,
+      type: 'started' as const,
       operation: query.operation,
     };
 

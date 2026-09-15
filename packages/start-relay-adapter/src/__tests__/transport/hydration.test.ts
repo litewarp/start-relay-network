@@ -1,46 +1,41 @@
-import type { PreloadedQuery } from "#@/preload/types.js";
-import type { OperationType } from "relay-runtime";
+import type { PreloadedQuery } from '#@/preload/types.js';
+import type { OperationType } from 'relay-runtime';
 
-import { createMockOperationDescriptor } from "#@/__tests__/utils/index.js";
-import { attachQueryRegistry } from "#@/environment.js";
-import { createQueryRegistry } from "#@/query-cache.js";
-import {
-  dehydratePreloadedQuery,
-  hydratePreloadedQuery,
-} from "#@/transport/hydration.js";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { createMockOperationDescriptor } from '#@/__tests__/utils/index.js';
+import { attachQueryRegistry } from '#@/environment.js';
+import { createQueryRegistry } from '#@/query-cache.js';
+import { dehydratePreloadedQuery, hydratePreloadedQuery } from '#@/transport/hydration.js';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-describe("hydration", () => {
+describe('hydration', () => {
   // Mock StreamedPreloadedQuery for testing
-  function createMockStreamedPreloadedQuery<
-    TQuery extends OperationType = OperationType,
-  >(
+  function createMockStreamedPreloadedQuery<TQuery extends OperationType = OperationType>(
     overrides: Partial<{
       id: string;
       name: string;
-      variables: TQuery["variables"];
+      variables: TQuery['variables'];
       fetchPolicy: string;
     }> = {},
   ): PreloadedQuery<TQuery> {
     const operation = createMockOperationDescriptor({
-      id: overrides.id ?? "TestQuery",
-      name: overrides.name ?? "TestQuery",
+      id: overrides.id ?? 'TestQuery',
+      name: overrides.name ?? 'TestQuery',
       variables: (overrides.variables ?? {}) as Record<string, unknown>,
     });
 
     return {
-      kind: "PreloadedQuery" as const,
+      kind: 'PreloadedQuery' as const,
       dispose: vi.fn(),
       environment: {} as any,
       isDisposed: false,
       source: undefined,
       environmentProviderOptions: undefined,
-      fetchKey: "fetch-key-123",
-      fetchPolicy: (overrides.fetchPolicy ?? "store-or-network") as any,
+      fetchKey: 'fetch-key-123',
+      fetchPolicy: (overrides.fetchPolicy ?? 'store-or-network') as any,
       networkCacheConfig: { force: false },
-      id: overrides.id ?? "TestQuery",
-      name: overrides.name ?? "TestQuery",
-      variables: (overrides.variables ?? {}) as TQuery["variables"],
+      id: overrides.id ?? 'TestQuery',
+      name: overrides.name ?? 'TestQuery',
+      variables: (overrides.variables ?? {}) as TQuery['variables'],
       $__relay_queryRef: {
         operation,
       },
@@ -59,45 +54,45 @@ describe("hydration", () => {
     return { mockEnvironment, queryRegistry };
   }
 
-  describe("dehydratePreloadedQuery", () => {
-    it("removes non-serializable fields from preloaded query", () => {
+  describe('dehydratePreloadedQuery', () => {
+    it('removes non-serializable fields from preloaded query', () => {
       const preloadedQuery = createMockStreamedPreloadedQuery({
-        id: "MyQuery",
-        variables: { userId: "123" },
+        id: 'MyQuery',
+        variables: { userId: '123' },
       });
 
       const dehydrated = dehydratePreloadedQuery(preloadedQuery);
 
       // Should NOT have these fields
-      expect(dehydrated).not.toHaveProperty("dispose");
-      expect(dehydrated).not.toHaveProperty("environment");
-      expect(dehydrated).not.toHaveProperty("isDisposed");
-      expect(dehydrated).not.toHaveProperty("networkError");
-      expect(dehydrated).not.toHaveProperty("releaseQuery");
-      expect(dehydrated).not.toHaveProperty("source");
+      expect(dehydrated).not.toHaveProperty('dispose');
+      expect(dehydrated).not.toHaveProperty('environment');
+      expect(dehydrated).not.toHaveProperty('isDisposed');
+      expect(dehydrated).not.toHaveProperty('networkError');
+      expect(dehydrated).not.toHaveProperty('releaseQuery');
+      expect(dehydrated).not.toHaveProperty('source');
     });
 
-    it("preserves serializable fields", () => {
+    it('preserves serializable fields', () => {
       const preloadedQuery = createMockStreamedPreloadedQuery({
-        id: "MyQuery",
-        name: "MyQuery",
-        variables: { userId: "123", limit: 10 },
-        fetchPolicy: "network-only",
+        id: 'MyQuery',
+        name: 'MyQuery',
+        variables: { userId: '123', limit: 10 },
+        fetchPolicy: 'network-only',
       });
 
       const dehydrated = dehydratePreloadedQuery(preloadedQuery);
 
-      expect(dehydrated.kind).toBe("PreloadedQuery");
-      expect(dehydrated.id).toBe("MyQuery");
-      expect(dehydrated.name).toBe("MyQuery");
-      expect(dehydrated.variables).toEqual({ userId: "123", limit: 10 });
-      expect(dehydrated.fetchPolicy).toBe("network-only");
-      expect(dehydrated.fetchKey).toBe("fetch-key-123");
+      expect(dehydrated.kind).toBe('PreloadedQuery');
+      expect(dehydrated.id).toBe('MyQuery');
+      expect(dehydrated.name).toBe('MyQuery');
+      expect(dehydrated.variables).toEqual({ userId: '123', limit: 10 });
+      expect(dehydrated.fetchPolicy).toBe('network-only');
+      expect(dehydrated.fetchKey).toBe('fetch-key-123');
     });
 
-    it("preserves operation descriptor reference", () => {
+    it('preserves operation descriptor reference', () => {
       const preloadedQuery = createMockStreamedPreloadedQuery({
-        id: "TestQuery",
+        id: 'TestQuery',
       });
 
       const dehydrated = dehydratePreloadedQuery(preloadedQuery);
@@ -108,7 +103,7 @@ describe("hydration", () => {
       );
     });
 
-    it("preserves environmentProviderOptions", () => {
+    it('preserves environmentProviderOptions', () => {
       const preloadedQuery = {
         ...createMockStreamedPreloadedQuery(),
         environmentProviderOptions: { customOption: true },
@@ -121,7 +116,7 @@ describe("hydration", () => {
       });
     });
 
-    it("preserves networkCacheConfig", () => {
+    it('preserves networkCacheConfig', () => {
       const preloadedQuery = {
         ...createMockStreamedPreloadedQuery(),
         networkCacheConfig: { force: true },
@@ -133,7 +128,7 @@ describe("hydration", () => {
     });
   });
 
-  describe("hydratePreloadedQuery", () => {
+  describe('hydratePreloadedQuery', () => {
     let mockEnvironment: any;
     let queryRegistry: ReturnType<typeof createQueryRegistry>;
 
@@ -142,34 +137,34 @@ describe("hydration", () => {
       mockEnvironment = result.mockEnvironment;
       queryRegistry = result.queryRegistry;
       // Suppress console.log during tests
-      vi.spyOn(console, "log").mockImplementation(() => {});
+      vi.spyOn(console, 'log').mockImplementation(() => {});
     });
 
-    it("creates a hydrated query from dehydrated data", () => {
+    it('creates a hydrated query from dehydrated data', () => {
       const originalQuery = createMockStreamedPreloadedQuery({
-        id: "TestQuery",
-        variables: { id: "1" },
+        id: 'TestQuery',
+        variables: { id: '1' },
       });
       const dehydrated = dehydratePreloadedQuery(originalQuery);
 
       const hydrated = hydratePreloadedQuery(mockEnvironment, dehydrated);
 
-      expect(hydrated.kind).toBe("PreloadedQuery");
-      expect(hydrated.id).toBe("TestQuery");
-      expect(hydrated.variables).toEqual({ id: "1" });
+      expect(hydrated.kind).toBe('PreloadedQuery');
+      expect(hydrated.id).toBe('TestQuery');
+      expect(hydrated.variables).toEqual({ id: '1' });
       expect(hydrated.environment).toBe(mockEnvironment);
     });
 
-    it("adds dispose function to hydrated query", () => {
+    it('adds dispose function to hydrated query', () => {
       const originalQuery = createMockStreamedPreloadedQuery();
       const dehydrated = dehydratePreloadedQuery(originalQuery);
 
       const hydrated = hydratePreloadedQuery(mockEnvironment, dehydrated);
 
-      expect(typeof hydrated.dispose).toBe("function");
+      expect(typeof hydrated.dispose).toBe('function');
     });
 
-    it("dispose function is idempotent", () => {
+    it('dispose function is idempotent', () => {
       const originalQuery = createMockStreamedPreloadedQuery();
       const dehydrated = dehydratePreloadedQuery(originalQuery);
 
@@ -183,7 +178,7 @@ describe("hydration", () => {
       expect(hydrated.isDisposed).toBe(true);
     });
 
-    it("tracks isDisposed state correctly", () => {
+    it('tracks isDisposed state correctly', () => {
       const originalQuery = createMockStreamedPreloadedQuery();
       const dehydrated = dehydratePreloadedQuery(originalQuery);
 
@@ -194,9 +189,9 @@ describe("hydration", () => {
       expect(hydrated.isDisposed).toBe(true);
     });
 
-    it("builds query in the query registry", () => {
+    it('builds query in the query registry', () => {
       const originalQuery = createMockStreamedPreloadedQuery({
-        id: "CachedQuery",
+        id: 'CachedQuery',
         variables: { x: 1 },
       });
       const dehydrated = dehydratePreloadedQuery(originalQuery);
@@ -208,15 +203,15 @@ describe("hydration", () => {
       expect(queryRegistry.get(queryKey)).toBeDefined();
     });
 
-    it("preserves all metadata from dehydrated query", () => {
+    it('preserves all metadata from dehydrated query', () => {
       const baseQuery = createMockStreamedPreloadedQuery({
-        id: "MetadataQuery",
-        name: "MetadataQuery",
-        fetchPolicy: "store-and-network",
+        id: 'MetadataQuery',
+        name: 'MetadataQuery',
+        fetchPolicy: 'store-and-network',
       });
       const originalQuery = {
         ...baseQuery,
-        fetchKey: "unique-fetch-key",
+        fetchKey: 'unique-fetch-key',
         networkCacheConfig: { force: true },
         environmentProviderOptions: { test: true },
       };
@@ -224,21 +219,21 @@ describe("hydration", () => {
       const dehydrated = dehydratePreloadedQuery(originalQuery);
       const hydrated = hydratePreloadedQuery(mockEnvironment, dehydrated);
 
-      expect(hydrated.fetchKey).toBe("unique-fetch-key");
-      expect(hydrated.fetchPolicy).toBe("store-and-network");
+      expect(hydrated.fetchKey).toBe('unique-fetch-key');
+      expect(hydrated.fetchPolicy).toBe('store-and-network');
       expect(hydrated.networkCacheConfig).toEqual({ force: true });
       expect(hydrated.environmentProviderOptions).toEqual({ test: true });
     });
   });
 
-  describe("round-trip serialization", () => {
-    it("preserves query identity through dehydrate/hydrate cycle", () => {
+  describe('round-trip serialization', () => {
+    it('preserves query identity through dehydrate/hydrate cycle', () => {
       const { mockEnvironment } = createMockEnvironmentWithRegistry({ isServer: false });
 
-      vi.spyOn(console, "log").mockImplementation(() => {});
+      vi.spyOn(console, 'log').mockImplementation(() => {});
 
       const original = createMockStreamedPreloadedQuery({
-        id: "RoundTripQuery",
+        id: 'RoundTripQuery',
         variables: { limit: 5, offset: 10 },
       });
 

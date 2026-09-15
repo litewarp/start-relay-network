@@ -1,6 +1,6 @@
-import type { QueryRegistry } from "#@/query-cache.js";
-import type { RelayMiddleware, ResponseTransform } from "#@/middleware/types.js";
-import type { ExecuteFunction } from "relay-runtime";
+import type { QueryRegistry } from '#@/query-cache.js';
+import type { RelayMiddleware, ResponseTransform } from '#@/middleware/types.js';
+import type { ExecuteFunction } from 'relay-runtime';
 
 export interface RelayNetworkConfig {
   url: string;
@@ -13,4 +13,4 @@ export interface StartSsrRelayNetwork {
   execute: ExecuteFunction;
 }
 
-export type CreateNetworkInit = Omit<RelayNetworkConfig, "queryRegistry">;
+export type CreateNetworkInit = Omit<RelayNetworkConfig, 'queryRegistry'>;

@@ -38,7 +38,7 @@ describe('QueryRegistry', () => {
       const registry = createQueryRegistry();
       const operation = createMockOperationDescriptor({
         id: 'TestQuery',
-        variables: { id: '1' }
+        variables: { id: '1' },
       });
 
       const query = registry.build(operation);
@@ -51,7 +51,7 @@ describe('QueryRegistry', () => {
       const registry = createQueryRegistry();
       const operation = createMockOperationDescriptor({
         id: 'TestQuery',
-        variables: { id: '1' }
+        variables: { id: '1' },
       });
 
       const query1 = registry.build(operation);
@@ -64,11 +64,11 @@ describe('QueryRegistry', () => {
       const registry = createQueryRegistry();
       const operation1 = createMockOperationDescriptor({
         id: 'TestQuery',
-        variables: { id: '1' }
+        variables: { id: '1' },
       });
       const operation2 = createMockOperationDescriptor({
         id: 'TestQuery',
-        variables: { id: '2' }
+        variables: { id: '2' },
       });
 
       const query1 = registry.build(operation1);
@@ -81,7 +81,7 @@ describe('QueryRegistry', () => {
       const registry = createQueryRegistry();
       const operation = createMockOperationDescriptor({
         id: 'TestQuery',
-        variables: {}
+        variables: {},
       });
 
       const query = registry.build(operation);
@@ -101,7 +101,7 @@ describe('QueryRegistry', () => {
       const registry = createQueryRegistry();
       const operation = createMockOperationDescriptor({
         id: 'TestQuery',
-        variables: {}
+        variables: {},
       });
 
       const query = registry.build(operation);
@@ -120,8 +120,8 @@ describe('QueryRegistry', () => {
         registry.onQueryStarted({
           type: 'started',
           id: 'TestQuery:{}',
-          operation
-        })
+          operation,
+        }),
       ).toThrow('onQueryStarted should not be called on the server');
     });
 
@@ -133,7 +133,7 @@ describe('QueryRegistry', () => {
       registry.onQueryStarted({
         type: 'started',
         id: queryId,
-        operation
+        operation,
       });
 
       // The query should be retrievable
@@ -148,8 +148,8 @@ describe('QueryRegistry', () => {
       expect(() =>
         registry.onQueryProgress({
           type: 'complete',
-          id: 'test'
-        })
+          id: 'test',
+        }),
       ).toThrow('onQueryProgress should not be called on the server');
     });
 
@@ -159,8 +159,8 @@ describe('QueryRegistry', () => {
       expect(() =>
         registry.onQueryProgress({
           type: 'complete',
-          id: 'non-existent'
-        })
+          id: 'non-existent',
+        }),
       ).toThrow('QueryRecord with id non-existent not found');
     });
 
@@ -180,7 +180,7 @@ describe('QueryRegistry', () => {
       expect(mockNext).toHaveBeenCalledWith({
         type: 'next',
         id: queryId,
-        data: response
+        data: response,
       });
     });
 
@@ -212,7 +212,7 @@ describe('QueryRegistry', () => {
       registry.onQueryProgress({
         type: 'error',
         id: queryId,
-        error: 'test error'
+        error: 'test error',
       });
 
       expect(mockError).toHaveBeenCalled();
@@ -257,11 +257,11 @@ describe('QueryRegistry', () => {
       const registry = createQueryRegistry({ isServer: true });
       const operation1 = createMockOperationDescriptor({
         id: 'Query1',
-        variables: {}
+        variables: {},
       });
       const operation2 = createMockOperationDescriptor({
         id: 'Query2',
-        variables: {}
+        variables: {},
       });
 
       const query1 = registry.build(operation1);

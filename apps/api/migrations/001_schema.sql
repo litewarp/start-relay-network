@@ -7,7 +7,7 @@ CREATE SCHEMA IF NOT EXISTS app_public;
 -- Entity tables
 -------------------------------------------------------------------------------
 
-CREATE TABLE app_public.planet (
+CREATE TABLE IF NOT EXISTS app_public.planet (
   id integer PRIMARY KEY,
   name text NOT NULL,
   diameter integer,
@@ -22,7 +22,7 @@ CREATE TABLE app_public.planet (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE app_public.species (
+CREATE TABLE IF NOT EXISTS app_public.species (
   id integer PRIMARY KEY,
   name text NOT NULL,
   classification text,
@@ -38,7 +38,7 @@ CREATE TABLE app_public.species (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE app_public.film (
+CREATE TABLE IF NOT EXISTS app_public.film (
   id integer PRIMARY KEY,
   title text NOT NULL,
   episode_id integer NOT NULL UNIQUE,
@@ -50,7 +50,7 @@ CREATE TABLE app_public.film (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE app_public.person (
+CREATE TABLE IF NOT EXISTS app_public.person (
   id integer PRIMARY KEY,
   name text NOT NULL,
   birth_year text,
@@ -66,7 +66,7 @@ CREATE TABLE app_public.person (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE app_public.starship (
+CREATE TABLE IF NOT EXISTS app_public.starship (
   id integer PRIMARY KEY,
   name text NOT NULL,
   model text,
@@ -85,7 +85,7 @@ CREATE TABLE app_public.starship (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE app_public.vehicle (
+CREATE TABLE IF NOT EXISTS app_public.vehicle (
   id integer PRIMARY KEY,
   name text NOT NULL,
   model text,
@@ -106,43 +106,43 @@ CREATE TABLE app_public.vehicle (
 -- Join tables (many-to-many relationships)
 -------------------------------------------------------------------------------
 
-CREATE TABLE app_public.film_person (
+CREATE TABLE IF NOT EXISTS app_public.film_person (
   film_id integer NOT NULL REFERENCES app_public.film(id),
   person_id integer NOT NULL REFERENCES app_public.person(id),
   PRIMARY KEY (film_id, person_id)
 );
 
-CREATE TABLE app_public.film_planet (
+CREATE TABLE IF NOT EXISTS app_public.film_planet (
   film_id integer NOT NULL REFERENCES app_public.film(id),
   planet_id integer NOT NULL REFERENCES app_public.planet(id),
   PRIMARY KEY (film_id, planet_id)
 );
 
-CREATE TABLE app_public.film_species (
+CREATE TABLE IF NOT EXISTS app_public.film_species (
   film_id integer NOT NULL REFERENCES app_public.film(id),
   species_id integer NOT NULL REFERENCES app_public.species(id),
   PRIMARY KEY (film_id, species_id)
 );
 
-CREATE TABLE app_public.film_starship (
+CREATE TABLE IF NOT EXISTS app_public.film_starship (
   film_id integer NOT NULL REFERENCES app_public.film(id),
   starship_id integer NOT NULL REFERENCES app_public.starship(id),
   PRIMARY KEY (film_id, starship_id)
 );
 
-CREATE TABLE app_public.film_vehicle (
+CREATE TABLE IF NOT EXISTS app_public.film_vehicle (
   film_id integer NOT NULL REFERENCES app_public.film(id),
   vehicle_id integer NOT NULL REFERENCES app_public.vehicle(id),
   PRIMARY KEY (film_id, vehicle_id)
 );
 
-CREATE TABLE app_public.person_starship (
+CREATE TABLE IF NOT EXISTS app_public.person_starship (
   person_id integer NOT NULL REFERENCES app_public.person(id),
   starship_id integer NOT NULL REFERENCES app_public.starship(id),
   PRIMARY KEY (person_id, starship_id)
 );
 
-CREATE TABLE app_public.person_vehicle (
+CREATE TABLE IF NOT EXISTS app_public.person_vehicle (
   person_id integer NOT NULL REFERENCES app_public.person(id),
   vehicle_id integer NOT NULL REFERENCES app_public.vehicle(id),
   PRIMARY KEY (person_id, vehicle_id)
@@ -152,15 +152,15 @@ CREATE TABLE app_public.person_vehicle (
 -- Indexes on foreign key columns for efficient backward lookups
 -------------------------------------------------------------------------------
 
-CREATE INDEX idx_species_homeworld ON app_public.species(homeworld_id);
-CREATE INDEX idx_person_homeworld ON app_public.person(homeworld_id);
-CREATE INDEX idx_person_species ON app_public.person(species_id);
+CREATE INDEX IF NOT EXISTS idx_species_homeworld ON app_public.species(homeworld_id);
+CREATE INDEX IF NOT EXISTS idx_person_homeworld ON app_public.person(homeworld_id);
+CREATE INDEX IF NOT EXISTS idx_person_species ON app_public.person(species_id);
 
 -- Join table reverse-direction indexes (PK covers the first column already)
-CREATE INDEX idx_film_person_person ON app_public.film_person(person_id);
-CREATE INDEX idx_film_planet_planet ON app_public.film_planet(planet_id);
-CREATE INDEX idx_film_species_species ON app_public.film_species(species_id);
-CREATE INDEX idx_film_starship_starship ON app_public.film_starship(starship_id);
-CREATE INDEX idx_film_vehicle_vehicle ON app_public.film_vehicle(vehicle_id);
-CREATE INDEX idx_person_starship_starship ON app_public.person_starship(starship_id);
-CREATE INDEX idx_person_vehicle_vehicle ON app_public.person_vehicle(vehicle_id);
+CREATE INDEX IF NOT EXISTS idx_film_person_person ON app_public.film_person(person_id);
+CREATE INDEX IF NOT EXISTS idx_film_planet_planet ON app_public.film_planet(planet_id);
+CREATE INDEX IF NOT EXISTS idx_film_species_species ON app_public.film_species(species_id);
+CREATE INDEX IF NOT EXISTS idx_film_starship_starship ON app_public.film_starship(starship_id);
+CREATE INDEX IF NOT EXISTS idx_film_vehicle_vehicle ON app_public.film_vehicle(vehicle_id);
+CREATE INDEX IF NOT EXISTS idx_person_starship_starship ON app_public.person_starship(starship_id);
+CREATE INDEX IF NOT EXISTS idx_person_vehicle_vehicle ON app_public.person_vehicle(vehicle_id);

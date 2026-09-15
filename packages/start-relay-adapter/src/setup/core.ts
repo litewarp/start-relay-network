@@ -21,7 +21,7 @@ export type RouterRelayOptions<TRouter extends AnyRouter> = {
 };
 
 export function configureRouterRelay<TRouter extends AnyRouter>(
-  options: RouterRelayOptions<TRouter>
+  options: RouterRelayOptions<TRouter>,
 ) {
   const { router, environment, providerContext } = options;
 
@@ -38,7 +38,7 @@ export function configureRouterRelay<TRouter extends AnyRouter>(
       return {
         ...ogDehydrated,
         recordSource: environment.getStore().getSource().toJSON(),
-        relayTransport
+        relayTransport,
       };
     };
   } else {
@@ -54,6 +54,6 @@ export function configureRouterRelay<TRouter extends AnyRouter>(
   router.options.serializationAdapters = [
     ...(router.options.serializationAdapters ?? []),
     createPreloadedQuerySerializer(environment),
-    transportSerializationAdapter
+    transportSerializationAdapter,
   ];
 }

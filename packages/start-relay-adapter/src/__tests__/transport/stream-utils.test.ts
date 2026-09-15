@@ -15,7 +15,7 @@ describe('stream-utils', () => {
       await new Promise<void>((resolve) => {
         observable.subscribe({
           next: (value) => results.push(value),
-          complete: resolve
+          complete: resolve,
         });
       });
 
@@ -32,7 +32,7 @@ describe('stream-utils', () => {
           complete: () => {
             completeSpy();
             resolve();
-          }
+          },
         });
       });
 
@@ -51,7 +51,7 @@ describe('stream-utils', () => {
           complete: () => {
             completeSpy();
             resolve();
-          }
+          },
         });
       });
 
@@ -68,7 +68,7 @@ describe('stream-utils', () => {
       await new Promise<void>((resolve) => {
         observable.subscribe({
           next: (value) => results.push(value),
-          complete: resolve
+          complete: resolve,
         });
       });
 
@@ -85,17 +85,17 @@ describe('stream-utils', () => {
           controller.enqueue('first');
           controller.enqueue('second');
           controller.close();
-        }
+        },
       });
 
       const observable = observableFromStream(stream);
 
       await new Promise<void>((resolve) => {
-        const subscription = observable.subscribe({
+        observable.subscribe({
           next: (value) => {
             results.push(value);
           },
-          complete: resolve
+          complete: resolve,
         });
       });
 

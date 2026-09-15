@@ -1,15 +1,23 @@
-import { describe, it, expect, beforeAll } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { execSync } from 'node:child_process';
-import { resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 
 const pkgRoot = resolve(import.meta.dirname, '../../..');
-const distFile = resolve(pkgRoot, 'dist/index.mjs');
+// Build into a scratch directory rather than the real dist/, which other
+// tasks (the web app's typecheck and build) read concurrently.
+const outDir = mkdtempSync(join(tmpdir(), 'start-relay-bundle-'));
+const distFile = join(outDir, 'index.mjs');
 
 describe('bundle output', () => {
   beforeAll(() => {
-    execSync('bun run build', { cwd: pkgRoot, stdio: 'pipe' });
+    execSync(`bun run tsdown --out-dir ${outDir}`, { cwd: pkgRoot, stdio: 'pipe' });
   }, 60_000);
+
+  afterAll(() => {
+    rmSync(outDir, { recursive: true, force: true });
+  });
 
   it('does not contain the debug package', () => {
     const dist = readFileSync(distFile, 'utf-8');

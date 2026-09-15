@@ -41,9 +41,11 @@ export type ResponseTransform = () => (response: GraphQLResponse) => GraphQLResp
  * ```
  */
 export function createMiddleware<TMeta extends Record<string, unknown> = Record<string, unknown>>(
-  fn: (ctx: RequestContext & { meta: RequestContext['meta'] & TMeta }) =>
+  fn: (
+    ctx: RequestContext & { meta: RequestContext['meta'] & TMeta },
+  ) =>
     | (RequestContext & { meta: RequestContext['meta'] & TMeta })
-    | Promise<RequestContext & { meta: RequestContext['meta'] & TMeta }>
+    | Promise<RequestContext & { meta: RequestContext['meta'] & TMeta }>,
 ): RelayMiddleware {
   return fn as RelayMiddleware;
 }

@@ -4,7 +4,7 @@ import {
   createMockRequestParameters,
   createMultipartResponse,
   createMockStream,
-  createMockOperationDescriptor
+  createMockOperationDescriptor,
 } from '../utils/relay-mocks.js';
 import type { GraphQLResponse } from 'relay-runtime';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -20,10 +20,10 @@ function mockMultipartFetchResponse(parts: object[], boundary = '----abc123') {
   return {
     status: 200,
     headers: new Headers({
-      'Content-Type': `multipart/mixed; boundary=${boundary}`
+      'Content-Type': `multipart/mixed; boundary=${boundary}`,
     }),
     body: stream,
-    json: vi.fn().mockResolvedValue({})
+    json: vi.fn().mockResolvedValue({}),
   };
 }
 
@@ -35,7 +35,7 @@ function mockJsonFetchResponse(data: object) {
     status: 200,
     headers: new Headers({ 'Content-Type': 'application/json' }),
     json: vi.fn().mockResolvedValue(data),
-    body: null
+    body: null,
   };
 }
 
@@ -52,7 +52,7 @@ function subscribeAndCollect(observable: { subscribe: Function }) {
     const result = {
       values: [] as GraphQLResponse[],
       error: null as Error | null,
-      completed: false
+      completed: false,
     };
     const timeout = setTimeout(() => resolve(result), 2000);
 
@@ -67,7 +67,7 @@ function subscribeAndCollect(observable: { subscribe: Function }) {
         result.completed = true;
         clearTimeout(timeout);
         resolve(result);
-      }
+      },
     });
   });
 }
@@ -87,7 +87,7 @@ describe('createClientFetchFn', () => {
   function createClientNetwork(queryRegistry?: QueryRegistry) {
     return createClientFetchFn({
       url: 'http://test.com/graphql',
-      queryRegistry: queryRegistry ?? new QueryRegistry()
+      queryRegistry: queryRegistry ?? new QueryRegistry(),
     });
   }
 
@@ -97,18 +97,18 @@ describe('createClientFetchFn', () => {
         {
           data: { allUsersList: [] },
           hasNext: true,
-          pending: [{ id: '0', path: ['allUsersList'], label: 'users' }]
+          pending: [{ id: '0', path: ['allUsersList'], label: 'users' }],
         },
         {
           incremental: [{ id: '0', items: [{ id: 1, name: 'Alice' }] }],
           completed: [],
-          hasNext: true
+          hasNext: true,
         },
         {
           incremental: [{ id: '0', items: [{ id: 2, name: 'Bob' }] }],
           completed: [{ id: '0' }],
-          hasNext: false
-        }
+          hasNext: false,
+        },
       ];
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
@@ -122,17 +122,17 @@ describe('createClientFetchFn', () => {
       expect(values[0]).toEqual({
         data: { allUsersList: [] },
         hasNext: true,
-        pending: [{ id: '0', path: ['allUsersList'], label: 'users' }]
+        pending: [{ id: '0', path: ['allUsersList'], label: 'users' }],
       });
       expect(values[1]).toEqual({
         incremental: [{ id: '0', items: [{ id: 1, name: 'Alice' }] }],
         completed: [],
-        hasNext: true
+        hasNext: true,
       });
       expect(values[2]).toEqual({
         incremental: [{ id: '0', items: [{ id: 2, name: 'Bob' }] }],
         completed: [{ id: '0' }],
-        hasNext: false
+        hasNext: false,
       });
       expect(completed).toBe(true);
     });
@@ -142,18 +142,18 @@ describe('createClientFetchFn', () => {
         {
           data: { allUsersList: [] },
           hasNext: true,
-          pending: [{ id: '0', path: ['allUsersList'], label: 'users' }]
+          pending: [{ id: '0', path: ['allUsersList'], label: 'users' }],
         },
         {
           incremental: [{ id: '0', items: [{ id: 1, name: 'Alice' }] }],
           completed: [],
-          hasNext: true
+          hasNext: true,
         },
         {
           incremental: [{ id: '0', items: [{ id: 2, name: 'Bob' }] }],
           completed: [{ id: '0' }],
-          hasNext: false
-        }
+          hasNext: false,
+        },
       ];
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
@@ -163,18 +163,18 @@ describe('createClientFetchFn', () => {
       const { values, completed } = await subscribeAndCollect(observable);
 
       expect(values[0]).toEqual(
-        expect.objectContaining({ data: { allUsersList: [] }, hasNext: true })
+        expect.objectContaining({ data: { allUsersList: [] }, hasNext: true }),
       );
       expect(values[1]).toEqual(
         expect.objectContaining({
-          incremental: [{ id: '0', items: [{ id: 1, name: 'Alice' }] }]
-        })
+          incremental: [{ id: '0', items: [{ id: 1, name: 'Alice' }] }],
+        }),
       );
       expect(values[2]).toEqual(
         expect.objectContaining({
           incremental: [{ id: '0', items: [{ id: 2, name: 'Bob' }] }],
-          hasNext: false
-        })
+          hasNext: false,
+        }),
       );
       expect(completed).toBe(true);
     });
@@ -184,13 +184,13 @@ describe('createClientFetchFn', () => {
         {
           data: { allUsersList: [{ id: 1, name: 'Alice' }] },
           hasNext: true,
-          pending: [{ id: '0', path: ['allUsersList'], label: 'users' }]
+          pending: [{ id: '0', path: ['allUsersList'], label: 'users' }],
         },
         {
           incremental: [{ id: '0', items: [{ id: 2, name: 'Bob' }] }],
           completed: [{ id: '0' }],
-          hasNext: false
-        }
+          hasNext: false,
+        },
       ];
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
@@ -203,14 +203,14 @@ describe('createClientFetchFn', () => {
       expect(values[0]).toEqual(
         expect.objectContaining({
           data: { allUsersList: [{ id: 1, name: 'Alice' }] },
-          hasNext: true
-        })
+          hasNext: true,
+        }),
       );
       expect(values[1]).toEqual(
         expect.objectContaining({
           incremental: [{ id: '0', items: [{ id: 2, name: 'Bob' }] }],
-          hasNext: false
-        })
+          hasNext: false,
+        }),
       );
       expect(completed).toBe(true);
     });
@@ -220,14 +220,14 @@ describe('createClientFetchFn', () => {
         {
           data: { allUsersList: [] },
           hasNext: true,
-          pending: [{ id: '0', path: ['allUsersList'], label: 'users' }]
+          pending: [{ id: '0', path: ['allUsersList'], label: 'users' }],
         },
         {
           incremental: [{ id: '0', items: [{ id: 1, name: 'Alice' }] }],
           completed: [],
-          hasNext: true
+          hasNext: true,
         },
-        { hasNext: false }
+        { hasNext: false },
       ];
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
@@ -246,9 +246,9 @@ describe('createClientFetchFn', () => {
         data: {
           allUsersList: [
             { id: 1, name: 'Alice' },
-            { id: 2, name: 'Bob' }
-          ]
-        }
+            { id: 2, name: 'Bob' },
+          ],
+        },
       };
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockJsonFetchResponse(data));
@@ -269,13 +269,13 @@ describe('createClientFetchFn', () => {
         {
           data: { userById: { id: 1 } },
           hasNext: true,
-          pending: [{ id: '0', path: ['userById'], label: 'details' }]
+          pending: [{ id: '0', path: ['userById'], label: 'details' }],
         },
         {
           incremental: [{ id: '0', data: { name: 'Alice', email: 'alice@example.com' } }],
           completed: [{ id: '0' }],
-          hasNext: false
-        }
+          hasNext: false,
+        },
       ];
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
@@ -286,13 +286,13 @@ describe('createClientFetchFn', () => {
 
       expect(values).toHaveLength(2);
       expect(values[0]).toEqual(
-        expect.objectContaining({ data: { userById: { id: 1 } }, hasNext: true })
+        expect.objectContaining({ data: { userById: { id: 1 } }, hasNext: true }),
       );
       expect(values[1]).toEqual(
         expect.objectContaining({
           incremental: [{ id: '0', data: { name: 'Alice', email: 'alice@example.com' } }],
-          hasNext: false
-        })
+          hasNext: false,
+        }),
       );
       expect(completed).toBe(true);
     });
@@ -302,15 +302,15 @@ describe('createClientFetchFn', () => {
         {
           data: { userById: { id: 1, __typename: 'User' } },
           hasNext: true,
-          pending: [{ id: '0', path: ['userById'], label: 'UserDetails' }]
+          pending: [{ id: '0', path: ['userById'], label: 'UserDetails' }],
         },
         {
           incremental: [
-            { id: '0', data: { name: 'Alice', email: 'alice@example.com', bio: 'Hello' } }
+            { id: '0', data: { name: 'Alice', email: 'alice@example.com', bio: 'Hello' } },
           ],
           completed: [{ id: '0' }],
-          hasNext: false
-        }
+          hasNext: false,
+        },
       ];
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
@@ -323,17 +323,19 @@ describe('createClientFetchFn', () => {
       expect(values[0]).toEqual(
         expect.objectContaining({
           data: { userById: { id: 1, __typename: 'User' } },
-          hasNext: true
-        })
+          hasNext: true,
+        }),
       );
       // Second emission: raw incremental delivery payload
       expect(values[1]).toEqual(
         expect.objectContaining({
           incremental: expect.arrayContaining([
-            expect.objectContaining({ data: expect.objectContaining({ name: 'Alice', email: 'alice@example.com' }) })
+            expect.objectContaining({
+              data: expect.objectContaining({ name: 'Alice', email: 'alice@example.com' }),
+            }),
           ]),
-          hasNext: false
-        })
+          hasNext: false,
+        }),
       );
       expect(completed).toBe(true);
     });
@@ -343,18 +345,18 @@ describe('createClientFetchFn', () => {
         {
           data: { userById: { id: 1 } },
           hasNext: true,
-          pending: [{ id: '0', path: ['userById'], label: 'details' }]
+          pending: [{ id: '0', path: ['userById'], label: 'details' }],
         },
         {
           incremental: [{ id: '0', data: { name: 'Alice' } }],
           completed: [],
-          hasNext: true
+          hasNext: true,
         },
         {
           incremental: [{ id: '0', data: { email: 'alice@example.com' } }],
           completed: [{ id: '0' }],
-          hasNext: false
-        }
+          hasNext: false,
+        },
       ];
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
@@ -374,28 +376,28 @@ describe('createClientFetchFn', () => {
         {
           data: { allUsersList: [] },
           hasNext: true,
-          pending: [{ id: '0', path: ['allUsersList'], label: 'users' }]
+          pending: [{ id: '0', path: ['allUsersList'], label: 'users' }],
         },
         {
           incremental: [{ id: '0', items: [{ id: 1 }] }],
           pending: [{ id: '1', path: ['allUsersList', 0], label: 'UserDetails' }],
           completed: [],
-          hasNext: true
+          hasNext: true,
         },
         {
           incremental: [
             { id: '1', data: { name: 'Alice', email: 'alice@example.com' } },
-            { id: '0', items: [{ id: 2 }] }
+            { id: '0', items: [{ id: 2 }] },
           ],
           pending: [{ id: '2', path: ['allUsersList', 1], label: 'UserDetails' }],
           completed: [{ id: '1' }],
-          hasNext: true
+          hasNext: true,
         },
         {
           incremental: [{ id: '2', data: { name: 'Bob', email: 'bob@example.com' } }],
           completed: [{ id: '0' }, { id: '2' }],
-          hasNext: false
-        }
+          hasNext: false,
+        },
       ];
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
@@ -407,28 +409,28 @@ describe('createClientFetchFn', () => {
       // Raw multipart parts passed through — 4 parts, one per multipart chunk
       expect(values).toHaveLength(4);
       expect(values[0]).toEqual(
-        expect.objectContaining({ data: { allUsersList: [] }, hasNext: true })
+        expect.objectContaining({ data: { allUsersList: [] }, hasNext: true }),
       );
       expect(values[1]).toEqual(
         expect.objectContaining({
           incremental: [{ id: '0', items: [{ id: 1 }] }],
-          hasNext: true
-        })
+          hasNext: true,
+        }),
       );
       expect(values[2]).toEqual(
         expect.objectContaining({
           incremental: [
             { id: '1', data: { name: 'Alice', email: 'alice@example.com' } },
-            { id: '0', items: [{ id: 2 }] }
+            { id: '0', items: [{ id: 2 }] },
           ],
-          hasNext: true
-        })
+          hasNext: true,
+        }),
       );
       expect(values[3]).toEqual(
         expect.objectContaining({
           incremental: [{ id: '2', data: { name: 'Bob', email: 'bob@example.com' } }],
-          hasNext: false
-        })
+          hasNext: false,
+        }),
       );
       expect(completed).toBe(true);
     });
@@ -438,24 +440,24 @@ describe('createClientFetchFn', () => {
         {
           data: { userById: { id: 1 } },
           hasNext: true,
-          pending: [{ id: '0', path: ['userById'], label: 'UserWithPosts' }]
+          pending: [{ id: '0', path: ['userById'], label: 'UserWithPosts' }],
         },
         {
           incremental: [{ id: '0', data: { posts: [] } }],
           pending: [{ id: '1', path: ['userById', 'posts'], label: 'PostItems' }],
           completed: [{ id: '0' }],
-          hasNext: true
+          hasNext: true,
         },
         {
           incremental: [{ id: '1', items: [{ id: 101, title: 'Post 1' }] }],
           completed: [],
-          hasNext: true
+          hasNext: true,
         },
         {
           incremental: [{ id: '1', items: [{ id: 102, title: 'Post 2' }] }],
           completed: [{ id: '1' }],
-          hasNext: false
-        }
+          hasNext: false,
+        },
       ];
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
@@ -467,25 +469,25 @@ describe('createClientFetchFn', () => {
       expect(values).toHaveLength(4);
       // Initial payload (raw, including pending)
       expect(values[0]).toEqual(
-        expect.objectContaining({ data: { userById: { id: 1 } }, hasNext: true })
+        expect.objectContaining({ data: { userById: { id: 1 } }, hasNext: true }),
       );
       // Deferred fragment with empty posts (raw incremental)
       expect(values[1]).toEqual(
         expect.objectContaining({
-          incremental: [{ id: '0', data: { posts: [] } }]
-        })
+          incremental: [{ id: '0', data: { posts: [] } }],
+        }),
       );
       // Streamed post items (raw incremental)
       expect(values[2]).toEqual(
         expect.objectContaining({
-          incremental: [{ id: '1', items: [{ id: 101, title: 'Post 1' }] }]
-        })
+          incremental: [{ id: '1', items: [{ id: 101, title: 'Post 1' }] }],
+        }),
       );
       expect(values[3]).toEqual(
         expect.objectContaining({
           incremental: [{ id: '1', items: [{ id: 102, title: 'Post 2' }] }],
-          hasNext: false
-        })
+          hasNext: false,
+        }),
       );
       expect(completed).toBe(true);
     });
@@ -497,8 +499,8 @@ describe('createClientFetchFn', () => {
         {
           data: null,
           errors: [{ message: 'Query failed' }],
-          hasNext: false
-        }
+          hasNext: false,
+        },
       ];
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
@@ -511,8 +513,8 @@ describe('createClientFetchFn', () => {
       expect(values[0]).toEqual(
         expect.objectContaining({
           data: null,
-          errors: [{ message: 'Query failed' }]
-        })
+          errors: [{ message: 'Query failed' }],
+        }),
       );
       expect(completed).toBe(true);
     });
@@ -522,19 +524,19 @@ describe('createClientFetchFn', () => {
         {
           data: { userById: { id: 1 } },
           hasNext: true,
-          pending: [{ id: '0', path: ['userById'], label: 'details' }]
+          pending: [{ id: '0', path: ['userById'], label: 'details' }],
         },
         {
           incremental: [
             {
               id: '0',
               data: null,
-              errors: [{ message: 'Deferred field failed' }]
-            }
+              errors: [{ message: 'Deferred field failed' }],
+            },
           ],
           completed: [{ id: '0' }],
-          hasNext: false
-        }
+          hasNext: false,
+        },
       ];
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
@@ -545,7 +547,7 @@ describe('createClientFetchFn', () => {
 
       // First value is the initial payload (raw, including pending)
       expect(values[0]).toEqual(
-        expect.objectContaining({ data: { userById: { id: 1 } }, hasNext: true })
+        expect.objectContaining({ data: { userById: { id: 1 } }, hasNext: true }),
       );
       // Second value: raw incremental delivery with error
       expect(values[1]).toEqual(
@@ -554,11 +556,11 @@ describe('createClientFetchFn', () => {
             {
               id: '0',
               data: null,
-              errors: [{ message: 'Deferred field failed' }]
-            }
+              errors: [{ message: 'Deferred field failed' }],
+            },
           ],
-          hasNext: false
-        })
+          hasNext: false,
+        }),
       );
       expect(completed).toBe(true);
     });
@@ -568,7 +570,7 @@ describe('createClientFetchFn', () => {
         status: 200,
         headers: new Headers({ 'Content-Type': 'application/json' }),
         json: vi.fn().mockRejectedValue(new Error('Invalid JSON')),
-        body: null
+        body: null,
       };
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockResponse);
@@ -586,21 +588,19 @@ describe('createClientFetchFn', () => {
         start(controller) {
           const encoder = new TextEncoder();
           controller.enqueue(
-            encoder.encode(
-              '\r\n------abc\r\nContent-Type: application/json\r\n\r\n{invalid json'
-            )
+            encoder.encode('\r\n------abc\r\nContent-Type: application/json\r\n\r\n{invalid json'),
           );
           controller.close();
-        }
+        },
       });
 
       const mockResponse = {
         status: 200,
         headers: new Headers({
-          'Content-Type': 'multipart/mixed; boundary=----abc'
+          'Content-Type': 'multipart/mixed; boundary=----abc',
         }),
         body: stream,
-        json: vi.fn().mockResolvedValue({})
+        json: vi.fn().mockResolvedValue({}),
       };
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockResponse);
@@ -640,16 +640,16 @@ describe('createClientFetchFn', () => {
           } else {
             controller.error(new Error('Stream error'));
           }
-        }
+        },
       });
 
       const mockResponse = {
         status: 200,
         headers: new Headers({
-          'Content-Type': 'multipart/mixed; boundary=----abc'
+          'Content-Type': 'multipart/mixed; boundary=----abc',
         }),
         body: stream,
-        json: vi.fn()
+        json: vi.fn(),
       };
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockResponse);
@@ -714,7 +714,7 @@ describe('createClientFetchFn', () => {
       const part1 = { data: { userById: { id: 1 } }, hasNext: true } as GraphQLResponse;
       const part2 = {
         incremental: [{ id: '0', data: { name: 'Alice' } }],
-        hasNext: false
+        hasNext: false,
       } as unknown as GraphQLResponse;
 
       query.next(part1);

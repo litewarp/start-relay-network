@@ -4,7 +4,7 @@ import {
   removeQuotes,
   splitWithRest,
   getBoundary,
-  parseMultipartHttp
+  parseMultipartHttp,
 } from '#@/fetch/multipart-utils.js';
 import { describe, it, expect } from 'vitest';
 
@@ -132,7 +132,7 @@ describe('multipart-utils', () => {
       const part1 = JSON.stringify({ data: { count: 1 }, hasNext: true });
       const part2 = JSON.stringify({
         incremental: [{ data: { name: 'test' } }],
-        hasNext: false
+        hasNext: false,
       });
 
       const buffer =
@@ -145,7 +145,7 @@ describe('multipart-utils', () => {
       expect(result.parts[0]).toEqual({ data: { count: 1 }, hasNext: true });
       expect(result.parts[1]).toEqual({
         incremental: [{ data: { name: 'test' } }],
-        hasNext: false
+        hasNext: false,
       });
     });
 
@@ -179,7 +179,7 @@ describe('multipart-utils', () => {
         buffer,
         boundary,
         existingParts,
-        false // not preamble
+        false, // not preamble
       );
 
       expect(result.parts).toHaveLength(2);

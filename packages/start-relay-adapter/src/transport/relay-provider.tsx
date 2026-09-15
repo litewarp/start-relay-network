@@ -33,10 +33,7 @@ export function RelayProvider(props: {
   children: React.ReactNode;
 }) {
   return (
-    <WrappedRelayProvider
-      getEnvironment={() => props.environment}
-      context={props.context}
-    >
+    <WrappedRelayProvider getEnvironment={() => props.environment} context={props.context}>
       {props.children}
     </WrappedRelayProvider>
   );

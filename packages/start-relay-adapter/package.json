@@ -1,25 +1,27 @@
 {
   "name": "@litewarp/start-relay-network",
-  "version": "1.0.0-beta.7",
+  "version": "1.0.0",
   "description": "TanStack Start adapter for Relay with SSR streaming support",
   "keywords": [
     "relay",
-    "tanstack",
-    "start",
     "ssr",
-    "streaming"
+    "start",
+    "streaming",
+    "tanstack"
   ],
   "license": "MIT",
   "author": "litewarp",
+  "files": [
+    "dist",
+    "!dist/stats.html",
+    "!dist/stats.json",
+    "README.md",
+    "tsconfig.json"
+  ],
   "type": "module",
   "imports": {
     "#@/*": "./src/*"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "tsconfig.json"
-  ],
   "exports": {
     ".": {
       "import": "./dist/index.mjs",
@@ -38,31 +40,30 @@
     "build": "tsdown"
   },
   "devDependencies": {
-    "@tanstack/react-router": "^1.163.3",
-    "@tanstack/react-router-devtools": "^1.163.3",
-    "@tanstack/react-start": "^1.164.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@types/react-relay": "^18.2.1",
-    "@types/relay-runtime": "^20.1.1",
-    "graphql": "^16.13.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-relay": "^20.1.1",
-    "relay-runtime": "^20.1.1",
-    "rollup-plugin-visualizer": "^6.0.8",
-    "tailwind-merge": "^3.5.0",
+    "@tanstack/react-router": "^1.170.36",
+    "@tanstack/react-router-devtools": "^1.167.2",
+    "@tanstack/react-start": "^1.168.54",
+    "@tanstack/router-core": "^1.170.36",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitest/coverage-v8": "^5.0.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-relay": "^21.0.1",
+    "relay-runtime": "^21.0.1",
+    "rollup-plugin-visualizer": "^7.1.1",
+    "tailwind-merge": "^3.7.0",
     "vite": "catalog:",
     "vitest": "catalog:",
     "zod": "catalog:"
   },
   "peerDependencies": {
-    "@tanstack/react-router": "^1.163.3",
-    "@tanstack/react-start": "^1.164.0",
-    "graphql": "catalog:",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "react-relay": "^20.1.1",
-    "relay-runtime": "^20.1.1"
+    "@tanstack/react-router": "^1.170.36",
+    "@tanstack/react-start": "^1.168.54",
+    "@tanstack/router-core": "^1.170.36",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-relay": "^21.0.1",
+    "relay-runtime": "^21.0.1"
   }
 }

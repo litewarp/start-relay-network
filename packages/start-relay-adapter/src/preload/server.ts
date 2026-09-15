@@ -1,21 +1,19 @@
-import { debugPreload } from "../debug.js";
-import { getQueryRegistry } from "../environment.js";
+import { debugPreload } from '../debug.js';
+import { getQueryRegistry } from '../environment.js';
 
-import type { EnvironmentProviderOptions, LoadQueryOptions } from "react-relay";
+import type { EnvironmentProviderOptions, LoadQueryOptions } from 'react-relay';
 
-import relay from "react-relay";
+import relay from 'react-relay';
 import runtime, {
   type Environment,
   type GraphQLTaggedNode,
   type OperationType,
   type VariablesOf,
-} from "relay-runtime";
-import type { PreloadedQuery } from "./types.js";
+} from 'relay-runtime';
+import type { PreloadedQuery } from './types.js';
 const { getRequest, createOperationDescriptor } = runtime;
 
-export const createServerPreloader = (
-  environment: Environment,
-) => {
+export const createServerPreloader = (environment: Environment) => {
   const queryRegistry = getQueryRegistry(environment);
 
   return <TQuery extends OperationType>(
@@ -24,15 +22,11 @@ export const createServerPreloader = (
     options?: LoadQueryOptions,
     environmentProviderOptions?: EnvironmentProviderOptions,
   ): PreloadedQuery<TQuery> => {
-    debugPreload("[server] Preloading query:", request, variables);
+    debugPreload('[server] Preloading query:', request, variables);
 
     // build the operation descriptor
     const req = getRequest(request);
-    const operation = createOperationDescriptor(
-      req,
-      variables,
-      options?.networkCacheConfig,
-    );
+    const operation = createOperationDescriptor(req, variables, options?.networkCacheConfig);
 
     // store the operation in the queryRegistry
     queryRegistry.build(operation);
@@ -42,7 +36,7 @@ export const createServerPreloader = (
     // causes Relay to skip the fetch when client:root exists in the store.
     const serverOptions: LoadQueryOptions = {
       ...options,
-      fetchPolicy: "network-only",
+      fetchPolicy: 'network-only',
     };
     const preloadedQuery = relay.loadQuery<TQuery>(
       environment,

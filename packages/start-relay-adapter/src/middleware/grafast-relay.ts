@@ -37,8 +37,8 @@ export function transformToRelayResponse(result: GrafastResult) {
       ...(label ? { label } : {}),
       extensions: {
         ...extensions,
-        is_final: !hasNext
-      }
+        is_final: !hasNext,
+      },
     };
   }
 
@@ -49,8 +49,8 @@ export function transformToRelayResponse(result: GrafastResult) {
     ...(errors ? { errors } : {}),
     extensions: {
       ...extensions,
-      is_final: true
-    }
+      is_final: true,
+    },
   };
 }
 
@@ -66,9 +66,7 @@ export function transformToRelayResponse(result: GrafastResult) {
  */
 export const grafastRelayTransform: ResponseTransform = () => {
   return (response: GraphQLResponse) => {
-    const transformed = transformToRelayResponse(
-      response as unknown as GrafastResult
-    );
+    const transformed = transformToRelayResponse(response as unknown as GrafastResult);
     return [transformed as unknown as GraphQLResponse];
   };
 };

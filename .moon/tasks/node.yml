@@ -1,64 +1,79 @@
 # Shared tasks for all Node.js projects
 fileGroups:
   sources:
-    - "src/**/*"
+    - 'src/**/*'
   tests:
-    - "**/__tests__/**/*"
-    - "**/*.test.*"
-    - "**/*.spec.*"
+    - '**/__tests__/**/*'
+    - '**/*.test.*'
+    - '**/*.spec.*'
   configs:
-    - "*.config.*"
+    - '*.config.*'
+  manifests:
+    - 'package.json'
+    - 'tsconfig.json'
+    - '/package.json'
+    - '/bun.lock'
+    - '/tsconfig.json'
+    - '/.oxlintrc.json'
+    - '/.oxfmtrc.json'
+    - '/vitest.config.ts'
 
 tasks:
   lint:
-    command: "bun run oxlint ."
+    command: 'bun run oxlint .'
     inputs:
-      - "@globs(sources)"
-      - "@globs(tests)"
-      - "@globs(configs)"
+      - '@globs(sources)'
+      - '@globs(tests)'
+      - '@globs(configs)'
+      - '@files(manifests)'
 
   lint-fix:
-    command: "bun run oxlint --fix ."
+    command: 'bun run oxlint --fix .'
     inputs:
-      - "@globs(sources)"
-      - "@globs(tests)"
-      - "@globs(configs)"
+      - '@globs(sources)'
+      - '@globs(tests)'
+      - '@globs(configs)'
+      - '@files(manifests)'
 
   format:
-    command: "bun run oxfmt ."
+    command: 'bun run oxfmt .'
     inputs:
-      - "@globs(sources)"
-      - "@globs(tests)"
-      - "@globs(configs)"
+      - '@globs(sources)'
+      - '@globs(tests)'
+      - '@globs(configs)'
+      - '@files(manifests)'
 
   format-write:
-    command: "bun run --write ."
+    command: 'bun run oxfmt --write .'
     inputs:
-      - "@globs(sources)"
-      - "@globs(tests)"
-      - "@globs(configs)"
+      - '@globs(sources)'
+      - '@globs(tests)'
+      - '@globs(configs)'
+      - '@files(manifests)'
 
   typecheck:
-    command: "bun run tsgo --noEmit"
+    command: 'bun run tsgo --noEmit'
     inputs:
-      - "@globs(sources)"
-      - "@globs(tests)"
-      - "tsconfig.json"
+      - '@globs(sources)'
+      - '@globs(tests)'
+      - 'tsconfig.json'
 
   test:
-    command: "bun run vitest run"
+    command: 'bun run vitest run --passWithNoTests'
     inputs:
-      - "@globs(sources)"
-      - "@globs(tests)"
+      - '@globs(sources)'
+      - '@globs(tests)'
+      - '@files(manifests)'
 
   test-watch:
-    command: "bun run vitest"
+    command: 'bun run vitest'
     options:
       cache: false
       persistent: true
 
   test-coverage:
-    command: "bun run vitest run --coverage"
+    command: 'bun run vitest run --coverage --passWithNoTests'
     inputs:
-      - "@globs(sources)"
-      - "@globs(tests)"
+      - '@globs(sources)'
+      - '@globs(tests)'
+      - '@files(manifests)'

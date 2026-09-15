@@ -1,5 +1,5 @@
 import { makePgService } from 'postgraphile/adaptors/pg';
-import PostGraphileAmberPreset from 'postgraphile/presets/amber';
+import { PostGraphileAmberPreset } from 'postgraphile/presets/amber';
 import { PostGraphileRelayPreset } from 'postgraphile/presets/relay';
 import { PgSimplifyInflectionPreset } from '@graphile/simplify-inflection';
 import { StreamDeferPlugin } from 'postgraphile/graphile-build';
