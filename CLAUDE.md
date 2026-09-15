@@ -214,5 +214,6 @@ Test files should be colocated with source:
 - `.oxlintrc.json` - Linting rules (oxlint, not ESLint)
 - `.oxfmtrc.json` - Formatting rules (oxfmt, not Prettier)
 - `vitest.config.ts` - Vitest configuration at workspace root
+- `graphql` is pinned to 16 in the root catalog because PostGraphile and Grafast require `^16.9`. The adapter itself has no graphql dependency (Relay does not use graphql-js at runtime), so this only constrains the apps.
 - `.prototools` - Toolchain version pinning (proto). Note: `@moonrepo/cli` in `package.json` may be newer than the proto-pinned `moon`; CI uses the package version via `bun run moon`.
 - `tsconfig.json` - TypeScript configuration per package
