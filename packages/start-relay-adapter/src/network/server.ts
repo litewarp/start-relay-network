@@ -19,7 +19,7 @@ const getAbortSignal = (cacheConfig: CacheConfig): AbortSignal | undefined => {
 };
 
 export function createServerFetchFn(config: RelayNetworkConfig) {
-  const { getFetchOptions, url, queryRegistry, middleware = [], responseTransforms = [] } = config;
+  const { url, queryRegistry, middleware = [], responseTransforms = [] } = config;
 
   const fetchFn: FetchFunction = (request, variables, cacheConfig, _uploadables) => {
     debugNetworkServer('Executing request:', request);
@@ -40,18 +40,23 @@ export function createServerFetchFn(config: RelayNetworkConfig) {
 
     const signal = getAbortSignal(cacheConfig);
 
-    // Build context, apply request middleware, then fetch with streaming
-    getFetchOptions(request, variables, cacheConfig)
-      .then(async (baseFetchOptions) => {
-        const ctx = await applyMiddleware(middleware, {
-          request,
-          variables,
-          cacheConfig,
-          fetchOptions: { ...baseFetchOptions, signal },
-          url,
-        });
+    // Build default options, apply middleware, then fetch with streaming
+    const fetchOptions: RequestInit = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: request.text, variables }),
+      signal,
+    };
 
-        // Create a per-request response transform pipeline
+    applyMiddleware(middleware, {
+      request,
+      variables,
+      cacheConfig,
+      fetchOptions,
+      url,
+      meta: {},
+    })
+      .then(async (ctx) => {
         const transform = createResponseTransform(responseTransforms);
 
         return multipartFetch({

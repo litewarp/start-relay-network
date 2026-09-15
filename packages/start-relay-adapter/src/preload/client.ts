@@ -31,7 +31,7 @@ export const createClientPreloader = (
     return {
       ..._preloadedQuery,
       $__relay_queryRef: undefined,
-    } as unknown as PreloadedQuery<TQuery>;
+    };
   };
 };
 

@@ -6,6 +6,7 @@ export interface RequestContext {
   cacheConfig: CacheConfig;
   fetchOptions: RequestInit;
   url: string;
+  meta: Record<string, unknown>;
 }
 
 /**
@@ -21,3 +22,28 @@ export type RelayMiddleware = (ctx: RequestContext) => RequestContext | Promise<
  * concurrent requests.
  */
 export type ResponseTransform = () => (response: GraphQLResponse) => GraphQLResponse[];
+
+/**
+ * Creates a typed middleware function. The generic parameter narrows
+ * `ctx.meta` so you get type-safe access to custom properties that
+ * middleware adds to the context.
+ *
+ * @example
+ * ```ts
+ * const authMiddleware = createMiddleware<{ token: string }>(async (ctx) => ({
+ *   ...ctx,
+ *   meta: { ...ctx.meta, token: await getToken() },
+ *   fetchOptions: {
+ *     ...ctx.fetchOptions,
+ *     headers: { ...ctx.fetchOptions.headers, Authorization: `Bearer ${token}` },
+ *   },
+ * }));
+ * ```
+ */
+export function createMiddleware<TMeta extends Record<string, unknown> = Record<string, unknown>>(
+  fn: (ctx: RequestContext & { meta: RequestContext['meta'] & TMeta }) =>
+    | (RequestContext & { meta: RequestContext['meta'] & TMeta })
+    | Promise<RequestContext & { meta: RequestContext['meta'] & TMeta }>
+): RelayMiddleware {
+  return fn as RelayMiddleware;
+}

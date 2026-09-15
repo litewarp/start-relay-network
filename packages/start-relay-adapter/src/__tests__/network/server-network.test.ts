@@ -74,11 +74,6 @@ describe('createServerFetchFn', () => {
   function createServerNetwork(queryRegistry: QueryRegistry) {
     return createServerFetchFn({
       url: 'http://test.com/graphql',
-      getFetchOptions: async () => ({
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: 'test' })
-      }),
       queryRegistry
     });
   }

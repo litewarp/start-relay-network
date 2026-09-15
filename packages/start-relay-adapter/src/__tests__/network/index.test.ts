@@ -3,7 +3,6 @@ import { describe, it, expect } from 'vitest';
 
 const config = {
   url: 'http://test.com/graphql',
-  getFetchOptions: async () => ({ method: 'POST' as const }),
 };
 
 describe('createRelayEnvironment', () => {

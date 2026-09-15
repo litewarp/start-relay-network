@@ -13,7 +13,7 @@ import runtime, {
 const { Network, Observable } = runtime;
 
 export function createClientFetchFn(config: RelayNetworkConfig) {
-  const { url, queryRegistry, getFetchOptions, middleware = [], responseTransforms = [] } = config;
+  const { url, queryRegistry, middleware = [], responseTransforms = [] } = config;
 
   const fetchFn: FetchFunction = (request, variables, cacheConfig, _uploadables) => {
     const queryKey = queryKeyFromIdAndVariables(request.id ?? request.cacheID, variables);
@@ -43,18 +43,23 @@ export function createClientFetchFn(config: RelayNetworkConfig) {
       });
     }
 
-    // Fresh fetch — apply request middleware, then stream with response transforms
+    // Fresh fetch — build default options, apply middleware, then stream
     return Observable.create<GraphQLResponse>((sink) => {
-      getFetchOptions(request, variables, cacheConfig)
-        .then(async (baseFetchOptions) => {
-          const ctx = await applyMiddleware(middleware, {
-            request,
-            variables,
-            cacheConfig,
-            fetchOptions: baseFetchOptions,
-            url,
-          });
+      const fetchOptions: RequestInit = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: request.text, variables }),
+      };
 
+      applyMiddleware(middleware, {
+        request,
+        variables,
+        cacheConfig,
+        fetchOptions,
+        url,
+        meta: {},
+      })
+        .then(async (ctx) => {
           const transform = createResponseTransform(responseTransforms);
 
           return multipartFetch({

@@ -58,7 +58,7 @@ export const createServerPreloader = (
       $__relay_queryRef: {
         operation,
       },
-    } as unknown as PreloadedQuery<TQuery>;
+    };
   };
 };
 
