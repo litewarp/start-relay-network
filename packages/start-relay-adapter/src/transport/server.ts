@@ -1,8 +1,5 @@
 import type { QueryRecord } from '#@/cache/relay-query.js';
-import type {
-  TransportStream,
-  QueryEvent,
-} from './types.js';
+import type { TransportStream, QueryEvent } from './types.js';
 
 export class ServerTransport {
   stream: TransportStream;
@@ -16,7 +13,7 @@ export class ServerTransport {
     this.stream = new ReadableStream({
       start: (controller) => {
         this.controller = controller;
-      }
+      },
     });
   }
 
@@ -34,7 +31,7 @@ export class ServerTransport {
 
   trackQuery = ({
     event,
-    query
+    query,
   }: {
     event: Extract<QueryEvent, { type: 'started' }>;
     query: QueryRecord;
@@ -52,7 +49,7 @@ export class ServerTransport {
         }
       },
       error: finalize,
-      complete: finalize
+      complete: finalize,
     });
   };
 }

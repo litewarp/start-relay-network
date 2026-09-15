@@ -1,8 +1,4 @@
-import {
-  createMockOperationDescriptor,
-  collectStream,
-  flushMicrotasks
-} from '../utils/index.js';
+import { createMockOperationDescriptor, collectStream, flushMicrotasks } from '../utils/index.js';
 
 import { QueryRecord } from '#@/cache/relay-query.js';
 import { ClientTransport } from '#@/transport/client.js';
@@ -37,7 +33,7 @@ describe('ServerTransport', () => {
 
       transport.trackQuery({
         event: { type: 'started', id: query.queryKey, operation },
-        query
+        query,
       });
 
       // Complete the query to allow stream to close
@@ -48,7 +44,7 @@ describe('ServerTransport', () => {
       expect(events[0]).toEqual({
         type: 'started',
         id: query.queryKey,
-        operation
+        operation,
       });
     });
 
@@ -59,7 +55,7 @@ describe('ServerTransport', () => {
 
       transport.trackQuery({
         event: { type: 'started', id: query.queryKey, operation },
-        query
+        query,
       });
 
       query.next({ data: { user: { id: '1' } } });
@@ -82,11 +78,11 @@ describe('ServerTransport', () => {
 
       const operation1 = createMockOperationDescriptor({
         id: 'Query1',
-        variables: {}
+        variables: {},
       });
       const operation2 = createMockOperationDescriptor({
         id: 'Query2',
-        variables: {}
+        variables: {},
       });
 
       const query1 = new QueryRecord(operation1);
@@ -94,11 +90,11 @@ describe('ServerTransport', () => {
 
       transport.trackQuery({
         event: { type: 'started', id: query1.queryKey, operation: operation1 },
-        query: query1
+        query: query1,
       });
       transport.trackQuery({
         event: { type: 'started', id: query2.queryKey, operation: operation2 },
-        query: query2
+        query: query2,
       });
 
       query1.next({ data: { result: 1 } });
@@ -130,7 +126,7 @@ describe('ServerTransport', () => {
 
       transport.trackQuery({
         event: { type: 'started', id: query.queryKey, operation },
-        query
+        query,
       });
 
       transport.drainAndClose();
@@ -157,7 +153,7 @@ describe('ClientTransport', () => {
       const events = [
         { type: 'started' as const, id: 'test', operation: {} as any },
         { type: 'next' as const, id: 'test', data: { result: 1 } },
-        { type: 'complete' as const, id: 'test' }
+        { type: 'complete' as const, id: 'test' },
       ];
 
       const stream = new ReadableStream({
@@ -166,7 +162,7 @@ describe('ClientTransport', () => {
             controller.enqueue(event);
           }
           controller.close();
-        }
+        },
       });
 
       const client = new ClientTransport(stream);
@@ -184,7 +180,7 @@ describe('ClientTransport', () => {
     it('receives replayed events when subscribing after consumption', async () => {
       const events = [
         { type: 'started' as const, id: 'q1', operation: {} as any },
-        { type: 'next' as const, id: 'q1', data: { x: 1 } }
+        { type: 'next' as const, id: 'q1', data: { x: 1 } },
       ];
 
       const stream = new ReadableStream({
@@ -193,7 +189,7 @@ describe('ClientTransport', () => {
             controller.enqueue(event);
           }
           controller.close();
-        }
+        },
       });
 
       const client = new ClientTransport(stream);
@@ -210,7 +206,7 @@ describe('ClientTransport', () => {
       const stream = new ReadableStream({
         start(c) {
           controller = c;
-        }
+        },
       });
 
       const client = new ClientTransport(stream);
@@ -229,7 +225,6 @@ describe('ClientTransport', () => {
       expect(received).toHaveLength(2);
     });
   });
-
 });
 
 describe('transportSerializationAdapter', () => {
@@ -247,7 +242,7 @@ describe('transportSerializationAdapter', () => {
     expect(transportSerializationAdapter.test(null)).toBe(false);
     expect(transportSerializationAdapter.test('string')).toBe(false);
     expect(transportSerializationAdapter.test(new ClientTransport(new ReadableStream()))).toBe(
-      false
+      false,
     );
   });
 

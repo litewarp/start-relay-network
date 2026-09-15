@@ -43,4 +43,4 @@ tasks:
     inputs:
       - src/**/*.{ts,tsx}
       - src/**/*.graphql
-    outputs: ["src/__generated__/**/*"]
+    outputs: ['src/__generated__/**/*']

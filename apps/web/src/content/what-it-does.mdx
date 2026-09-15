@@ -28,8 +28,8 @@ middleware, and response transforms — the function returns the appropriate
 environment for the current runtime.
 
 ```tsx
-import { createRelayEnvironment } from "@litewarp/start-relay-network";
-import { createIsomorphicFn } from "@tanstack/react-start";
+import { createRelayEnvironment } from '@litewarp/start-relay-network';
+import { createIsomorphicFn } from '@tanstack/react-start';
 
 export const getRelayEnvironment = createIsomorphicFn()
   .client(() => createRelayEnvironment({ url, isServer: false }))
@@ -46,7 +46,7 @@ On the server, this builds an operation descriptor and registers it in an intern
 You use it directly in TanStack Router loaders:
 
 ```tsx
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute('/')({
   loader: ({ context }) => {
     const preloadedQuery = context.preloadQuery(query, {});
     return { preloadedQuery };
@@ -74,10 +74,10 @@ GraphQL servers use different wire formats for incremental delivery (`@defer`, `
 The package provides **response transforms** that normalize server responses into the format
 Relay expects:
 
-| Transform | Use case |
-|---|---|
-| `grafastRelayTransform` | PostGraphile v5 / Grafast servers (v16 incremental spec) |
-| `incrementalDeliveryTransform` | Servers using the 2023 incremental delivery spec |
+| Transform                      | Use case                                                 |
+| ------------------------------ | -------------------------------------------------------- |
+| `grafastRelayTransform`        | PostGraphile v5 / Grafast servers (v16 incremental spec) |
+| `incrementalDeliveryTransform` | Servers using the 2023 incremental delivery spec         |
 
 Transforms are factories — each network request gets a fresh instance to avoid state leakage
 across concurrent requests.
@@ -101,8 +101,8 @@ const authMiddleware: RelayMiddleware = async (ctx) => {
 
 ## Package exports
 
-| Export path | What it provides |
-|---|---|
-| `@litewarp/start-relay-network` | `createRelayEnvironment`, `integrateRelayWithRouter`, `RelayRouterContext` type |
-| `.../transforms/grafast-relay` | `grafastRelayTransform` for PostGraphile/Grafast |
-| `.../transforms/incremental-delivery` | `incrementalDeliveryTransform` for 2023 spec servers |
+| Export path                           | What it provides                                                                |
+| ------------------------------------- | ------------------------------------------------------------------------------- |
+| `@litewarp/start-relay-network`       | `createRelayEnvironment`, `integrateRelayWithRouter`, `RelayRouterContext` type |
+| `.../transforms/grafast-relay`        | `grafastRelayTransform` for PostGraphile/Grafast                                |
+| `.../transforms/incremental-delivery` | `incrementalDeliveryTransform` for 2023 spec servers                            |

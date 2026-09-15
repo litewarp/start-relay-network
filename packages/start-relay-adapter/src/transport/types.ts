@@ -38,7 +38,7 @@ export type TransportProviderComponent<TExtraProps> = FC<
       callback: (query: {
         event: Extract<QueryEvent, { type: 'started' }>;
         query: QueryRecord;
-      }) => void
+      }) => void,
     ) => void;
     /** will always be present */
     children: React.ReactNode;

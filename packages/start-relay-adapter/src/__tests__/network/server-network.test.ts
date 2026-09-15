@@ -4,7 +4,7 @@ import {
   createMockRequestParameters,
   createMultipartResponse,
   createMockStream,
-  createMockOperationDescriptor
+  createMockOperationDescriptor,
 } from '../utils/relay-mocks.js';
 import type { GraphQLResponse } from 'relay-runtime';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -19,13 +19,12 @@ function mockMultipartFetchResponse(parts: object[], boundary = '----abc123') {
   return {
     status: 200,
     headers: new Headers({
-      'Content-Type': `multipart/mixed; boundary=${boundary}`
+      'Content-Type': `multipart/mixed; boundary=${boundary}`,
     }),
     body: stream,
-    json: vi.fn().mockResolvedValue({})
+    json: vi.fn().mockResolvedValue({}),
   };
 }
-
 
 /**
  * Subscribes to a Relay Observable and collects all emissions.
@@ -39,7 +38,7 @@ function subscribeAndCollect(observable: { subscribe: Function }) {
     const result = {
       values: [] as GraphQLResponse[],
       error: null as Error | null,
-      completed: false
+      completed: false,
     };
     const timeout = setTimeout(() => resolve(result), 2000);
 
@@ -54,7 +53,7 @@ function subscribeAndCollect(observable: { subscribe: Function }) {
         result.completed = true;
         clearTimeout(timeout);
         resolve(result);
-      }
+      },
     });
   });
 }
@@ -74,7 +73,7 @@ describe('createServerFetchFn', () => {
   function createServerNetwork(queryRegistry: QueryRegistry) {
     return createServerFetchFn({
       url: 'http://test.com/graphql',
-      queryRegistry
+      queryRegistry,
     });
   }
 
@@ -88,18 +87,18 @@ describe('createServerFetchFn', () => {
         {
           data: { allUsersList: [] },
           hasNext: true,
-          pending: [{ id: '0', path: ['allUsersList'], label: 'users' }]
+          pending: [{ id: '0', path: ['allUsersList'], label: 'users' }],
         },
         {
           incremental: [{ id: '0', items: [{ id: 1, name: 'Alice' }] }],
           completed: [],
-          hasNext: true
+          hasNext: true,
         },
         {
           incremental: [{ id: '0', items: [{ id: 2, name: 'Bob' }] }],
           completed: [{ id: '0' }],
-          hasNext: false
-        }
+          hasNext: false,
+        },
       ];
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
@@ -114,17 +113,17 @@ describe('createServerFetchFn', () => {
       expect(values[0]).toEqual({
         data: { allUsersList: [] },
         hasNext: true,
-        pending: [{ id: '0', path: ['allUsersList'], label: 'users' }]
+        pending: [{ id: '0', path: ['allUsersList'], label: 'users' }],
       });
       expect(values[1]).toEqual({
         incremental: [{ id: '0', items: [{ id: 1, name: 'Alice' }] }],
         completed: [],
-        hasNext: true
+        hasNext: true,
       });
       expect(values[2]).toEqual({
         incremental: [{ id: '0', items: [{ id: 2, name: 'Bob' }] }],
         completed: [{ id: '0' }],
-        hasNext: false
+        hasNext: false,
       });
       expect(completed).toBe(true);
     });
@@ -138,13 +137,13 @@ describe('createServerFetchFn', () => {
         {
           data: { userById: { id: 1 } },
           hasNext: true,
-          pending: [{ id: '0', path: ['userById'], label: 'details' }]
+          pending: [{ id: '0', path: ['userById'], label: 'details' }],
         },
         {
           incremental: [{ id: '0', data: { name: 'Alice', email: 'alice@example.com' } }],
           completed: [{ id: '0' }],
-          hasNext: false
-        }
+          hasNext: false,
+        },
       ];
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
@@ -156,13 +155,13 @@ describe('createServerFetchFn', () => {
 
       expect(values).toHaveLength(2);
       expect(values[0]).toEqual(
-        expect.objectContaining({ data: { userById: { id: 1 } }, hasNext: true })
+        expect.objectContaining({ data: { userById: { id: 1 } }, hasNext: true }),
       );
       expect(values[1]).toEqual(
         expect.objectContaining({
           incremental: [{ id: '0', data: { name: 'Alice', email: 'alice@example.com' } }],
-          hasNext: false
-        })
+          hasNext: false,
+        }),
       );
       expect(completed).toBe(true);
     });
@@ -194,13 +193,13 @@ describe('createServerFetchFn', () => {
         {
           data: { userById: { id: 1 } },
           hasNext: true,
-          pending: [{ id: '0', path: ['userById'], label: 'details' }]
+          pending: [{ id: '0', path: ['userById'], label: 'details' }],
         },
         {
           incremental: [{ id: '0', data: { name: 'Alice' } }],
           completed: [{ id: '0' }],
-          hasNext: false
-        }
+          hasNext: false,
+        },
       ];
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockMultipartFetchResponse(parts));
@@ -280,16 +279,16 @@ describe('createServerFetchFn', () => {
           } else {
             controller.error(new Error('Stream error'));
           }
-        }
+        },
       });
 
       const mockResponse = {
         status: 200,
         headers: new Headers({
-          'Content-Type': 'multipart/mixed; boundary=----abc'
+          'Content-Type': 'multipart/mixed; boundary=----abc',
         }),
         body: stream,
-        json: vi.fn()
+        json: vi.fn(),
       };
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockResponse);
@@ -324,7 +323,7 @@ describe('createServerFetchFn', () => {
       // Verify fetch was called with the abort signal
       expect(globalThis.fetch).toHaveBeenCalledWith(
         'http://test.com/graphql',
-        expect.objectContaining({ signal: controller.signal })
+        expect.objectContaining({ signal: controller.signal }),
       );
     });
 
@@ -344,7 +343,7 @@ describe('createServerFetchFn', () => {
       // Signal should be undefined when not provided
       expect(globalThis.fetch).toHaveBeenCalledWith(
         'http://test.com/graphql',
-        expect.objectContaining({ signal: undefined })
+        expect.objectContaining({ signal: undefined }),
       );
     });
   });

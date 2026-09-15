@@ -19,7 +19,7 @@ describe('QueryRecord', () => {
     it('creates a QueryRecord from an operation descriptor', () => {
       const operation = createMockOperationDescriptor({
         id: 'TestQuery',
-        variables: { id: '123' }
+        variables: { id: '123' },
       });
 
       const query = new QueryRecord(operation);
@@ -30,7 +30,7 @@ describe('QueryRecord', () => {
     it('exposes the operation descriptor via public readonly field', () => {
       const operation = createMockOperationDescriptor({
         id: 'MyQuery',
-        variables: {}
+        variables: {},
       });
 
       const query = new QueryRecord(operation);
@@ -53,7 +53,7 @@ describe('QueryRecord', () => {
       expect(mockNext).toHaveBeenCalledWith({
         type: 'next',
         id: query.queryKey,
-        data: response
+        data: response,
       });
     });
 
@@ -75,12 +75,12 @@ describe('QueryRecord', () => {
       expect(mockNext).toHaveBeenNthCalledWith(1, {
         type: 'next',
         id: query.queryKey,
-        data: response1
+        data: response1,
       });
       expect(mockNext).toHaveBeenNthCalledWith(2, {
         type: 'next',
         id: query.queryKey,
-        data: response2
+        data: response2,
       });
     });
   });
@@ -107,7 +107,7 @@ describe('QueryRecord', () => {
       // a 'complete' type event, it calls observer.complete() - NOT observer.next()
       query.subscribe({
         next: (event) => events.push(`next:${event.type}`),
-        complete: () => events.push('complete')
+        complete: () => events.push('complete'),
       });
 
       query.complete();
@@ -140,7 +140,7 @@ describe('QueryRecord', () => {
       // an 'error' type event, it calls observer.error() - NOT observer.next()
       query.subscribe({
         next: (event) => events.push(`next:${event.type}`),
-        error: () => events.push('error')
+        error: () => events.push('error'),
       });
 
       query.error('test error');
@@ -183,17 +183,13 @@ describe('QueryRecord', () => {
     it('completes the internal replay subject', () => {
       const operation = createMockOperationDescriptor({ id: 'TestQuery' });
       const query = new QueryRecord(operation);
-      let completeCalled = false;
-
       // The wrapper in QueryRecord.subscribe() only passes through events
       // of type 'next'. When dispose() calls _replaySubject.complete(),
       // the ReplaySubject internally calls the subscriber's complete callback
       // but this goes through the wrapper's internal subscriber, not our observer.
       // So we verify the query state changes instead.
       const subscription = query.subscribe({
-        complete: () => {
-          completeCalled = true;
-        }
+        complete: () => {},
       });
 
       query.dispose();

@@ -23,12 +23,12 @@ to set up the compiler, then add the Babel plugin to your Vite config:
 
 ```tsx
 // vite.config.ts
-import viteReact from "@vitejs/plugin-react";
+import viteReact from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [
     viteReact({
-      babel: { plugins: ["relay"] },
+      babel: { plugins: ['relay'] },
     }),
   ],
 });
@@ -41,13 +41,13 @@ platform-specific environments:
 
 ```tsx
 // src/lib/relay/environment.ts
-import { createIsomorphicFn } from "@tanstack/react-start";
-import { createRelayEnvironment } from "@litewarp/start-relay-network";
-import { grafastRelayTransform } from "@litewarp/start-relay-network/transforms/grafast-relay";
+import { createIsomorphicFn } from '@tanstack/react-start';
+import { createRelayEnvironment } from '@litewarp/start-relay-network';
+import { grafastRelayTransform } from '@litewarp/start-relay-network/transforms/grafast-relay';
 
 function createConfig(isServer: boolean) {
   return {
-    url: "http://localhost:4000/graphql",
+    url: 'http://localhost:4000/graphql',
     responseTransforms: [grafastRelayTransform],
     isServer,
   };
@@ -60,12 +60,12 @@ export const getRelayEnvironment = createIsomorphicFn()
 
 ### Configuration options
 
-| Option | Type | Description |
-|---|---|---|
-| `url` | `string` | GraphQL endpoint URL |
-| `responseTransforms` | `ResponseTransform[]` | Normalize server responses to Relay's format |
-| `middleware` | `RelayMiddleware[]` | Intercept/modify requests before they're sent |
-| `isServer` | `boolean` | Explicitly set the runtime mode |
+| Option               | Type                  | Description                                   |
+| -------------------- | --------------------- | --------------------------------------------- |
+| `url`                | `string`              | GraphQL endpoint URL                          |
+| `responseTransforms` | `ResponseTransform[]` | Normalize server responses to Relay's format  |
+| `middleware`         | `RelayMiddleware[]`   | Intercept/modify requests before they're sent |
+| `isServer`           | `boolean`             | Explicitly set the runtime mode               |
 
 ## 3. Integrate with the router
 
@@ -75,18 +75,18 @@ Your root route should use `createRootRouteWithContext<RelayRouterContext>()` so
 
 ```tsx
 // src/router.tsx
-import { createRouter } from "@tanstack/react-router";
-import { integrateRelayWithRouter } from "@litewarp/start-relay-network";
-import type { RelayRouterContext } from "@litewarp/start-relay-network";
-import { routeTree } from "./routeTree.gen";
-import { getRelayEnvironment } from "./lib/relay/environment";
+import { createRouter } from '@tanstack/react-router';
+import { integrateRelayWithRouter } from '@litewarp/start-relay-network';
+import type { RelayRouterContext } from '@litewarp/start-relay-network';
+import { routeTree } from './routeTree.gen';
+import { getRelayEnvironment } from './lib/relay/environment';
 
 export function getRouter() {
   const { environment, preloadQuery } = getRelayEnvironment();
 
   const router = createRouter({
     routeTree,
-    defaultPreload: "intent",
+    defaultPreload: 'intent',
     scrollRestoration: true,
     context: { environment, preloadQuery },
   });
@@ -96,7 +96,7 @@ export function getRouter() {
   return router;
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface Register {
     router: ReturnType<typeof getRouter>;
   }
@@ -105,8 +105,8 @@ declare module "@tanstack/react-router" {
 
 ```tsx
 // src/routes/__root.tsx
-import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
-import type { RelayRouterContext } from "@litewarp/start-relay-network";
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
+import type { RelayRouterContext } from '@litewarp/start-relay-network';
 
 export const Route = createRootRouteWithContext<RelayRouterContext>()({
   component: () => <Outlet />,
@@ -120,9 +120,9 @@ Relay's `usePreloadedQuery` hook:
 
 ```tsx
 // src/routes/index.tsx
-import { createFileRoute } from "@tanstack/react-router";
-import relay from "react-relay";
-import type { indexQuery } from "../__generated__/indexQuery.graphql";
+import { createFileRoute } from '@tanstack/react-router';
+import relay from 'react-relay';
+import type { indexQuery } from '../__generated__/indexQuery.graphql';
 
 const { graphql, usePreloadedQuery } = relay;
 
@@ -135,7 +135,7 @@ const query = graphql`
   }
 `;
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute('/')({
   loader: ({ context }) => {
     const preloadedQuery = context.preloadQuery<indexQuery>(query, {});
     return { preloadedQuery };
@@ -158,7 +158,7 @@ Pick the transform that matches your GraphQL server:
 ### PostGraphile v5 / Grafast
 
 ```tsx
-import { grafastRelayTransform } from "@litewarp/start-relay-network/transforms/grafast-relay";
+import { grafastRelayTransform } from '@litewarp/start-relay-network/transforms/grafast-relay';
 
 createRelayEnvironment({
   // ...
@@ -172,7 +172,7 @@ expected wire format (`extensions.is_final`).
 ### 2023 Incremental Delivery spec
 
 ```tsx
-import { incrementalDeliveryTransform } from "@litewarp/start-relay-network/transforms/incremental-delivery";
+import { incrementalDeliveryTransform } from '@litewarp/start-relay-network/transforms/incremental-delivery';
 
 createRelayEnvironment({
   // ...
@@ -217,7 +217,7 @@ a `RequestContext` containing:
 Add an `Authorization` header to every request:
 
 ```tsx
-import { createMiddleware } from "@litewarp/start-relay-network";
+import { createMiddleware } from '@litewarp/start-relay-network';
 
 const authMiddleware = createMiddleware(async (ctx) => {
   const token = await getAuthToken();
@@ -234,7 +234,7 @@ const authMiddleware = createMiddleware(async (ctx) => {
 });
 
 createRelayEnvironment({
-  url: "http://localhost:4000/graphql",
+  url: 'http://localhost:4000/graphql',
   middleware: [authMiddleware],
 });
 ```
@@ -247,7 +247,7 @@ The `meta` bag is typed as `Record<string, unknown>`. Use the generic parameter 
 chained across the middleware array, so you'll need to cast:
 
 ```tsx
-import { createMiddleware } from "@litewarp/start-relay-network";
+import { createMiddleware } from '@litewarp/start-relay-network';
 
 interface AppMeta {
   authService: AuthService;
@@ -275,7 +275,7 @@ const tokenMiddleware = createMiddleware<AppMeta>(async (ctx) => {
 });
 
 createRelayEnvironment({
-  url: "http://localhost:4000/graphql",
+  url: 'http://localhost:4000/graphql',
   middleware: [serviceMiddleware, tokenMiddleware],
 });
 ```

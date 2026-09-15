@@ -4,22 +4,22 @@
   "description": "TanStack Start adapter for Relay with SSR streaming support",
   "keywords": [
     "relay",
-    "tanstack",
-    "start",
     "ssr",
-    "streaming"
+    "start",
+    "streaming",
+    "tanstack"
   ],
   "license": "MIT",
   "author": "litewarp",
-  "type": "module",
-  "imports": {
-    "#@/*": "./src/*"
-  },
   "files": [
     "dist",
     "README.md",
     "tsconfig.json"
   ],
+  "type": "module",
+  "imports": {
+    "#@/*": "./src/*"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.mjs",

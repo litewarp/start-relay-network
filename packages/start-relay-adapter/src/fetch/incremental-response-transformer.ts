@@ -41,7 +41,7 @@ export class IncrementalResponseTransformer {
       for (const entry of pending) {
         this.#pendingMap.set(entry.id, {
           path: entry.path,
-          label: entry.label ?? ''
+          label: entry.label ?? '',
         });
       }
     }
@@ -69,7 +69,7 @@ export class IncrementalResponseTransformer {
         const expanded: Record<string, unknown> = {
           path: meta.path,
           label: meta.label,
-          hasNext
+          hasNext,
         };
 
         if (item.data !== undefined) {

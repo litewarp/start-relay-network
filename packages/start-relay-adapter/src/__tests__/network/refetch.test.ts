@@ -43,7 +43,7 @@ describe('refetch', () => {
         status: 200,
         headers: new Headers({ 'Content-Type': 'application/json' }),
         json: vi.fn().mockResolvedValue({ data: { user: { id: '1' } } }),
-        body: null
+        body: null,
       };
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockResponse);
@@ -56,11 +56,11 @@ describe('refetch', () => {
         url: 'http://test.com/graphql',
         getRequestInit: async () => ({
           method: 'POST',
-          body: JSON.stringify({ query: '{ user { id } }' })
+          body: JSON.stringify({ query: '{ user { id } }' }),
         }),
         onNext,
         onComplete,
-        onError
+        onError,
       });
 
       expect(onNext).toHaveBeenCalledWith([{ data: { user: { id: '1' } } }]);
@@ -72,11 +72,11 @@ describe('refetch', () => {
       const boundary = '----abc123';
       const part1 = JSON.stringify({
         data: { user: { id: '1' } },
-        hasNext: true
+        hasNext: true,
       });
       const part2 = JSON.stringify({
         incremental: [{ id: '0', data: { name: 'Alice' } }],
-        hasNext: false
+        hasNext: false,
       });
 
       const responseBody =
@@ -93,17 +93,17 @@ describe('refetch', () => {
             controller.enqueue(chunk);
           }
           controller.close();
-        }
+        },
       });
 
       const mockResponse = {
         status: 200,
         headers: new Headers({
-          'Content-Type': `multipart/mixed; boundary=${boundary}`
+          'Content-Type': `multipart/mixed; boundary=${boundary}`,
         }),
         body: stream,
         // json() shouldn't be called for multipart responses, but needs to exist
-        json: vi.fn().mockResolvedValue({})
+        json: vi.fn().mockResolvedValue({}),
       };
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockResponse);
@@ -116,11 +116,11 @@ describe('refetch', () => {
         url: 'http://test.com/graphql',
         getRequestInit: async () => ({
           method: 'POST',
-          body: JSON.stringify({ query: '{ user { id ...UserDetails } }' })
+          body: JSON.stringify({ query: '{ user { id ...UserDetails } }' }),
         }),
         onNext,
         onComplete,
-        onError
+        onError,
       });
 
       // Wait for stream processing
@@ -134,10 +134,10 @@ describe('refetch', () => {
       const mockResponse = {
         status: 200,
         headers: new Headers({
-          'Content-Type': 'multipart/mixed; boundary=----abc'
+          'Content-Type': 'multipart/mixed; boundary=----abc',
         }),
         body: null,
-        json: vi.fn()
+        json: vi.fn(),
       };
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockResponse);
@@ -152,8 +152,8 @@ describe('refetch', () => {
           getRequestInit: async () => ({}),
           onNext,
           onComplete,
-          onError
-        })
+          onError,
+        }),
       ).rejects.toThrow('Malformed Response');
     });
 
@@ -162,14 +162,14 @@ describe('refetch', () => {
         status: 200,
         headers: new Headers({ 'Content-Type': 'application/json' }),
         json: vi.fn().mockResolvedValue({ data: {} }),
-        body: null
+        body: null,
       };
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockResponse);
 
       const customHeaders = {
         'X-Custom-Header': 'test-value',
-        Authorization: 'Bearer token'
+        Authorization: 'Bearer token',
       };
 
       await multipartFetch({
@@ -177,17 +177,17 @@ describe('refetch', () => {
         getRequestInit: async () => ({
           method: 'POST',
           headers: customHeaders,
-          body: JSON.stringify({ query: '{ test }' })
+          body: JSON.stringify({ query: '{ test }' }),
         }),
         onNext: vi.fn(),
         onComplete: vi.fn(),
-        onError: vi.fn()
+        onError: vi.fn(),
       });
 
       expect(globalThis.fetch).toHaveBeenCalledWith('http://test.com/graphql', {
         method: 'POST',
         headers: customHeaders,
-        body: JSON.stringify({ query: '{ test }' })
+        body: JSON.stringify({ query: '{ test }' }),
       });
     });
 
@@ -195,10 +195,10 @@ describe('refetch', () => {
       const mockResponse = {
         status: 500,
         headers: new Headers({
-          'Content-Type': 'multipart/mixed; boundary=----abc'
+          'Content-Type': 'multipart/mixed; boundary=----abc',
         }),
         body: null,
-        json: vi.fn().mockResolvedValue({ errors: [{ message: 'Server error' }] })
+        json: vi.fn().mockResolvedValue({ errors: [{ message: 'Server error' }] }),
       };
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockResponse);
@@ -212,7 +212,7 @@ describe('refetch', () => {
         getRequestInit: async () => ({}),
         onNext,
         onComplete,
-        onError
+        onError,
       });
 
       // For non-2xx, it falls through to JSON handling
@@ -226,21 +226,19 @@ describe('refetch', () => {
           // Send incomplete/malformed JSON that will fail to parse
           const encoder = new TextEncoder();
           controller.enqueue(
-            encoder.encode(
-              '\r\n------abc\r\nContent-Type: application/json\r\n\r\n{invalid json'
-            )
+            encoder.encode('\r\n------abc\r\nContent-Type: application/json\r\n\r\n{invalid json'),
           );
           controller.close();
-        }
+        },
       });
 
       const mockResponse = {
         status: 200,
         headers: new Headers({
-          'Content-Type': 'multipart/mixed; boundary=----abc'
+          'Content-Type': 'multipart/mixed; boundary=----abc',
         }),
         body: stream,
-        json: vi.fn().mockResolvedValue({})
+        json: vi.fn().mockResolvedValue({}),
       };
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockResponse);
@@ -254,7 +252,7 @@ describe('refetch', () => {
         getRequestInit: async () => ({}),
         onNext,
         onComplete,
-        onError
+        onError,
       });
 
       // Wait for stream processing
@@ -287,11 +285,11 @@ describe('refetch', () => {
         url: 'http://test.com/graphql',
         getRequestInit: async () => ({
           method: 'POST',
-          signal: controller.signal
+          signal: controller.signal,
         }),
         onNext,
         onComplete,
-        onError
+        onError,
       });
 
       controller.abort();
@@ -307,7 +305,7 @@ describe('refetch', () => {
         status: 200,
         headers: new Headers({ 'Content-Type': 'application/json' }),
         json: vi.fn().mockRejectedValue(new Error('Invalid JSON')),
-        body: null
+        body: null,
       };
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockResponse);
@@ -320,11 +318,11 @@ describe('refetch', () => {
         url: 'http://test.com/graphql',
         getRequestInit: async () => ({
           method: 'POST',
-          body: JSON.stringify({ query: '{ user { id } }' })
+          body: JSON.stringify({ query: '{ user { id } }' }),
         }),
         onNext,
         onComplete,
-        onError
+        onError,
       });
 
       // Should call onError instead of hanging
@@ -345,12 +343,12 @@ describe('refetch', () => {
         multipartFetch({
           url: 'http://test.com/graphql',
           getRequestInit: async () => ({
-            method: 'POST'
+            method: 'POST',
           }),
           onNext,
           onComplete,
-          onError
-        })
+          onError,
+        }),
       ).rejects.toThrow('Network error');
 
       expect(onNext).not.toHaveBeenCalled();
@@ -370,16 +368,16 @@ describe('refetch', () => {
             // Second pull: error
             controller.error(new Error('Stream error'));
           }
-        }
+        },
       });
 
       const mockResponse = {
         status: 200,
         headers: new Headers({
-          'Content-Type': 'multipart/mixed; boundary=----abc'
+          'Content-Type': 'multipart/mixed; boundary=----abc',
         }),
         body: stream,
-        json: vi.fn()
+        json: vi.fn(),
       };
 
       globalThis.fetch = vi.fn().mockResolvedValue(mockResponse);
@@ -393,7 +391,7 @@ describe('refetch', () => {
         getRequestInit: async () => ({}),
         onNext,
         onComplete,
-        onError
+        onError,
       });
 
       // Wait for stream processing
@@ -418,8 +416,8 @@ describe('refetch', () => {
           },
           onNext,
           onComplete,
-          onError
-        })
+          onError,
+        }),
       ).rejects.toThrow('Failed to get auth token');
 
       expect(onNext).not.toHaveBeenCalled();

@@ -25,13 +25,13 @@ export async function multipartFetch(opts: MultipartFetchOptions): Promise<void>
 
     const patch = new MultipartStreamParser<GraphQLResponse>({
       onNext: opts.onNext,
-      boundary: getBoundary(contentType)
+      boundary: getBoundary(contentType),
     });
 
     observableFromStream(res.body).subscribe({
       next: (val) => patch.handleChunk(val),
       complete: () => opts.onComplete(),
-      error: (err: unknown) => opts.onError(coerceError(err))
+      error: (err: unknown) => opts.onError(coerceError(err)),
     });
   } else {
     // otherwise just return as normal JSON

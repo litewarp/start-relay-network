@@ -5,11 +5,7 @@ import { queryKeyFromIdAndVariables } from '../query-cache.js';
 import type { RelayNetworkConfig } from './types.js';
 
 import { debugNetworkServer } from '#@/debug.js';
-import runtime, {
-  type CacheConfig,
-  type FetchFunction,
-  type GraphQLResponse
-} from 'relay-runtime';
+import runtime, { type CacheConfig, type FetchFunction, type GraphQLResponse } from 'relay-runtime';
 
 const { Network, Observable } = runtime;
 
@@ -27,10 +23,7 @@ export function createServerFetchFn(config: RelayNetworkConfig) {
 
     const query = queryRegistry.get(queryKey);
     if (!query) {
-      debugNetworkServer(
-        'Query not preloaded — skipping server fetch for queryKey:',
-        queryKey
-      );
+      debugNetworkServer('Query not preloaded — skipping server fetch for queryKey:', queryKey);
       return Observable.create<GraphQLResponse>(() => {});
     }
 
@@ -89,7 +82,7 @@ export function createServerFetchFn(config: RelayNetworkConfig) {
           }
         },
         error: (err) => sink.error(err),
-        complete: () => sink.complete()
+        complete: () => sink.complete(),
       });
     });
   };

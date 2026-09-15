@@ -6,7 +6,7 @@ import type { GraphQLResponse } from 'relay-runtime';
  */
 export async function applyMiddleware(
   middlewares: RelayMiddleware[],
-  ctx: RequestContext
+  ctx: RequestContext,
 ): Promise<RequestContext> {
   let current = ctx;
   for (const mw of middlewares) {
@@ -21,7 +21,7 @@ export async function applyMiddleware(
  * fetch lifecycle (important for stateful transforms).
  */
 export function createResponseTransform(
-  factories: ResponseTransform[]
+  factories: ResponseTransform[],
 ): (response: GraphQLResponse) => GraphQLResponse[] {
   const transforms = factories.map((factory) => factory());
   return (response: GraphQLResponse) => {

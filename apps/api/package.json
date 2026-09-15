@@ -1,9 +1,9 @@
 {
   "name": "api",
   "version": "0.1.0",
+  "private": true,
   "type": "module",
   "scripts": {},
-  "private": true,
   "dependencies": {
     "@graphile-contrib/pg-many-to-many": "^2.0.0-rc.1",
     "cors": "^2.8.6",

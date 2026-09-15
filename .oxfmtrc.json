@@ -7,5 +7,14 @@
   "singleQuote": true,
   "trailingComma": "all",
   "arrowParens": "always",
-  "bracketSpacing": true
+  "bracketSpacing": true,
+  "ignorePatterns": [
+    "**/__generated__/**",
+    "**/routeTree.gen.ts",
+    "**/schema.graphql",
+    "**/CHANGELOG.md",
+    ".changeset/**",
+    "**/dist/**",
+    "**/.output/**"
+  ]
 }

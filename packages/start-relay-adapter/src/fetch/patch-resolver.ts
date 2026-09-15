@@ -30,7 +30,7 @@ export class MultipartStreamParser<T> {
       this.#chunkBuffer,
       this.boundary,
       prevParts,
-      this.#isPreamble
+      this.#isPreamble,
     );
     this.#isPreamble = isPreamble;
     this.#chunkBuffer = newBuffer;

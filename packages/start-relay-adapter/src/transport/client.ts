@@ -24,7 +24,7 @@ export class ClientTransport {
       error: (error: unknown) => {
         errorRelay('Error in ClientTransport:', error);
         this._eventSubject.error(error instanceof Error ? error : new Error(String(error)));
-      }
+      },
     });
   }
 

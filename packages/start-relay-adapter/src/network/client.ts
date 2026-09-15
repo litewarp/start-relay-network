@@ -5,10 +5,7 @@ import { multipartFetch } from '#@/fetch/refetch.js';
 import { applyMiddleware, createResponseTransform } from '#@/middleware/compose.js';
 import { queryKeyFromIdAndVariables } from '#@/query-cache.js';
 import { coerceError } from '#@/utils.js';
-import runtime, {
-  type FetchFunction,
-  type GraphQLResponse
-} from 'relay-runtime';
+import runtime, { type FetchFunction, type GraphQLResponse } from 'relay-runtime';
 
 const { Network, Observable } = runtime;
 
@@ -34,7 +31,7 @@ export function createClientFetchFn(config: RelayNetworkConfig) {
             } else if (data.type === 'next') {
               sink.next(data.data);
             }
-          }
+          },
         });
 
         return () => {

@@ -112,13 +112,13 @@ describe('MultipartStreamParser', () => {
       const initial = createDelimitedPart({
         data: { user: { id: '1' } },
         hasNext: true,
-        pending: [{ id: '0', path: ['user'], label: 'UserQuery$defer$fragment' }]
+        pending: [{ id: '0', path: ['user'], label: 'UserQuery$defer$fragment' }],
       });
 
       const subsequent = createDelimitedPart({
         incremental: [{ id: '0', data: { name: 'Alice' } }],
         completed: [{ id: '0' }],
-        hasNext: false
+        hasNext: false,
       });
 
       const closing = `\r\n--${boundary}--`;
@@ -131,13 +131,13 @@ describe('MultipartStreamParser', () => {
         {
           data: { user: { id: '1' } },
           hasNext: true,
-          pending: [{ id: '0', path: ['user'], label: 'UserQuery$defer$fragment' }]
+          pending: [{ id: '0', path: ['user'], label: 'UserQuery$defer$fragment' }],
         },
         {
           incremental: [{ id: '0', data: { name: 'Alice' } }],
           completed: [{ id: '0' }],
-          hasNext: false
-        }
+          hasNext: false,
+        },
       ]);
     });
 
@@ -162,13 +162,13 @@ describe('MultipartStreamParser', () => {
       const initial = createDelimitedPart({
         data: { user: { id: '1' } },
         hasNext: true,
-        pending: [{ id: '0', path: ['user'], label: 'frag' }]
+        pending: [{ id: '0', path: ['user'], label: 'frag' }],
       });
 
       // A chunk with only completed and hasNext (no incremental)
       const completedOnly = createDelimitedPart({
         completed: [{ id: '0' }],
-        hasNext: false
+        hasNext: false,
       });
 
       const closing = `\r\n--${boundary}--`;
@@ -181,12 +181,12 @@ describe('MultipartStreamParser', () => {
         {
           data: { user: { id: '1' } },
           hasNext: true,
-          pending: [{ id: '0', path: ['user'], label: 'frag' }]
+          pending: [{ id: '0', path: ['user'], label: 'frag' }],
         },
         {
           completed: [{ id: '0' }],
-          hasNext: false
-        }
+          hasNext: false,
+        },
       ]);
     });
   });

@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import relay from 'react-relay';
 import type { routesIndexQuery } from '../__generated__/routesIndexQuery.graphql';
-import { loggingMiddleware } from '#@/utils/loggingMiddleware.js';
 const { graphql, usePreloadedQuery } = relay;
 import { createLink } from '@tanstack/react-router';
 import { Link as HeroUILink } from '@heroui/react';

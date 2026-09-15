@@ -1,6 +1,4 @@
-import type {
-  TransportProviderComponent
-} from './types.js';
+import type { TransportProviderComponent } from './types.js';
 
 import { getQueryRegistry } from '#@/environment.js';
 import { useMemo } from 'react';
@@ -16,9 +14,7 @@ export type WrappedRelayProviderProps<P> = {
   children: React.ReactNode;
 } & P;
 
-export function WrapRelayProvider<P>(
-  TransportProvider: TransportProviderComponent<P>
-) {
+export function WrapRelayProvider<P>(TransportProvider: TransportProviderComponent<P>) {
   const WrappedRelayProvider = (props: WrappedRelayProviderProps<P>) => {
     const { getEnvironment, children, ...extraProps } = props;
 

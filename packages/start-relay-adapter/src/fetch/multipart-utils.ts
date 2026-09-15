@@ -24,7 +24,7 @@ export function parseMultipartHttp<T>(
   buffer: string,
   boundary: string,
   previousParts: T[] = [],
-  isPreamble = true
+  isPreamble = true,
 ): { newBuffer: string; parts: T[]; isPreamble: boolean } {
   const delimiter = getDelimiter(boundary);
 
@@ -48,7 +48,7 @@ export function parseMultipartHttp<T>(
       return {
         newBuffer: buffer,
         parts: previousParts,
-        isPreamble
+        isPreamble,
       };
     }
   }

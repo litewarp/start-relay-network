@@ -17,5 +17,7 @@ export const incrementalDeliveryTransform: ResponseTransform = () => {
   const transformer = new IncrementalResponseTransformer();
   return (response: GraphQLResponse) =>
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-    transformer.transform(response as unknown as Record<string, unknown>) as unknown as GraphQLResponse[];
+    transformer.transform(
+      response as unknown as Record<string, unknown>,
+    ) as unknown as GraphQLResponse[];
 };

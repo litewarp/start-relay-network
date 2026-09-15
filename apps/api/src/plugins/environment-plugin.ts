@@ -31,7 +31,7 @@ export const EnvironmentPlugin = extendSchema((build) => {
           executionEnvironment() {
             const $ctx = context();
             return grafast.lambda($ctx.get('relayEnvironment'), (env) =>
-              typeof env === 'string' ? env : 'unknown'
+              typeof env === 'string' ? env : 'unknown',
             );
           },
         },
