@@ -66,6 +66,7 @@ Located in `apps/web/`:
 - **Router Setup**: `src/router.tsx` configures router with error boundaries and 404 handling
 - **Styling**: Tailwind CSS v4 with HeroUI
 - **Relay artifacts**: `src/__generated__/` is produced by `moon run web:relay` (relay-compiler) from `apps/api/schema.graphql`. Re-run it after changing queries or the schema.
+- **Relay babel transform**: `vite-plugin-relay.ts` runs `babel-plugin-relay` over files containing a `graphql` tag in both the client and SSR environments. `@vitejs/plugin-react` 6 transforms JSX with oxc and no longer accepts babel plugins, and `@rolldown/plugin-babel` only transformed the client bundle.
 - **Embedded GraphQL**: `src/server/entry.ts` intercepts `POST /api/graphql` and hands it to `src/server/graphile-handler.ts` (Grafast execute with inlined Relay response transforms and multipart streaming); everything else goes to the TanStack Start handler. The preset lives in `src/server/graphile.config.ts`. Import graphile presets by name (`import { PostGraphileAmberPreset } ...`); default imports arrive as a CommonJS namespace under Vite SSR. The Start plugin resolves `server.entry` relative to `srcDirectory`. The server-side Relay environment resolves `/api/graphql` against the incoming request URL with `getRequestUrl()`.
 
 ## Common Development Commands

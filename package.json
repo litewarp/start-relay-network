@@ -27,13 +27,12 @@
     "oxlint": "^1.83.0",
     "oxlint-tsgolint": "^0.15.0",
     "tsdown": "^0.23.0",
-    "vite-plugin-dts": "^4.5.4",
     "vitest": "catalog:"
   },
   "catalog": {
     "graphql": "^16.14.2",
-    "vite": "^7.3.6",
-    "vitest": "^4.1.11",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.0",
     "zod": "^4.6.5"
   }
 }

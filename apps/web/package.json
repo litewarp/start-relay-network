@@ -30,6 +30,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.0",
     "@graphile/simplify-inflection": "^8.0.0",
     "@heroui/react": "^3.2.5",
     "@heroui/styles": "^3.2.5",
@@ -37,11 +38,13 @@
     "@mdx-js/rollup": "^3.1.1",
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.3",
+    "@types/babel__core": "^7.20.5",
     "@types/mdx": "^2.0.14",
     "@types/pg": "^8.23.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^5.2.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "babel-plugin-relay": "^21.0.1",
     "relay-compiler": "^21.0.1",
     "tailwindcss": "^4.3.3",
     "vite": "catalog:"
