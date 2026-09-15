@@ -1,7 +1,6 @@
 /**
- * @generated SignedSource<<4d4cd2b2447ded2845f0c23546dfce24>>
+ * @generated SignedSource<<4a8cedc021cd92646824341c614f88c2>>
  * @lightSyntaxTransform
- * @nogrep
  */
 
 /* tslint:disable */
@@ -103,7 +102,7 @@ return {
     "kind": "Fragment",
     "metadata": null,
     "name": "routesIndexQuery",
-    "selections": (v0/*: any*/),
+    "selections": (v0/*:: as any*/),
     "type": "Query",
     "abstractKey": null
   },
@@ -112,7 +111,7 @@ return {
     "argumentDefinitions": [],
     "kind": "Operation",
     "name": "routesIndexQuery",
-    "selections": (v0/*: any*/)
+    "selections": (v0/*:: as any*/)
   },
   "params": {
     "cacheID": "3a29344fa1914b035421191e3307c23d",
